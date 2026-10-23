@@ -89,12 +89,14 @@
     const style = document.createElement("style");
     style.id = "calendarHouseholdStyles";
     style.textContent = `
-      .bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr))!important;padding-left:10px;padding-right:10px;gap:4px}
-      .bottom-nav:not(.household-enabled){grid-template-columns:repeat(4,minmax(0,1fr))!important}
+      .bottom-nav{display:grid!important;align-items:center!important;justify-content:center!important;padding-left:12px!important;padding-right:12px!important;gap:6px!important;width:100%!important}
       .bottom-nav .nav-btn[hidden]{display:none!important}
-      .bottom-nav .nav-btn{min-width:0;white-space:nowrap;font-size:11px}
-      .bottom-nav .nav-btn svg{width:22px;height:22px}
-      .bottom-nav .nav-add{width:52px;height:52px}
+      .bottom-nav[data-visible-count="5"]{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+      .bottom-nav[data-visible-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-width:390px!important;margin:0 auto!important}
+      .bottom-nav[data-visible-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:320px!important;margin:0 auto!important}
+      .bottom-nav .nav-btn{min-width:0;white-space:nowrap;font-size:12px}
+      .bottom-nav .nav-btn svg{width:24px;height:24px}
+      .bottom-nav .nav-add{width:54px;height:54px}
       .feature-page[hidden],.feature-settings[hidden],.feature-calendar-view[hidden]{display:none!important}
       .feature-page{min-width:0}
       .feature-page.screen-enter{animation:screen-enter var(--motion-duration) var(--motion-easing) both}
@@ -182,7 +184,7 @@
         .calendar-list-group{gap:9px;margin:16px 0}.calendar-group-title{font-size:14px}.calendar-event{grid-template-columns:70px minmax(0,1fr) auto;gap:11px;min-height:68px;padding:12px 13px;border-radius:16px}.calendar-event-date{font-size:12px}.calendar-event-open strong{font-size:14px;line-height:1.35}.calendar-event-open small{font-size:12px}.calendar-event-action{min-height:44px;padding:8px 10px;border-radius:11px;font-size:12px}
         .calendar-month-controls{margin:5px 0 13px}.calendar-month-controls strong{font-size:16px}.calendar-month-controls button{width:44px;height:44px;font-size:24px}.calendar-grid{gap:5px}.calendar-weekday{padding:5px 0;font-size:11px}.calendar-day{min-height:52px;padding:5px 2px;border-radius:12px;font-size:13px}.calendar-day.today>span:first-child{width:24px;height:24px}.calendar-day-dot{width:6px;height:6px;margin-top:4px}.calendar-day-count{top:3px;right:4px;font-size:9px}.calendar-selected{gap:9px;margin-top:16px}.calendar-selected>strong{font-size:14px}.feature-empty{padding:28px 16px;font-size:13px}
         .household-toolbar{gap:12px;margin-bottom:16px}.household-add{min-height:52px;padding:0 15px;border-radius:15px;font-size:14px}.household-filters{gap:8px;padding-bottom:4px}.household-filter{min-height:44px;padding:9px 14px;font-size:13px}.household-list{gap:10px}.household-task{grid-template-columns:28px minmax(0,1fr) 44px 44px;gap:8px;min-height:70px;padding:13px;border-radius:16px}.household-task input[type=checkbox]{width:22px;height:22px}.household-task-main strong{font-size:15px;line-height:1.35}.household-task-main small{margin-top:4px;font-size:12px}.household-task button{width:44px;height:44px;border-radius:11px;font-size:20px}.feature-status{min-height:18px;margin:11px 2px;font-size:12px}
-        .bottom-nav{grid-template-columns:repeat(5,minmax(0,1fr));padding-left:10px;padding-right:10px;gap:0}.bottom-nav:not(.household-enabled){grid-template-columns:repeat(4,minmax(0,1fr))}.bottom-nav .nav-btn{min-height:56px;font-size:12px}.bottom-nav .nav-btn svg{width:26px;height:26px}.bottom-nav .nav-add{width:56px;height:56px}
+        .bottom-nav{gap:6px}.bottom-nav[data-visible-count="5"]{grid-template-columns:repeat(5,minmax(0,1fr))!important}.bottom-nav[data-visible-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-width:390px!important;margin:0 auto!important}.bottom-nav[data-visible-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:320px!important;margin:0 auto!important}.bottom-nav .nav-btn{min-height:56px;font-size:12px}.bottom-nav .nav-btn svg{width:26px;height:26px}.bottom-nav .nav-add{width:56px;height:56px}
       }
       @media(max-width:360px){.calendar-event{grid-template-columns:62px minmax(0,1fr) auto;gap:8px;padding:10px}.calendar-event-action{padding:7px 8px;font-size:11px}.calendar-day{min-height:48px}.household-task{grid-template-columns:26px minmax(0,1fr) 40px 40px;padding:11px}.household-task button{width:40px;height:40px}.bottom-nav .nav-btn{font-size:11px}.bottom-nav .nav-btn svg{width:24px;height:24px}.bottom-nav .nav-add{width:52px;height:52px}}
 
@@ -444,22 +446,40 @@
     });
   }
 
+  function updateNavLayout() {
+    const nav = q(".bottom-nav");
+    if (!nav) return;
+    const preferences = state.featurePrefs;
+    const calBtn = q("#navCalendar");
+    const houseBtn = q("#navHousehold");
+    if (calBtn) calBtn.hidden = !preferences.calendar;
+    if (houseBtn) houseBtn.hidden = !preferences.household;
+    const visibleCount = Array.from(nav.children).filter((el) => !el.hidden && el.style.display !== "none").length;
+    nav.dataset.visibleCount = String(visibleCount);
+    nav.classList.toggle("household-enabled", !!preferences.household);
+    nav.classList.toggle("calendar-enabled", !!preferences.calendar);
+  }
+
   function renderScreens() {
     if (!q("#ideasScreen")) return;
     const preferences = state.featurePrefs;
-    q("#navCalendar").hidden = !preferences.calendar;
-    q("#navHousehold").hidden = !preferences.household;
-    q(".bottom-nav")?.classList.toggle("household-enabled", preferences.household);
+    updateNavLayout();
+
+    if (typeof app.getFeatureScreen === "function") {
+      const appScreen = app.getFeatureScreen();
+      if (appScreen) screen = appScreen;
+    }
+
     if (!preferences.calendar && screen === "calendar") screen = "ideas";
     if (!preferences.household && screen === "household") screen = "ideas";
     q("#ideasScreen").hidden = screen !== "ideas";
     q("#calendarScreen").hidden = screen !== "calendar";
     q("#householdScreen").hidden = screen !== "household";
-    q("#navCalendar").classList.toggle("active", screen === "calendar");
-    q("#navHousehold").classList.toggle("active", screen === "household");
+    q("#navCalendar")?.classList.toggle("active", screen === "calendar");
+    q("#navHousehold")?.classList.toggle("active", screen === "household");
     if (screen !== "ideas") {
-      q("#navIdeas").classList.remove("active");
-      q("#navDone").classList.remove("active");
+      q("#navIdeas")?.classList.remove("active");
+      q("#navDone")?.classList.remove("active");
     }
     const hero = q(".hero");
     if (hero) hero.hidden = screen !== "ideas";
