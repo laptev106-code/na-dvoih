@@ -191,6 +191,32 @@ export const syncDb = {
     return { ...pair, partnerTelegramId, inviteCode: null };
   },
 
+  async leaveOrDeleteCouple(coupleId: string, userId: string): Promise<void> {
+    if (isMysqlConfigured() && _mysqlDb) {
+      const rows = await _mysqlDb.select().from(mysqlCouples).where(eq(mysqlCouples.id, coupleId)).limit(1);
+      const pair = rows[0];
+      if (!pair) return;
+      if (pair.ownerTelegramId === userId && !pair.partnerTelegramId) {
+        await _mysqlDb.delete(mysqlCouples).where(eq(mysqlCouples.id, coupleId));
+      } else if (pair.partnerTelegramId === userId) {
+        await _mysqlDb.update(mysqlCouples).set({ partnerTelegramId: null }).where(eq(mysqlCouples.id, coupleId));
+      } else {
+        await _mysqlDb.delete(mysqlCouples).where(eq(mysqlCouples.id, coupleId));
+      }
+      return;
+    }
+    const db = getSqliteDb();
+    const pair = db.prepare("SELECT * FROM couples WHERE id = ? LIMIT 1").get(coupleId) as CoupleRow | undefined;
+    if (!pair) return;
+    if (pair.ownerTelegramId === userId && !pair.partnerTelegramId) {
+      db.prepare("DELETE FROM couples WHERE id = ?").run(coupleId);
+    } else if (pair.partnerTelegramId === userId) {
+      db.prepare("UPDATE couples SET partnerTelegramId = NULL, updatedAt = CURRENT_TIMESTAMP WHERE id = ?").run(coupleId);
+    } else {
+      db.prepare("DELETE FROM couples WHERE id = ?").run(coupleId);
+    }
+  },
+
   async listRecords(tableName: "synced_wishes" | "synced_household_tasks", coupleId: string): Promise<SyncedRecordRow[]> {
     if (isMysqlConfigured() && _mysqlDb) {
       const table = tableName === "synced_wishes" ? mysqlWishes : mysqlHousehold;

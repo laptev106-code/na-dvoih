@@ -12,6 +12,7 @@
       initData = hashParams.get("tgWebAppData") || "";
     } catch (_) {}
   }
+  const webUserId = localStorage.getItem("na-dvoih-web-user-id") || "";
   if (!initData) {
     const urlParams = new URLSearchParams(window.location.search);
     const devParam = urlParams.get("dev_user");
@@ -19,9 +20,11 @@
     const savedDevUser = localStorage.getItem("na-dvoih-dev-user") || (window.location.port ? "1" : "");
     if (savedDevUser) {
       initData = savedDevUser === "2" ? "dev_user:10000002:Partner" : "dev_user:10000001:Gennadiy";
+    } else if (webUserId) {
+      initData = `web_user:${webUserId}:Пользователь`;
     }
   }
-  const localUserId = String(app.telegramUserId || telegram?.initDataUnsafe?.user?.id || (initData.startsWith("dev_user:") ? initData.split(":")[1] : ""));
+  const localUserId = String(app.telegramUserId || telegram?.initDataUnsafe?.user?.id || (initData.startsWith("dev_user:") ? initData.split(":")[1] : (initData.startsWith("web_user:") ? initData.split(":")[1] : webUserId)));
   const META_KEY = `${app.storeKey || "na-dvoih"}-household-sync-v1`;
   let pairId = null;
   let active = false;
@@ -89,9 +92,9 @@
   }
 
   async function api(path, options = {}) {
-    if (!initData) throw Object.assign(new Error("Telegram Mini App не передал данные входа."), { status: 401, code: "telegram_auth_required" });
     const headers = new Headers(options.headers || {});
-    headers.set("X-Telegram-Init-Data", safeHeader(initData));
+    if (initData) headers.set("X-Telegram-Init-Data", safeHeader(initData));
+    if (webUserId) headers.set("X-Client-User-Id", webUserId);
     if (options.body !== undefined) headers.set("Content-Type", "application/json");
     const response = await fetch(path, {
       method: options.method || "GET",

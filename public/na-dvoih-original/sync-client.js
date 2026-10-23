@@ -11,7 +11,14 @@
     } catch (_) {}
   }
 
-  // Browser dev-mode support: if outside Telegram, allow mock user for testing
+  // Persistent web fallback user ID for browser testing / non-Telegram access
+  let webUserId = localStorage.getItem("na-dvoih-web-user-id");
+  if (!webUserId) {
+    webUserId = "u_" + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem("na-dvoih-web-user-id", webUserId);
+  }
+
+  // Browser dev-mode support / Web fallback: if outside Telegram, allow mock or web user
   if (!initData) {
     const urlParams = new URLSearchParams(window.location.search);
     const devUserParam = urlParams.get("dev_user");
@@ -23,10 +30,12 @@
       initData = savedDevUser === "2"
         ? "dev_user:10000002:Partner"
         : "dev_user:10000001:Gennadiy";
+    } else {
+      initData = `web_user:${webUserId}:Пользователь`;
     }
   }
 
-  let localUserId = String(app?.telegramUserId || telegram?.initDataUnsafe?.user?.id || (initData.startsWith("dev_user:") ? initData.split(":")[1] : ""));
+  let localUserId = String(app?.telegramUserId || telegram?.initDataUnsafe?.user?.id || (initData.startsWith("dev_user:") ? initData.split(":")[1] : (initData.startsWith("web_user:") ? initData.split(":")[1] : webUserId)));
   const legacyStoreKey = String(app?.legacyStoreKey || "na-dvoih-prototype-v1");
   const metaKey = `${app?.storeKey || legacyStoreKey}-online-sync`;
   const api = (path, options = {}) => request(path, options);
@@ -149,9 +158,9 @@
   }
 
   async function request(path, options = {}) {
-    if (!initData) throw Object.assign(new Error("Telegram Mini App не передал данные входа."), { code: "telegram_auth_required" });
     const headers = new Headers(options.headers || {});
-    headers.set("X-Telegram-Init-Data", safeHeader(initData));
+    if (initData) headers.set("X-Telegram-Init-Data", safeHeader(initData));
+    if (webUserId) headers.set("X-Client-User-Id", webUserId);
     if (options.body !== undefined) headers.set("Content-Type", "application/json");
     const response = await fetch(path, {
       method: options.method || "GET",
@@ -168,27 +177,31 @@
   function updateControls() {
     const hasSession = Boolean(initData && sessionInfo && sessionInfo.user?.id);
     const pair = sessionInfo?.pair || null;
-    byId("syncCreatePair").hidden = !hasSession || Boolean(pair);
-    byId("syncJoinForm").hidden = !hasSession || Boolean(pair);
-    byId("syncInviteRefresh").hidden = !hasSession || !pair || pair.role !== "owner" || pair.memberCount > 1;
-    byId("syncInviteRevoke").hidden = !hasSession || !pair || pair.role !== "owner" || pair.memberCount > 1;
-    byId("syncInviteRevokeNote").hidden = !hasSession || !pair || pair.role !== "owner" || pair.memberCount > 1;
-    byId("syncEnable").hidden = true; // Auto-enabled when pair exists
-    byId("syncNow").hidden = !hasSession || !pair;
-    byId("syncCloudState").hidden = !hasSession || !pair;
-    byId("syncLegacyTransfer").hidden = !hasSession || !app?.storeKey || app?.storeKey === legacyStoreKey || metadata.legacyImported === true || !hasLegacyData();
-    if (pair) {
-      byId("syncPairInfo").hidden = false;
-      byId("syncPairInfo").textContent = pair.memberCount === 2
-        ? "Вы в паре из двух участников. Общий список синхронизируется в реальном времени."
-        : "Пара создана; ожидается второй участник. Отправьте ему ссылку с приглашением.";
-      byId("syncInviteRefresh").textContent = "Создать новый код приглашения";
-      if (pair.inviteCode) {
-        showInvite(pair.inviteCode);
-      }
-    } else {
-      byId("syncPairInfo").hidden = true;
+    const isPaired = Boolean(pair && pair.memberCount === 2);
+    const isWaitingPartner = Boolean(pair && pair.memberCount === 1);
+
+    const connectedCard = byId("syncConnectedCard");
+    const pairingSection = byId("syncPairingSection");
+    if (connectedCard) connectedCard.hidden = !isPaired;
+    if (pairingSection) pairingSection.hidden = isPaired;
+
+    const createBtn = byId("syncCreatePair");
+    const inviteBox = byId("syncInviteBox");
+    if (createBtn) createBtn.hidden = isWaitingPartner && Boolean(pair?.inviteCode);
+    if (inviteBox) inviteBox.hidden = !isWaitingPartner || !pair?.inviteCode;
+
+    if (isWaitingPartner && pair?.inviteCode) {
+      showInvite(pair.inviteCode);
     }
+
+    if (isPaired) {
+      setStatus("Вы в паре 💕 Общие списки синхронизируются онлайн.");
+    } else if (isWaitingPartner) {
+      setStatus("Код создан! Отправьте его партнёру для соединения.");
+    } else {
+      setStatus("Создайте свой код или введите код партнёра.");
+    }
+
     window.dispatchEvent(new CustomEvent("na-dvoih:sync-state", {
       detail: { active: Boolean(pair), pairId: pair?.id || null, userId: sessionInfo?.user?.id || null },
     }));
@@ -380,16 +393,22 @@
 
   async function showInvite(code) {
     if (!code) return;
+    const clean = String(code).trim().replace(/[\s-]/g, "");
     const inviteNode = byId("syncInviteCode");
-    if (inviteNode) inviteNode.textContent = code;
+    if (inviteNode) {
+      inviteNode.textContent = clean.length === 6 ? `${clean.slice(0, 3)} ${clean.slice(3)}` : clean;
+      inviteNode.dataset.rawCode = clean;
+    }
     const box = byId("syncInviteBox");
     if (box) box.hidden = false;
+    const createBtn = byId("syncCreatePair");
+    if (createBtn) createBtn.hidden = true;
 
     const shareBtn = byId("syncShareInvite") || byId("syncShareTelegram");
     if (shareBtn) {
       shareBtn.onclick = () => {
-        const link = `https://t.me/${botUsername}/app?startapp=join_${code}`;
-        const text = "Присоединяйся ко мне в приложении «На двоих»! 💕";
+        const link = `https://t.me/${botUsername}/app?startapp=join_${clean}`;
+        const text = `Присоединяйся ко мне в приложении «На двоих»! Наш код синхронизации: ${clean} 💕`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
         if (telegram && typeof telegram.openTelegramLink === "function") {
           telegram.openTelegramLink(shareUrl);
@@ -402,29 +421,59 @@
 
   async function createPair() {
     try {
+      setStatus("Генерируем код...");
       const result = await api("/api/pair", { method: "POST", body: {} });
       sessionInfo = { ...(sessionInfo || {}), pair: result.pair };
-      active = true;
+      if (result.inviteCode) {
+        sessionInfo.pair.inviteCode = result.inviteCode;
+      }
+      active = Boolean(result.pair && result.pair.memberCount === 2);
       metadata.enabled = true;
       metadata.userId = sessionInfo.user.id;
       metadata.pairId = result.pair.id;
       persistMetadata();
-      updateControls();
       await showInvite(result.inviteCode);
-      setStatus("Пара создана. Отправьте ссылку второму участнику.");
-      syncCycle();
+      updateControls();
+      setStatus("Код успешно создан! Отправьте его партнёру.");
+      if (active) syncCycle();
     } catch (exception) {
-      setStatus(exception.code === "already_in_pair" ? "Этот Telegram-пользователь уже состоит в паре." : "Не удалось создать пару. Попробуйте позже.");
+      setStatus(exception.code === "already_in_pair" ? "Вы уже состоите в паре." : ("Не удалось создать код: " + (exception.message || "попробуйте позже.")));
     }
   }
 
   async function refreshInvite() {
     try {
+      setStatus("Обновляем код...");
       const result = await api("/api/pair/invite", { method: "POST", body: {} });
+      if (sessionInfo?.pair) sessionInfo.pair.inviteCode = result.inviteCode;
       await showInvite(result.inviteCode);
-      setStatus("Новый код приглашения создан; прежний код больше не действует.");
+      setStatus("Новый код создан!");
     } catch (exception) {
       setStatus(exception.code === "partner_already_joined" ? "Второй участник уже присоединился." : "Не удалось создать код приглашения.");
+    }
+  }
+
+  async function leavePair() {
+    if (!confirm("Вы уверены, что хотите отключить синхронизацию пары?")) return;
+    try {
+      setStatus("Отключаем...");
+      await api("/api/pair", { method: "DELETE", body: {} });
+      sessionInfo = { ...(sessionInfo || {}), pair: null };
+      active = false;
+      metadata.enabled = false;
+      metadata.pairId = null;
+      persistMetadata();
+      const inviteNode = byId("syncInviteCode");
+      if (inviteNode) {
+        inviteNode.textContent = "--- ---";
+        delete inviteNode.dataset.rawCode;
+      }
+      const box = byId("syncInviteBox");
+      if (box) box.hidden = true;
+      updateControls();
+      setStatus("Синхронизация отключена. Вы можете создать новую пару или присоединиться по коду.");
+    } catch (exception) {
+      setStatus("Не удалось отключить пару. Попробуйте позже.");
     }
   }
 
@@ -433,18 +482,22 @@
       await api("/api/pair/invite", { method: "DELETE", body: {} });
       byId("syncInviteCode").textContent = "";
       byId("syncInviteBox").hidden = true;
-      setStatus("Код отозван: новые вступления по прежнему коду не пройдут. Уже присоединившийся участник остаётся в паре.");
+      setStatus("Код отозван.");
     } catch (exception) {
       setStatus(exception.code === "partner_already_joined"
-        ? "Партнёр уже присоединился: отзыв invite code не изменяет членство пары."
+        ? "Партнёр уже присоединился."
         : "Не удалось отозвать код приглашения.");
     }
   }
 
   async function joinPairWithCode(code) {
-    const inviteCode = String(code || "").trim().toUpperCase();
-    if (!inviteCode) return;
+    const inviteCode = String(code || "").trim().replace(/[\s-]/g, "").toUpperCase();
+    if (!inviteCode) {
+      setStatus("Введите 6-значный код от партнёра.");
+      return;
+    }
     try {
+      setStatus("Подключаемся к паре...");
       const result = await api("/api/pair/join", { method: "POST", body: { inviteCode } });
       const input = byId("syncInviteInput");
       if (input) input.value = "";
@@ -455,14 +508,14 @@
       metadata.pairId = result.pair.id;
       persistMetadata();
       updateControls();
-      setStatus("Вы успешно присоединились к паре! Записи синхронизируются.");
+      setStatus("Ура! Вы успешно соединились в пару 💕");
       syncCycle();
     } catch (exception) {
       setStatus(exception.code === "invite_not_found"
-        ? "Код приглашения не найден или устарел. Попросите партнёра прислать новую ссылку."
+        ? "Код приглашения не найден или устарел. Проверьте цифры или попросите партнёра создать новый код."
         : exception.code === "already_in_pair"
           ? "Вы уже состоите в паре."
-          : "Не удалось присоединиться к паре.");
+          : ("Не удалось присоединиться к паре: " + (exception.message || "попробуйте позже.")));
     }
   }
 
@@ -917,19 +970,35 @@
 
   byId("openSync").addEventListener("click", openPanel);
   byId("syncClose").addEventListener("click", () => app.closeSyncModal?.());
-  byId("syncCreatePair").addEventListener("click", createPair);
-  byId("syncInviteRefresh").addEventListener("click", refreshInvite);
-  byId("syncInviteRevoke").addEventListener("click", revokeInvite);
-  byId("syncJoinButton").addEventListener("click", joinPair);
-  byId("syncInviteInput").addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); joinPair(); } });
-  byId("syncCopyInvite").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(byId("syncInviteCode").textContent); setStatus("Код скопирован."); }
-    catch { setStatus("Не удалось скопировать автоматически; выделите код и скопируйте его вручную."); }
+  byId("syncCreatePair")?.addEventListener("click", createPair);
+  byId("syncInviteRefresh")?.addEventListener("click", refreshInvite);
+  byId("syncInviteRevoke")?.addEventListener("click", revokeInvite);
+  byId("syncJoinButton")?.addEventListener("click", joinPair);
+  byId("syncLeavePair")?.addEventListener("click", leavePair);
+  byId("syncInviteInput")?.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); joinPair(); } });
+  byId("syncCopyInvite")?.addEventListener("click", async () => {
+    const rawCode = byId("syncInviteCode")?.dataset?.rawCode || byId("syncInviteCode")?.textContent?.replace(/\s+/g, "") || "";
+    if (!rawCode || rawCode.includes("-")) {
+      setStatus("Сначала сгенерируйте код.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(rawCode);
+      setStatus(`Код ${rawCode} скопирован в буфер обмена! 📋`);
+    } catch {
+      setStatus(`Код: ${rawCode} (скопируйте вручную)`);
+    }
   });
-  byId("syncEnable").addEventListener("click", enableSync);
-  byId("syncNow").addEventListener("click", syncCycle);
-  byId("legacyTransferCheck").addEventListener("click", inspectLegacy);
-  byId("legacyCopyConfirm").addEventListener("click", copyLegacyToAccount);
+  window.addEventListener("na-dvoih:remote-pair-joined", () => {
+    refreshSession();
+  });
+  window.addEventListener("na-dvoih:remote-pair-left", () => {
+    refreshSession();
+  });
+  byId("syncEnable")?.addEventListener("click", enableSync);
+  byId("syncNow")?.addEventListener("click", syncCycle);
+  byId("legacyTransferCheck")?.addEventListener("click", inspectLegacy);
+  byId("legacyCopyConfirm")?.addEventListener("click", copyLegacyToAccount);
   byId("syncConflictList").addEventListener("click", (event) => {
     const button = event.target.closest("[data-conflict-choice]");
     const row = button?.closest("[data-conflict-id]");

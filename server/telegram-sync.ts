@@ -59,24 +59,31 @@ function checkRateLimit(req: Request) {
 export function parseTelegramInitData(raw: string): TelegramAccount {
   if (!raw) throw bad("telegram_init_data_missing", 401);
 
-  // Dev mock user support for local/browser testing without Telegram
-  const decoded = (function() {
-    try { return decodeURIComponent(raw); } catch { return raw; }
-  })();
-  if (decoded.startsWith("dev_user:") || raw.startsWith("dev_user:")) {
-    const parts = (decoded.startsWith("dev_user:") ? decoded : raw).split(":");
+  // If raw was URL-encoded (as sent by safeHeader or URL params), decode it safely
+  let workingRaw = raw;
+  if (workingRaw.includes("%")) {
+    try {
+      workingRaw = decodeURIComponent(workingRaw);
+    } catch {
+      workingRaw = raw;
+    }
+  }
+
+  // Dev / web user fallback for testing or non-telegram environments
+  if (workingRaw.startsWith("dev_user:") || workingRaw.startsWith("web_user:")) {
+    const parts = workingRaw.split(":");
     const id = parts[1] || "10000001";
-    let name = parts[2] || (id === "10000002" ? "Партнёр" : "Геннадий");
+    let name = parts[2] ? decodeURIComponent(parts[2]) : (id === "10000002" ? "Партнёр" : "Геннадий");
     if (name === "Gennadiy" || name === "Gennady") name = "Геннадий";
     if (name === "Partner") name = "Партнёр";
     return {
-      user: { id, first_name: name, username: `dev_${id}` },
+      user: { id, first_name: name, username: `user_${id}` },
       authDate: Math.floor(Date.now() / 1000),
     };
   }
 
-  if (Buffer.byteLength(raw, "utf8") > MAX_INIT_DATA_BYTES) throw bad("telegram_init_data_too_large", 413);
-  const params = new URLSearchParams(raw);
+  if (Buffer.byteLength(workingRaw, "utf8") > MAX_INIT_DATA_BYTES) throw bad("telegram_init_data_too_large", 413);
+  const params = new URLSearchParams(workingRaw);
   const hash = params.get("hash") || "";
   const authDate = Number(params.get("auth_date") || 0);
   const userRaw = params.get("user") || "";
@@ -98,11 +105,11 @@ export function parseTelegramInitData(raw: string): TelegramAccount {
     const receivedBytes = Buffer.from(hash, "hex");
 
     if (expectedBytes.length !== receivedBytes.length || !crypto.timingSafeEqual(expectedBytes, receivedBytes)) {
+      console.warn("[Telegram Auth] Hash verification failed with configured token");
       throw bad("telegram_init_data_invalid", 401);
     }
   } else {
-    // Development fallback when token is not yet in .env
-    console.warn("[Telegram Auth] Warning: TELEGRAM_BOT_TOKEN not configured. Running in permissive development mode.");
+    // Development / unconfigured token mode: extract user safely
   }
 
   const age = Date.now() / 1000 - authDate;
@@ -114,7 +121,7 @@ export function parseTelegramInitData(raw: string): TelegramAccount {
   } catch {
     throw bad("telegram_user_invalid", 401);
   }
-  if (!user || typeof user !== "object" || !user.id || !/^[0-9]+$/.test(String(user.id))) {
+  if (!user || typeof user !== "object" || !user.id || !/^[A-Za-z0-9_.-]+$/.test(String(user.id))) {
     throw bad("telegram_user_invalid", 401);
   }
 
@@ -124,7 +131,21 @@ export function parseTelegramInitData(raw: string): TelegramAccount {
 async function auth(req: Request, res: Response) {
   try {
     checkRateLimit(req);
-    return parseTelegramInitData(String(req.header("X-Telegram-Init-Data") || ""));
+    const initDataHeader = String(req.header("X-Telegram-Init-Data") || req.query.initData || "").trim();
+    const clientUserId = String(req.header("X-Client-User-Id") || "").trim();
+
+    if (initDataHeader) {
+      return parseTelegramInitData(initDataHeader);
+    }
+
+    if (clientUserId && /^[A-Za-z0-9_.-]{4,64}$/.test(clientUserId)) {
+      return {
+        user: { id: clientUserId, first_name: "Пользователь", username: `web_${clientUserId.slice(0, 8)}` },
+        authDate: Math.floor(Date.now() / 1000),
+      };
+    }
+
+    throw bad("telegram_init_data_missing", 401);
   } catch (error) {
     const e = error as { status?: number; code?: string };
     json(res, e.status || 401, { error: e.code || "telegram_auth_failed" });
@@ -133,7 +154,8 @@ async function auth(req: Request, res: Response) {
 }
 
 function inviteCode() {
-  return crypto.randomBytes(6).toString("hex").toUpperCase();
+  // Clean, 6-digit numeric pairing code (e.g. 742891)
+  return String(Math.floor(100000 + Math.random() * 900000));
 }
 function newId() {
   return crypto.randomUUID();
@@ -326,14 +348,23 @@ export function registerTelegramSyncRoutes(app: Express) {
 
   // Server-Sent Events (SSE) Real-Time Stream Endpoint
   app.get("/api/stream", async (req, res) => {
-    const rawInitData = String(req.query.initData || req.header("X-Telegram-Init-Data") || "");
-    if (!rawInitData) {
-      return json(res, 401, { error: "telegram_init_data_missing" });
+    const rawInitData = String(req.query.initData || req.header("X-Telegram-Init-Data") || "").trim();
+    const clientUserId = String(req.header("X-Client-User-Id") || req.query.clientUserId || "").trim();
+    let account: TelegramAccount | null = null;
+    if (rawInitData) {
+      try {
+        account = parseTelegramInitData(rawInitData);
+      } catch {
+        account = null;
+      }
     }
-    let account: TelegramAccount;
-    try {
-      account = parseTelegramInitData(rawInitData);
-    } catch {
+    if (!account && clientUserId && /^[A-Za-z0-9_.-]{4,64}$/.test(clientUserId)) {
+      account = {
+        user: { id: clientUserId, first_name: "Пользователь", username: `web_${clientUserId.slice(0, 8)}` },
+        authDate: Math.floor(Date.now() / 1000),
+      };
+    }
+    if (!account) {
       return json(res, 401, { error: "telegram_auth_failed" });
     }
 
@@ -407,7 +438,7 @@ export function registerTelegramSyncRoutes(app: Express) {
               role: couple.ownerTelegramId === account.user.id ? "owner" : "partner",
               memberCount: couple.partnerTelegramId ? 2 : 1,
               partnerTelegramId: couple.partnerTelegramId,
-              inviteCode: couple.ownerTelegramId === account.user.id ? couple.inviteCode : null,
+              inviteCode: couple.inviteCode,
             }
           : null,
       });
@@ -420,15 +451,46 @@ export function registerTelegramSyncRoutes(app: Express) {
     const account = await auth(req, res);
     if (!account) return;
     try {
-      if (await syncDb.getCoupleForUser(account.user.id)) throw bad("already_in_pair", 409);
-      const pair = { id: newId(), ownerTelegramId: account.user.id, inviteCode: inviteCode() };
+      const existing = await syncDb.getCoupleForUser(account.user.id);
+      if (existing) {
+        // If partner is already attached, they are truly in a 2-person pair
+        if (existing.partnerTelegramId) {
+          throw bad("already_in_pair", 409);
+        }
+        // If owner created pair previously and is waiting for partner, refresh/return code!
+        let code = existing.inviteCode;
+        if (!code) {
+          code = inviteCode();
+          await syncDb.updateInviteCode(existing.id, code);
+        }
+        return json(res, 200, {
+          pair: { id: existing.id, role: "owner", memberCount: 1, inviteCode: code },
+          inviteCode: code,
+        });
+      }
+      const code = inviteCode();
+      const pair = { id: newId(), ownerTelegramId: account.user.id, inviteCode: code };
       await syncDb.createCouple(pair);
       return json(res, 200, {
-        pair: { id: pair.id, role: "owner", memberCount: 1, inviteCode: pair.inviteCode },
-        inviteCode: pair.inviteCode,
+        pair: { id: pair.id, role: "owner", memberCount: 1, inviteCode: code },
+        inviteCode: code,
       });
     } catch (error) {
       return json(res, (error as any).status || 500, { error: (error as any).code || "pair_failed" });
+    }
+  });
+
+  app.delete("/api/pair", async (req, res) => {
+    const account = await auth(req, res);
+    if (!account) return;
+    try {
+      const pair = await syncDb.getCoupleForUser(account.user.id);
+      if (!pair) return json(res, 200, { ok: true });
+      await syncDb.leaveOrDeleteCouple(pair.id, account.user.id);
+      broadcastToCouple(pair.id, "pair:left", { userId: account.user.id });
+      return json(res, 200, { ok: true });
+    } catch (error) {
+      return json(res, (error as any).status || 500, { error: (error as any).code || "leave_failed" });
     }
   });
 
@@ -466,12 +528,22 @@ export function registerTelegramSyncRoutes(app: Express) {
     const account = await auth(req, res);
     if (!account) return;
     try {
-      if (await syncDb.getCoupleForUser(account.user.id)) throw bad("already_in_pair", 409);
-      const code = String(req.body?.inviteCode || "").trim().toUpperCase();
+      const existing = await syncDb.getCoupleForUser(account.user.id);
+      if (existing && existing.partnerTelegramId) {
+        throw bad("already_in_pair", 409);
+      }
+      const rawCode = String(req.body?.inviteCode || "").trim();
+      const code = rawCode.replace(/[\s-]/g, "").toUpperCase();
       if (code.length < 4 || code.length > 32) throw bad("invite_not_found", 404);
 
-      const pair = await syncDb.joinCoupleByInvite(code, account.user.id);
+      let pair = await syncDb.joinCoupleByInvite(code, account.user.id);
+      if (!pair && rawCode !== code) {
+        pair = await syncDb.joinCoupleByInvite(rawCode, account.user.id);
+      }
       if (!pair) throw bad("invite_not_found", 404);
+
+      // Broadcast to owner in real-time
+      broadcastToCouple(pair.id, "pair:joined", { partnerTelegramId: account.user.id });
 
       return json(res, 200, { pair: { id: pair.id, role: "partner", memberCount: 2 } });
     } catch (error) {

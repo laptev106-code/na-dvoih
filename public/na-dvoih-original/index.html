@@ -236,7 +236,29 @@
     .partner-gender-hint{margin:4px 2px 0;color:var(--muted);font-size:10px;line-height:1.45}
     :root[data-mode="dark"] #profileEditors .avatar-photo-button{box-shadow:0 3px 8px rgba(0,0,0,.18)}
   
-    .sync-trigger{font-size:20px!important}.sync-description,.sync-footnote{margin:0 2px 12px;color:var(--muted);font-size:11px;line-height:1.5}.sync-status{margin:0 0 12px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);font-size:11px;line-height:1.45}.sync-pair-info,.sync-cloud-state{margin:8px 2px;color:var(--muted-strong);font-size:11px;line-height:1.45}.sync-invite-box{display:grid;gap:8px;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}.sync-invite-box[hidden],#syncCreatePair[hidden],#syncJoinForm[hidden],#syncInviteRefresh[hidden],#syncEnable[hidden],#syncNow[hidden],#syncCloudState[hidden],#syncPairInfo[hidden]{display:none!important}.sync-invite-box span{color:var(--muted);font-size:10px}.sync-invite-box code{overflow-wrap:anywhere;padding:9px;border-radius:8px;background:var(--card);font-size:14px;letter-spacing:.04em}.sync-join{display:grid;gap:9px;margin:10px 0}.sync-wide{margin:8px 0}.sync-footnote{margin-top:13px;margin-bottom:0}
+    .sync-trigger{font-size:20px!important}.sync-description,.sync-footnote{margin:0 2px 12px;color:var(--muted);font-size:11px;line-height:1.5}.sync-status{color:var(--ink);font-size:11.5px;line-height:1.45}.sync-pair-info,.sync-cloud-state{margin:8px 2px;color:var(--muted-strong);font-size:11px;line-height:1.45}.sync-wide{margin:8px 0;width:100%}.sync-footnote{margin-top:13px;margin-bottom:0}
+
+    /* Enhanced Mobile Sync Sheet Styles */
+    #syncOverlay .sheet{max-height:min(88dvh,720px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:22px 18px calc(24px + var(--safe-bottom));border-radius:26px 26px 0 0}
+    .sync-status-badge{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 14px;border-radius:14px;background:var(--soft);border:1px solid var(--line);font-size:11.5px;color:var(--ink);line-height:1.4}
+    .sync-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--polish-shadow);display:flex;flex-direction:column;gap:10px}
+    .sync-card-title{font-size:13.5px;font-weight:750;color:var(--ink);display:flex;align-items:center;gap:7px}
+    .sync-card-desc{font-size:11px;color:var(--muted);margin:0;line-height:1.4}
+    .sync-code-container{background:var(--soft);border:1.5px dashed var(--line);border-radius:14px;padding:12px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0 2px}
+    .sync-code-digits{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace;font-size:32px;font-weight:850;letter-spacing:0.2em;color:var(--green);line-height:1.1;padding-left:0.2em;user-select:all}
+    .sync-code-hint{font-size:10.5px;color:var(--muted)}
+    .sync-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+    .sync-btn-telegram{background:#2aabee!important;color:white!important;font-weight:700!important}
+    .sync-text-btn{background:transparent;border:0;color:var(--green);font-size:11px;font-weight:650;padding:6px;text-decoration:underline;cursor:pointer;align-self:center}
+    .sync-divider{display:flex;align-items:center;gap:10px;margin:6px 0 14px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+    .sync-divider::before,.sync-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+    .sync-input-code{height:50px!important;font-size:20px!important;font-weight:750!important;letter-spacing:0.15em!important;text-align:center!important;border-radius:14px!important}
+    .sync-connected-card{background:linear-gradient(145deg,var(--card) 0%,var(--soft) 100%);border:1px solid var(--line);border-radius:20px;padding:22px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:var(--polish-shadow);margin-bottom:12px}
+    .sync-connected-icon{width:54px;height:54px;border-radius:50%;background:#e9eee6;display:grid;place-items:center;font-size:28px}
+    .sync-live-badge{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;color:var(--green)}
+    .sync-live-badge .dot{width:7px;height:7px;background:#22c55e;border-radius:50%;box-shadow:0 0 6px #22c55e}
+    .sync-disconnect-btn{background:transparent;border:0;color:#df5734;font-size:11.5px;font-weight:600;padding:8px;cursor:pointer}
+    .sync-join{display:flex;flex-direction:column;gap:10px}
 
     .sync-transfer-box,.sync-conflicts{display:grid;gap:8px;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
     .sync-transfer-box[hidden],.sync-conflicts[hidden],#syncInviteRevoke[hidden],#syncInviteRevokeNote[hidden]{display:none!important}
@@ -350,31 +372,82 @@
   </section></div>
   <div class="overlay" id="themeOverlay" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle"><section class="sheet"><div class="sheet-head"><div><div class="sheet-title" id="themeModalTitle">Цвет оформления</div><div style="margin-top:2px;font-size:10px;color:var(--muted)">Двойные дуэты и моно-палитры</div></div><button class="close-btn" data-close="themeOverlay" aria-label="Закрыть">×</button></div><div class="theme-options" id="themeOptions"></div></section></div>
   <div class="overlay" id="categoryOverlay" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle"><section class="sheet"><div class="sheet-head"><div><div class="sheet-title" id="categoryModalTitle">Новая категория</div></div><button class="close-btn" data-close="categoryOverlay" aria-label="Закрыть">×</button></div><form id="categoryForm" class="form-grid"><div class="field"><label for="categoryName">Название</label><input id="categoryName" name="name" maxlength="24" placeholder="Например, Спорт или Кино" required></div><div class="field"><span class="field-label">Значок</span><input type="hidden" name="icon" value="✦"><div class="emoji-options" id="categoryEmojiOptions" aria-label="Выбрать значок"></div></div><button class="primary-btn" type="submit">Добавить категорию</button></form></section></div>
-  <div class="overlay" id="syncOverlay" role="dialog" aria-modal="true" aria-labelledby="syncTitle"><section class="sheet"><div class="sheet-head"><div class="sheet-title" id="syncTitle">Синхронизация пары</div><button class="close-btn" id="syncClose" data-close="syncOverlay" aria-label="Закрыть">×</button></div>
-    <p class="sync-description">Общие планы и дела обновляются у обоих мгновенно. Личные заметки остаются приватными.</p>
-    <p class="sync-status" id="syncStatus" role="status" aria-live="polite">Проверяем статус пары…</p>
-    <p class="sync-pair-info" id="syncPairInfo" hidden></p>
-    <div class="sync-invite-box" id="syncInviteBox" hidden><span>Код для соединения пары</span><code id="syncInviteCode"></code><button class="primary-btn" id="syncShareInvite" type="button" style="margin-bottom:8px">Поделиться ссылкой с партнёром</button><button class="secondary-btn" id="syncCopyInvite" type="button">Скопировать код</button></div>
-    <button class="primary-btn" id="syncCreatePair" type="button" hidden>Создать пару</button>
-    <div class="sync-join" id="syncJoinForm" hidden><div class="field"><label for="syncInviteInput">Код приглашения</label><input id="syncInviteInput" type="text" maxlength="64" autocomplete="off" placeholder="Вставьте 6-значный код партнёра"></div><button class="secondary-btn" id="syncJoinButton" type="button">Присоединиться к паре</button></div>
-    <button class="secondary-btn sync-wide" id="syncInviteRefresh" type="button" hidden>Создать код приглашения</button>
-    <button class="secondary-btn sync-wide" id="syncInviteRevoke" type="button" hidden>Отозвать код приглашения</button>
-    <p class="sync-pair-info" id="syncInviteRevokeNote" hidden>Отзывает код для новых подключений.</p>
-    <div class="sync-cloud-state" id="syncCloudState" hidden></div>
-    <button class="primary-btn" id="syncEnable" type="button" hidden>Объединить локальные записи и подключить список</button>
-    <button class="secondary-btn sync-wide" id="syncNow" type="button" hidden>Синхронизировать сейчас</button>
-    <div class="sync-transfer-box" id="syncLegacyTransfer" hidden>
-      <p>Найден локальный список. Можно скопировать записи в текущий профиль.</p>
-      <button class="secondary-btn" id="legacyTransferCheck" type="button">Проверить локальный список</button>
-      <p class="sync-transfer-summary" id="legacyTransferSummary" hidden></p>
-      <button class="secondary-btn" id="legacyCopyConfirm" type="button" hidden>Скопировать в аккаунт</button>
-    </div>
-    <div class="sync-conflicts" id="syncConflictBox" hidden>
-      <strong>Выберите версию для конфликтующей записи</strong>
-      <div id="syncConflictList"></div>
-    </div>
-    <p class="sync-footnote">Сквозная синхронизация через Telegram</p>
-  </section></div>
+  <div class="overlay" id="syncOverlay" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
+    <section class="sheet">
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title" id="syncTitle">Синхронизация пары</div>
+          <div style="margin-top:2px;font-size:10px;color:var(--muted)">Общие планы и дела на двоих</div>
+        </div>
+        <button class="close-btn" id="syncClose" data-close="syncOverlay" aria-label="Закрыть">×</button>
+      </div>
+
+      <div class="sync-status-badge" id="syncStatusBadge">
+        <span id="syncStatus">Проверяем статус пары…</span>
+      </div>
+
+      <!-- Card: When ALREADY Connected -->
+      <div class="sync-connected-card" id="syncConnectedCard" hidden>
+        <div class="sync-connected-icon">💕</div>
+        <div style="font-size:16px;font-weight:750;color:var(--ink)">Вы подключены друг к другу!</div>
+        <span class="sync-live-badge"><span class="dot"></span> Онлайн-синхронизация активна</span>
+        <p class="sync-card-desc">Все списки желаний, бытовые дела и календарь мгновенно обновляются на обоих устройствах в реальном времени.</p>
+        <button class="primary-btn sync-wide" id="syncNow" type="button" style="margin-top:6px">🔄 Синхронизировать сейчас</button>
+        <button class="sync-disconnect-btn" id="syncLeavePair" type="button">Отключить синхронизацию / Выйти</button>
+      </div>
+
+      <!-- Section: When NOT Connected (Pairing Flow) -->
+      <div id="syncPairingSection">
+        <!-- Option 1: Share My Code -->
+        <div class="sync-card" id="syncShareCard">
+          <div class="sync-card-title"><span>1️⃣</span> <span>Отправить свой код партнёру</span></div>
+          <p class="sync-card-desc">Партнёр сможет ввести этот код на своём телефоне и моментально соединиться с вами.</p>
+
+          <button class="primary-btn sync-wide" id="syncCreatePair" type="button">✨ Сгенерировать код для партнёра</button>
+
+          <div class="sync-code-container" id="syncInviteBox" hidden>
+            <span class="sync-code-hint">Ваш код синхронизации:</span>
+            <div class="sync-code-digits" id="syncInviteCode">--- ---</div>
+            <span class="sync-code-hint">Назовите или отправьте этот 6-значный код</span>
+            <div class="sync-actions-grid" style="width:100%">
+              <button class="primary-btn sync-btn-telegram" id="syncShareInvite" type="button">📲 В Telegram</button>
+              <button class="secondary-btn" id="syncCopyInvite" type="button">📋 Скопировать</button>
+            </div>
+            <button class="sync-text-btn" id="syncInviteRefresh" type="button" style="margin-top:4px">Сгенерировать другой код</button>
+          </div>
+        </div>
+
+        <div class="sync-divider"><span>или</span></div>
+
+        <!-- Option 2: Enter Partner's Code -->
+        <div class="sync-card" id="syncJoinCard">
+          <div class="sync-card-title"><span>2️⃣</span> <span>Ввести код от партнёра</span></div>
+          <p class="sync-card-desc">Если вторая половинка уже создала код, введите его ниже:</p>
+          <div class="sync-join" id="syncJoinForm">
+            <input id="syncInviteInput" class="field input sync-input-code" type="text" maxlength="12" autocomplete="off" placeholder="742 891" inputmode="numeric">
+            <button class="primary-btn" id="syncJoinButton" type="button" style="height:50px">Присоединиться к паре 💕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hidden Technical Details / Compatibility Elements -->
+      <p class="sync-pair-info" id="syncPairInfo" hidden></p>
+      <button class="secondary-btn sync-wide" id="syncInviteRevoke" type="button" hidden>Отозвать код</button>
+      <p class="sync-pair-info" id="syncInviteRevokeNote" hidden></p>
+      <div class="sync-cloud-state" id="syncCloudState" hidden></div>
+      <button class="primary-btn" id="syncEnable" type="button" hidden></button>
+      <div class="sync-transfer-box" id="syncLegacyTransfer" hidden>
+        <p>Найден локальный список. Можно скопировать записи в текущий профиль.</p>
+        <button class="secondary-btn" id="legacyTransferCheck" type="button">Проверить локальный список</button>
+        <p class="sync-transfer-summary" id="legacyTransferSummary" hidden></p>
+        <button class="secondary-btn" id="legacyCopyConfirm" type="button" hidden>Скопировать в аккаунт</button>
+      </div>
+      <div class="sync-conflicts" id="syncConflictBox" hidden>
+        <strong>Выберите версию для конфликтующей записи</strong>
+        <div id="syncConflictList"></div>
+      </div>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
   (()=>{

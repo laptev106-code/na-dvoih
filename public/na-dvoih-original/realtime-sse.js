@@ -15,6 +15,7 @@
     } catch (_) {}
   }
 
+  const webUserId = localStorage.getItem("na-dvoih-web-user-id") || "";
   if (!initData) {
     const urlParams = new URLSearchParams(window.location.search);
     const devParam = urlParams.get("dev_user");
@@ -22,10 +23,12 @@
     const savedDevUser = localStorage.getItem("na-dvoih-dev-user") || (window.location.port ? "1" : "");
     if (savedDevUser) {
       initData = savedDevUser === "2" ? "dev_user:10000002:Partner" : "dev_user:10000001:Gennadiy";
+    } else if (webUserId) {
+      initData = `web_user:${webUserId}:Пользователь`;
     }
   }
 
-  const localUserId = String(telegram?.initDataUnsafe?.user?.id || (initData.startsWith("dev_user:") ? initData.split(":")[1] : ""));
+  const localUserId = String(telegram?.initDataUnsafe?.user?.id || (initData.startsWith("dev_user:") ? initData.split(":")[1] : (initData.startsWith("web_user:") ? initData.split(":")[1] : webUserId)));
   let eventSource = null;
   let reconnectTimer = null;
   let lastEventId = localStorage.getItem("na-dvoih-last-event-id") || "0";
@@ -81,7 +84,7 @@
     }
 
     const encodedInit = encodeURIComponent(initData);
-    const url = `/api/stream?initData=${encodedInit}&lastEventId=${lastEventId}`;
+    const url = `/api/stream?initData=${encodedInit}&clientUserId=${encodeURIComponent(webUserId)}&lastEventId=${lastEventId}`;
 
     try {
       eventSource = new EventSource(url);
@@ -142,6 +145,12 @@
       eventSource.addEventListener("pair:joined", (e) => {
         window.NaDvoihHaptics?.notification?.("success");
         showPartnerToast("Партнёр подключился к паре! 🎉");
+        window.NaDvoihWishesSync?.refreshSession?.();
+      });
+
+      // Pair left / unpair event
+      eventSource.addEventListener("pair:left", (e) => {
+        showPartnerToast("Партнёр отключил пару");
         window.NaDvoihWishesSync?.refreshSession?.();
       });
 
