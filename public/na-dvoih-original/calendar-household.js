@@ -146,12 +146,13 @@
       .household-filter{flex:none;min-height:31px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);font-size:9px;font-weight:650;white-space:nowrap}
       .household-filter.active{border-color:var(--green);background:var(--green);color:#fff}
       .household-list{display:grid;gap:8px}
-      .household-task{display:grid;grid-template-columns:22px minmax(0,1fr) 32px 32px;align-items:center;gap:6px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
-      .household-task input[type=checkbox]{width:17px;height:17px;accent-color:var(--action-cta, var(--green))}
-      .household-task-main{min-width:0}.household-task-main strong{display:block;overflow-wrap:anywhere;font-size:11px;line-height:1.35}
-      .household-task-main small{display:block;margin-top:3px;color:var(--muted);font-size:9px}
+      .household-task{display:grid;grid-template-columns:26px minmax(0,1fr) 38px 38px;align-items:center;gap:8px;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+      .household-task input[type=checkbox]{width:22px;height:22px;accent-color:var(--action-cta, var(--green));cursor:pointer}
+      .household-task-main{min-width:0}.household-task-main strong{display:block;overflow-wrap:anywhere;font-size:12px;line-height:1.35}
+      .household-task-main small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
       .household-task.done .household-task-main strong{text-decoration:line-through;color:var(--muted)}
-      .household-task button{width:29px;height:29px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:13px}
+      .household-task button{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:15px;touch-action:manipulation;transition:transform 80ms ease,background-color 80ms ease}
+      .household-task button:active{transform:scale(.92);background:var(--soft)}
       .household-task button:hover{background:var(--soft);color:var(--green)}
       .household-task-overlay .sheet{max-height:90vh}
       .feature-status{min-height:15px;margin:9px 2px;color:var(--muted);font-size:9px;line-height:1.4}
@@ -287,8 +288,10 @@
     overlay.setAttribute("aria-modal", "true");
     overlay.setAttribute("aria-labelledby", "householdTaskTitle");
     overlay.innerHTML = `
-      <section class="sheet"><div class="sheet-head"><div class="sheet-title" id="householdTaskTitle">Новое дело</div><button class="close-btn" id="householdTaskClose" type="button" aria-label="Закрыть">×</button></div>
-      <form class="form-grid" id="householdTaskForm">
+      <section class="sheet">
+        <div class="sheet-drag-handle" aria-hidden="true"></div>
+        <div class="sheet-head"><div class="sheet-title" id="householdTaskTitle">Новое дело</div><button class="close-btn" id="householdTaskClose" type="button" aria-label="Закрыть">×</button></div>
+        <form class="form-grid" id="householdTaskForm">
         <input type="hidden" name="id">
         <div class="field"><label for="householdTaskCategory">Подкатегория</label><select id="householdTaskCategory" name="subcategory">${getHouseholdCategories().map((category) => `<option value="${category.id}">${category.label}</option>`).join("")}</select></div>
         <div class="field"><label for="householdTaskName">Дело</label><input id="householdTaskName" name="title" maxlength="90" placeholder="Например, купить молоко" required></div>
@@ -470,6 +473,7 @@
   function enterScreen(name) {
     if (name === "calendar" && !state.featurePrefs.calendar) return;
     if (name === "household" && !state.featurePrefs.household) return;
+    window.triggerHaptic?.('light');
     screen = name;
     app.setFeatureScreen(name);
     renderScreens();
@@ -571,12 +575,14 @@
     q("#calendarScreen").addEventListener("click", (event) => {
       const mode = event.target.closest("[data-calendar-mode]");
       if (mode) {
+        window.triggerHaptic?.('light');
         calendarMode = mode.dataset.calendarMode;
         renderCalendar();
         return;
       }
       const shift = event.target.closest("[data-month-shift]");
       if (shift) {
+        window.triggerHaptic?.('light');
         monthCursor.setMonth(monthCursor.getMonth() + Number(shift.dataset.monthShift));
         selectedDate = localDateString(new Date(monthCursor.getFullYear(), monthCursor.getMonth(), 1, 12));
         renderCalendar();
@@ -584,6 +590,7 @@
       }
       const day = event.target.closest("[data-calendar-date]");
       if (day) {
+        window.triggerHaptic?.('light');
         selectedDate = day.dataset.calendarDate;
         renderCalendar();
         return;
@@ -595,17 +602,25 @@
         const old = { ...item };
         item.done = true;
         if (!app.save()) Object.assign(item, old);
+        window.triggerHaptic?.('success');
         app.render();
         return;
       }
       const open = event.target.closest("[data-open-wish]");
-      if (open) openOriginalWish(open.dataset.openWish);
+      if (open) {
+        window.triggerHaptic?.('light');
+        openOriginalWish(open.dataset.openWish);
+      }
     });
 
-    q("#householdAdd").addEventListener("click", () => openTaskEditor());
+    q("#householdAdd").addEventListener("click", () => {
+      window.triggerHaptic?.('light');
+      openTaskEditor();
+    });
     q("#householdFilters").addEventListener("click", (event) => {
       const button = event.target.closest("[data-household-filter]");
       if (!button) return;
+      window.triggerHaptic?.('light');
       householdFilter = button.dataset.householdFilter;
       renderHousehold();
     });
@@ -617,17 +632,20 @@
       const old = task.done;
       task.done = checkbox.checked;
       if (!app.save()) task.done = old;
+      window.triggerHaptic?.(checkbox.checked ? 'success' : 'light');
       app.render();
     });
     q("#householdList").addEventListener("click", (event) => {
       const edit = event.target.closest("[data-household-edit]");
       if (edit) {
+        window.triggerHaptic?.('light');
         const task = state.householdTasks.find((item) => String(item.id) === edit.dataset.householdEdit);
         if (task) openTaskEditor(task);
         return;
       }
       const remove = event.target.closest("[data-household-delete]");
       if (remove) {
+        window.triggerHaptic?.('medium');
         const old = state.householdTasks;
         state.householdTasks = old.filter((task) => String(task.id) !== remove.dataset.householdDelete);
         saveTaskMutation(state.householdTasks, old, "Дело удалено.");
@@ -640,6 +658,7 @@
       const id = form.elements.id.value || `h${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
       const title = form.elements.title.value.trim();
       if (!title) return;
+      window.triggerHaptic?.('success');
       const existing = state.householdTasks.find((task) => String(task.id) === id);
       const task = { ...(existing || {}), id, title, subcategory: form.elements.subcategory.value, done: existing?.done || false };
       const old = [...state.householdTasks];

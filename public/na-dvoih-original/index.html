@@ -2,7 +2,7 @@
 <html lang="ru" data-theme="sage" data-mode="light" data-design-mode="mobile">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#f8f7f2">
   <meta name="description" content="Небольшое пространство для ваших общих и личных планов.">
   <link rel="icon" type="image/jpeg" href="assets/app-logo.jpg">
@@ -289,6 +289,39 @@
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--action-cta, var(--green)) 28%, transparent) !important;
     }
 
+    /* Mobile Sheet Drag Handle & Smooth Transitions */
+    .sheet-drag-handle {
+      width: 36px;
+      height: 4.5px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--ink) 20%, transparent);
+      margin: 0 auto 14px;
+      display: block;
+      flex: none;
+    }
+    .sheet {
+      overscroll-behavior: contain !important;
+      -webkit-overflow-scrolling: touch !important;
+      scroll-padding-bottom: 120px !important;
+      transform: translateY(16px);
+      opacity: 0.94;
+      transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .overlay.open .sheet {
+      transform: translateY(0) !important;
+      opacity: 1 !important;
+    }
+    .overlay.closing .sheet {
+      transform: translateY(22px) !important;
+      opacity: 0 !important;
+    }
+
+    /* Zero-CLS Image Containers */
+    .wish-image, .wish-art, .wish-art-photo {
+      aspect-ratio: 1/1 !important;
+      object-fit: cover !important;
+    }
+
     /* Unified Subtitles Strictly Under Words */
     .section-head {
       display: flex !important;
@@ -427,12 +460,23 @@
       background: transparent;
       border: 0;
       color: #df5734;
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1;
-      padding: 2px 6px;
+      min-width: 38px;
+      min-height: 38px;
+      padding: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      border-radius: 6px;
+      border-radius: 8px;
       flex: none;
+      touch-action: manipulation;
+      transition: transform 100ms ease, background-color 100ms ease;
+    }
+    .cat-manage-delete:active {
+      transform: scale(0.92);
+      background: color-mix(in srgb, #df5734 16%, transparent);
     }
     .cat-manage-delete:hover {
       background: var(--soft);
@@ -678,7 +722,7 @@
       <button class="nav-btn" id="navPair"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"></circle><path d="M2.8 20v-1.5a6.2 6.2 0 0 1 12.4 0V20"></path><path d="M16 5a3.3 3.3 0 0 1 0 6.5M17 14a5 5 0 0 1 4.2 4.9V20"></path></svg><span>Мы</span></button>
     </nav>
   </main>
-  <div class="overlay" id="wishOverlay" role="dialog" aria-modal="true" aria-labelledby="wishModalTitle"><section class="sheet"><div class="sheet-head"><div class="sheet-title" id="wishModalTitle">Новая идея</div><button class="close-btn" data-close="wishOverlay" aria-label="Закрыть">×</button></div>
+  <div class="overlay" id="wishOverlay" role="dialog" aria-modal="true" aria-labelledby="wishModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div class="sheet-title" id="wishModalTitle">Новая идея</div><button class="close-btn" data-close="wishOverlay" aria-label="Закрыть">×</button></div>
     <form id="wishForm" class="form-grid">
       <input type="hidden" name="id"><div class="field"><label for="wishTitle">Что хочется сделать?</label><input id="wishTitle" name="title" maxlength="90" placeholder="Например, увидеть море зимой" required></div>
       <div class="field"><label for="wishCategory">Категория</label><select id="wishCategory" name="category"></select></div>
@@ -725,12 +769,13 @@
       <button class="primary-btn" type="submit">Сохранить идею</button><button class="secondary-btn" id="deleteWish" type="button" hidden>Удалить идею</button>
     </form>
   </section></div>
-  <div class="overlay" id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle"><section class="sheet"><div class="sheet-head"><div><div class="sheet-title" id="profileModalTitle">Профили пары</div><div style="margin-top:2px;font-size:10px;color:var(--muted)">Имена, значки и аватары</div></div><button class="close-btn" data-close="profileOverlay" aria-label="Закрыть">×</button></div>
+  <div class="overlay" id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div><div class="sheet-title" id="profileModalTitle">Профили пары</div><div style="margin-top:2px;font-size:10px;color:var(--muted)">Имена, значки и аватары</div></div><button class="close-btn" data-close="profileOverlay" aria-label="Закрыть">×</button></div>
     <form id="profileForm" class="form-grid"><div class="field"><label for="partnerGender">Вторая половинка</label><select id="partnerGender" name="partnerGender" aria-describedby="partnerGenderHint"><option value="female">Любимая · вкладка «Её»</option><option value="male">Любимый · вкладка «Его»</option></select><p class="partner-gender-hint" id="partnerGenderHint">Название вкладки для личных планов партнёра.</p></div><div class="avatar-profiles" id="profileEditors"></div><button class="primary-btn" type="submit">Сохранить профили</button></form>
   </section></div>
-  <div class="overlay" id="themeOverlay" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle"><section class="sheet"><div class="sheet-head"><div><div class="sheet-title" id="themeModalTitle">Цвет оформления</div><div style="margin-top:2px;font-size:10px;color:var(--muted)">Двойные дуэты и моно-палитры</div></div><button class="close-btn" data-close="themeOverlay" aria-label="Закрыть">×</button></div><div class="theme-options" id="themeOptions"></div></section></div>
+  <div class="overlay" id="themeOverlay" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div><div class="sheet-title" id="themeModalTitle">Цвет оформления</div><div style="margin-top:2px;font-size:10px;color:var(--muted)">Двойные дуэты и моно-палитры</div></div><button class="close-btn" data-close="themeOverlay" aria-label="Закрыть">×</button></div><div class="theme-options" id="themeOptions"></div></section></div>
   <div class="overlay" id="categoryOverlay" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
     <section class="sheet">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="sheet-head">
         <div>
           <div class="sheet-title" id="categoryModalTitle">Категории</div>
@@ -756,6 +801,7 @@
   </div>
   <div class="overlay" id="syncOverlay" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
     <section class="sheet">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="sheet-head">
         <div>
           <div class="sheet-title" id="syncTitle">Синхронизация пары</div>
@@ -833,6 +879,34 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
   (()=>{
+    window.triggerHaptic = function(type = 'light') {
+      try {
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+          if (type === 'success' || type === 'error' || type === 'warning') {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred(type);
+          } else {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred(type);
+          }
+        } else if (navigator.vibrate) {
+          if (type === 'success') navigator.vibrate([12, 35, 18]);
+          else if (type === 'medium') navigator.vibrate(22);
+          else if (type === 'heavy') navigator.vibrate(35);
+          else navigator.vibrate(10);
+        }
+      } catch {}
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT')) {
+          setTimeout(() => {
+            active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }, 80);
+        }
+      });
+    }
+
     const DEFAULT_CATS=[{id:'trip',name:'Поездки',singular:'Поездка',icon:'✈️',image:'assets/trip.jpg'},{id:'place',name:'Места',singular:'Место',icon:'⌖',image:'assets/cafe.jpg'},{id:'food',name:'Еда',singular:'Ресторан',icon:'🍽️',image:'assets/cafe.jpg'},{id:'event',name:'События',singular:'Событие',icon:'🎟️',image:'assets/event.jpg'},{id:'buy',name:'Покупки',singular:'Покупка',icon:'🛍️',image:''}];
     const THEMES=[
       {id:'duo-sage',type:'duo',name:'Шалфей & Терракота',hint:'Зелёный + Терракота',swatch:'linear-gradient(135deg,#345243 0 50%,#df5734 50% 100%)'},
@@ -975,6 +1049,7 @@
       selectedWishLegacyImage='';
       $('#wishCropContainer').hidden=true;
       updateWishPhotoPreview('Фото подогнано и сжато');
+      triggerHaptic('medium');
       showToast('Фото кадрировано');
     });
     $('#recropWishPhoto')?.addEventListener('click',()=>{if(cropperState.img){$('#wishCropContainer').hidden=false;drawCropper()}});
@@ -1076,10 +1151,11 @@
       if(!save()){if(existing)Object.assign(existing,before);else state.items.shift();return}
       render();
       closeModal('wishOverlay');
+      triggerHaptic('success');
       showToast(existing?'Изменения сохранены':'Идея добавлена в копилку');
     });
 
-    $('#deleteWish').addEventListener('click',()=>{const id=$('#wishForm').elements.id.value;if(!id)return;const item=state.items.find(i=>i.id===id);if(item?._canEdit===false){showToast('Личную запись может удалить только автор');return}const before=state.items;state.items=state.items.filter(i=>i.id!==id);if(!save()){state.items=before;return}render();closeModal('wishOverlay');showToast('Идея удалена')});
+    $('#deleteWish').addEventListener('click',()=>{const id=$('#wishForm').elements.id.value;if(!id)return;const item=state.items.find(i=>i.id===id);if(item?._canEdit===false){showToast('Личную запись может удалить только автор');return}const before=state.items;state.items=state.items.filter(i=>i.id!==id);if(!save()){state.items=before;return}render();closeModal('wishOverlay');triggerHaptic('medium');showToast('Идея удалена')});
     $('#wishVisualDetails').addEventListener('click',e=>{const bg=e.target.closest('[data-wish-background]'),ill=e.target.closest('[data-wish-illustration]');if(bg){selectedWishBackground=bg.dataset.wishBackground;$('#wishBackgrounds').querySelectorAll('[data-wish-background]').forEach(x=>{const yes=x===bg;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(ill){selectedWishIllustration=ill.dataset.wishIllustration;$('#wishIllustrations').querySelectorAll('[data-wish-illustration]').forEach(x=>{const yes=x===ill;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(bg||ill)updateWishArtPreview()});
 
     $('#wishImageFile').addEventListener('change',e=>{
@@ -1116,28 +1192,29 @@
       const before=item.done;item.done=!item.done;
       if(!save()){item.done=before;return}
       render();
+      triggerHaptic(item.done?'success':'light');
       showToast(item.done?'Отмечено как сбывшееся':'Вернули в планы');
     });
 
-    $('#scopeSelect')?.addEventListener('change',e=>{currentScope=e.target.value;renderCards();animateScreen($('#cards'))});
+    $('#scopeSelect')?.addEventListener('change',e=>{triggerHaptic('light');currentScope=e.target.value;renderCards();animateScreen($('#cards'))});
     $('#searchInput').addEventListener('input',renderCards);
     const profilesRoot=$('#profileEditors'),avatarPhotoDrafts=new Map(),avatarPhotoDirty=new Set(),avatarPhotoTasks=new Map();
     function updatePartnerGenderHint(){const g=$('#partnerGender')?.value;$('#partnerGenderHint').textContent=g==='male'?'Личный фильтр партнёра будет «Его». Вкладка «Мои» всегда остаётся вашим списком.':'Личный фильтр партнёра будет «Её». Вкладка «Мои» всегда остаётся вашим списком.'}
     function updateProfilePreview(wrap){const id=wrap.dataset.profile,p=person(id),emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji,color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color,photo=avatarPhotoDirty.has(id)?(avatarPhotoDrafts.get(id)||''):safeAvatarPhoto(p.photo),preview=wrap.querySelector('[data-preview]');preview.style.background=color;preview.classList.toggle('has-photo',!!photo);preview.innerHTML=avatarContent(photo,emoji);const meta=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`),clear=wrap.querySelector(`[data-avatar-clear="${id}"]`);if(meta&&avatarPhotoDirty.has(id)&&photo)meta.textContent=`Сжато до ${Math.max(1,Math.round(photo.length*.75/1024))} КБ · сохраните профили`;if(clear)clear.hidden=!photo}
     function renderProfileForm(){avatarPhotoDrafts.clear();avatarPhotoDirty.clear();avatarPhotoTasks.clear();profilesRoot.innerHTML=state.profiles.map(p=>`<section class="profile-card" data-profile="${esc(p.id)}"><div class="profile-line">${avatar(p,'lg',true)}<div class="profile-name"><label for="name-${esc(p.id)}">${p.id==='me'?'ЭТО Я':'МОЯ ПОЛОВИНКА'}</label><input id="name-${esc(p.id)}" name="name-${esc(p.id)}" maxlength="22" value="${esc(p.name)}" aria-label="Имя"></div></div><div class="avatar-photo-tools"><label class="avatar-photo-button" for="avatarPhoto-${esc(p.id)}">Загрузить фото</label><input class="avatar-photo-input" id="avatarPhoto-${esc(p.id)}" data-avatar-photo="${esc(p.id)}" type="file" accept="image/*" aria-label="Загрузить фото аватара: ${esc(p.name)}"><span class="avatar-photo-status" data-avatar-photo-meta="${esc(p.id)}">${p.photo?'Своё фото сохранено':'Фото сожмётся прямо на телефоне'}</span><button class="secondary-btn avatar-photo-clear" type="button" data-avatar-clear="${esc(p.id)}" ${p.photo?'':'hidden'}>Убрать фото</button></div><div class="emoji-options avatar-emoji-options" aria-label="Выбрать один из ${EMOJIS.length} готовых аватаров">${EMOJIS.map(emoji=>{const selected=p.emoji===emoji;return `<button class="emoji-option ${selected?'selected':''}" type="button" data-emoji="${emoji}" aria-label="${selected?'Выбранный аватар':'Аватар'} ${emoji}" aria-pressed="${selected}">${selected?'<span aria-hidden="true">✓</span>':emoji}</button>`}).join('')}</div><div class="color-options" aria-label="Выбрать фон аватара">${COLORS.map(color=>`<button class="color-option ${p.color===color?'selected':''}" type="button" data-color="${color}" style="background:${color}" aria-label="Цвет фона" aria-pressed="${p.color===color}"></button>`).join('')}</div></section>`).join('');$('#partnerGender').value=person('her').gender==='male'?'male':'female';updatePartnerGenderHint()}
-    profilesRoot.addEventListener('click',e=>{const clear=e.target.closest('[data-avatar-clear]');if(clear){const id=clear.dataset.avatarClear,wrap=clear.closest('[data-profile]');avatarPhotoDrafts.set(id,'');avatarPhotoDirty.add(id);avatarPhotoTasks.set(id,(avatarPhotoTasks.get(id)||0)+1);wrap.querySelector(`[data-avatar-photo="${id}"]`).value='';wrap.querySelector(`[data-avatar-photo-meta="${id}"]`).textContent='Фото будет убрано после сохранения профилей';updateProfilePreview(wrap);return}const b=e.target.closest('[data-emoji],[data-color]');if(!b)return;const wrap=b.closest('[data-profile]');if(b.dataset.emoji){wrap.querySelectorAll('[data-emoji]').forEach(x=>{const selected=x===b;x.classList.toggle('selected',selected);x.setAttribute('aria-pressed',selected?'true':'false');x.innerHTML=selected?'<span aria-hidden="true">✓</span>':esc(x.dataset.emoji)})}else{wrap.querySelectorAll('[data-color]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})}updateProfilePreview(wrap)});
-    profilesRoot.addEventListener('change',async e=>{const input=e.target.closest('[data-avatar-photo]'),file=input?.files?.[0];if(!input||!file)return;const id=input.dataset.avatarPhoto,wrap=input.closest('[data-profile]'),task=(avatarPhotoTasks.get(id)||0)+1;avatarPhotoTasks.set(id,task);const status=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`);status.textContent='Сжимаем фото прямо на устройстве…';try{const data=await compressAvatarImage(file);if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;avatarPhotoDrafts.set(id,data);avatarPhotoDirty.add(id);updateProfilePreview(wrap);status.textContent=`Сжато до ${Math.max(1,Math.round(data.length*.75/1024))} КБ · сохраните профили`;showToast('Фото аватара сжато локально')}catch(error){if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;status.textContent=error.message||'Не удалось обработать фото';input.value='';showToast(error.message||'Не удалось обработать фото')}});
+    profilesRoot.addEventListener('click',e=>{const clear=e.target.closest('[data-avatar-clear]');if(clear){triggerHaptic('medium');const id=clear.dataset.avatarClear,wrap=clear.closest('[data-profile]');avatarPhotoDrafts.set(id,'');avatarPhotoDirty.add(id);avatarPhotoTasks.set(id,(avatarPhotoTasks.get(id)||0)+1);wrap.querySelector(`[data-avatar-photo="${id}"]`).value='';wrap.querySelector(`[data-avatar-photo-meta="${id}"]`).textContent='Фото будет убрано после сохранения профилей';updateProfilePreview(wrap);return}const b=e.target.closest('[data-emoji],[data-color]');if(!b)return;triggerHaptic('light');const wrap=b.closest('[data-profile]');if(b.dataset.emoji){wrap.querySelectorAll('[data-emoji]').forEach(x=>{const selected=x===b;x.classList.toggle('selected',selected);x.setAttribute('aria-pressed',selected?'true':'false');x.innerHTML=selected?'<span aria-hidden="true">✓</span>':esc(x.dataset.emoji)})}else{wrap.querySelectorAll('[data-color]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})}updateProfilePreview(wrap)});
+    profilesRoot.addEventListener('change',async e=>{const input=e.target.closest('[data-avatar-photo]'),file=input?.files?.[0];if(!input||!file)return;const id=input.dataset.avatarPhoto,wrap=input.closest('[data-profile]'),task=(avatarPhotoTasks.get(id)||0)+1;avatarPhotoTasks.set(id,task);const status=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`);status.textContent='Сжимаем фото прямо на устройстве…';try{const data=await compressAvatarImage(file);if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;avatarPhotoDrafts.set(id,data);avatarPhotoDirty.add(id);updateProfilePreview(wrap);status.textContent=`Сжато до ${Math.max(1,Math.round(data.length*.75/1024))} КБ · сохраните профили`;triggerHaptic('success');showToast('Фото аватара сжато локально')}catch(error){if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;status.textContent=error.message||'Не удалось обработать фото';input.value='';showToast(error.message||'Не удалось обработать фото')}});
     $('#partnerGender').addEventListener('change',updatePartnerGenderHint);
-    $('#profileForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,before=structuredClone(state);state.profiles.forEach(p=>{const wrap=profilesRoot.querySelector(`[data-profile="${p.id}"]`);p.name=f.elements[`name-${p.id}`].value.trim()||p.name;p.emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji;p.color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color;if(avatarPhotoDirty.has(p.id))p.photo=avatarPhotoDrafts.get(p.id)||''});person('her').gender=f.elements.partnerGender.value==='male'?'male':'female';if(!save()){state=before;renderProfileForm();return}render();closeModal('profileOverlay');showToast('Профили обновлены')});
-    $('#openProfiles').addEventListener('click',()=>{renderProfileForm();openModal('profileOverlay')});$('#navPair').addEventListener('click',()=>{renderProfileForm();openModal('profileOverlay')});$('#navAdd').addEventListener('click',()=>openWish());$('#heroAdd').addEventListener('click',()=>openWish());
-    $('#navIdeas').addEventListener('click',()=>{activeFeatureScreen='ideas';showDone=false;render();animateScreen($('#ideasScreen'))});$('#navDone').addEventListener('click',()=>{activeFeatureScreen='ideas';showDone=true;render();animateScreen($('#ideasScreen'))});
+    $('#profileForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,before=structuredClone(state);state.profiles.forEach(p=>{const wrap=profilesRoot.querySelector(`[data-profile="${p.id}"]`);p.name=f.elements[`name-${p.id}`].value.trim()||p.name;p.emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji;p.color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color;if(avatarPhotoDirty.has(p.id))p.photo=avatarPhotoDrafts.get(p.id)||''});person('her').gender=f.elements.partnerGender.value==='male'?'male':'female';if(!save()){state=before;renderProfileForm();return}render();closeModal('profileOverlay');triggerHaptic('success');showToast('Профили обновлены')});
+    $('#openProfiles').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navPair').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});$('#heroAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});
+    $('#navIdeas').addEventListener('click',()=>{triggerHaptic('light');activeFeatureScreen='ideas';showDone=false;render();animateScreen($('#ideasScreen'))});$('#navDone').addEventListener('click',()=>{triggerHaptic('light');activeFeatureScreen='ideas';showDone=true;render();animateScreen($('#ideasScreen'))});
     $$('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));$$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id)}));
     function renderThemeOptions(){const root=$('#themeOptions');const duos=THEMES.filter(t=>t.type==='duo'),classics=THEMES.filter(t=>t.type==='classic');const makeBtn=t=>`<button type="button" class="theme-choice ${state.theme===t.id?'selected':''}" data-theme-id="${t.id}" aria-pressed="${state.theme===t.id}"><span class="theme-swatch" style="background:${t.swatch}"></span><span class="theme-choice-text"><span class="theme-choice-name">${t.name}</span><span class="theme-choice-hint">${t.hint}</span></span>${state.theme===t.id?'<span class="check" aria-hidden="true">✓</span>':''}</button>`;root.innerHTML=`<div class="theme-group-label">Двухцветные дуэты (Основа + Акцент)</div><div class="theme-grid">${duos.map(makeBtn).join('')}</div><div class="theme-group-label" style="margin-top:14px">Монохромные палитры</div><div class="theme-grid">${classics.map(makeBtn).join('')}</div>`}
-    $('#openThemes').addEventListener('click',()=>{renderThemeOptions();openModal('themeOverlay')});
-    $('#toggleMode').addEventListener('click',()=>{const before=state.mode;state.mode=state.mode==='dark'?'light':'dark';applyTheme();if(!save()){state.mode=before;applyTheme()}});
-    $('#themeOptions').addEventListener('click',e=>{const b=e.target.closest('[data-theme-id]');if(!b)return;const before=state.theme;state.theme=b.dataset.themeId;applyTheme();if(!save()){state.theme=before;applyTheme();renderThemeOptions();return}renderThemeOptions();showToast(`Тема «${THEMES.find(t=>t.id===state.theme).name}» включена`)});
+    $('#openThemes').addEventListener('click',()=>{triggerHaptic('light');renderThemeOptions();openModal('themeOverlay')});
+    $('#toggleMode').addEventListener('click',()=>{triggerHaptic('light');const before=state.mode;state.mode=state.mode==='dark'?'light':'dark';applyTheme();if(!save()){state.mode=before;applyTheme()}});
+    $('#themeOptions').addEventListener('click',e=>{const b=e.target.closest('[data-theme-id]');if(!b)return;triggerHaptic('light');const before=state.theme;state.theme=b.dataset.themeId;applyTheme();if(!save()){state.theme=before;applyTheme();renderThemeOptions();return}renderThemeOptions();showToast(`Тема «${THEMES.find(t=>t.id===state.theme).name}» включена`)});
     function openCategory(){const f=$('#categoryForm');f.reset();f.elements.icon.value='✦';renderCategoryManageList();$('#categoryEmojiOptions').innerHTML=CATEGORY_EMOJIS.map((icon,i)=>`<button type="button" class="emoji-option ${i===0?'selected':''}" data-category-icon="${esc(icon)}" aria-label="Значок ${esc(icon)}">${esc(icon)}</button>`).join('');openModal('categoryOverlay')}
-    $('#categoryEmojiOptions').addEventListener('click',e=>{const b=e.target.closest('[data-category-icon]');if(!b)return;$('#categoryEmojiOptions').querySelectorAll('[data-category-icon]').forEach(x=>x.classList.toggle('selected',x===b));$('#categoryForm').elements.icon.value=b.dataset.categoryIcon});
+    $('#categoryEmojiOptions').addEventListener('click',e=>{const b=e.target.closest('[data-category-icon]');if(!b)return;triggerHaptic('light');$('#categoryEmojiOptions').querySelectorAll('[data-category-icon]').forEach(x=>x.classList.toggle('selected',x===b));$('#categoryForm').elements.icon.value=b.dataset.categoryIcon});
     $('#categoryOverlay').addEventListener('click',e=>{
       const delBtn=e.target.closest('[data-delete-cat]');
       if(!delBtn)return;
@@ -1153,10 +1230,11 @@
       renderCategories();
       renderCards();
       renderCategoryManageList();
+      triggerHaptic('medium');
       showToast('Категория удалена');
     });
-    $('#categoryForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,name=f.elements.name.value.trim();if(!name)return;if(categories().some(c=>c.name.toLocaleLowerCase('ru')===name.toLocaleLowerCase('ru'))){showToast('Такая категория уже есть');return}const id=`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`,beforeCategory=currentCategory,beforeDone=showDone;state.categories.push({id,name,singular:name,icon:f.elements.icon.value||'✦',image:''});currentCategory=id;showDone=false;if(!save()){state.categories.pop();currentCategory=beforeCategory;showDone=beforeDone;render();return}render();renderCategoryManageList();closeModal('categoryOverlay');showToast('Категория добавлена')});
-    $('#categoryTabs').addEventListener('click',e=>{if(e.target.closest('[data-open-category]')){openCategory();return}const b=e.target.closest('[data-category]');if(!b)return;currentCategory=b.dataset.category;renderCategories();renderCards();animateScreen($('#cards'))});
+    $('#categoryForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,name=f.elements.name.value.trim();if(!name)return;if(categories().some(c=>c.name.toLocaleLowerCase('ru')===name.toLocaleLowerCase('ru'))){showToast('Такая категория уже есть');return}const id=`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`,beforeCategory=currentCategory,beforeDone=showDone;state.categories.push({id,name,singular:name,icon:f.elements.icon.value||'✦',image:''});currentCategory=id;showDone=false;if(!save()){state.categories.pop();currentCategory=beforeCategory;showDone=beforeDone;render();return}render();renderCategoryManageList();closeModal('categoryOverlay');triggerHaptic('success');showToast('Категория добавлена')});
+    $('#categoryTabs').addEventListener('click',e=>{if(e.target.closest('[data-open-category]')){triggerHaptic('light');openCategory();return}const b=e.target.closest('[data-category]');if(!b)return;triggerHaptic('light');currentCategory=b.dataset.category;renderCategories();renderCards();animateScreen($('#cards'))});
     // Native overflow handles touch swipes; pointer dragging adds the same gesture for a mouse.
     $$('#categoryTabs').forEach(el=>{let startX=0,startScroll=0,pointerId=null,moved=false;el.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;pointerId=e.pointerId;startX=e.clientX;startScroll=el.scrollLeft;moved=false});el.addEventListener('pointermove',e=>{if(pointerId!==e.pointerId)return;const dx=e.clientX-startX;if(!moved&&Math.abs(dx)>5){moved=true;el.classList.add('dragging');el.setPointerCapture(e.pointerId)}if(moved){el.scrollLeft=startScroll-dx;e.preventDefault()}});const finish=e=>{if(pointerId!==e.pointerId)return;if(moved){dragSuppressClick=true;el.classList.remove('dragging');if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}pointerId=null};el.addEventListener('pointerup',finish);el.addEventListener('pointercancel',finish);el.addEventListener('click',e=>{if(dragSuppressClick){e.preventDefault();e.stopPropagation();dragSuppressClick=false}},true)});
     window.NaDvoihApp={getState:()=>state,storeKey:STORE,legacyStoreKey:BASE_STORE,telegramUserId,save,render,animateScreen,setFeatureScreen:(name)=>{activeFeatureScreen=['ideas','calendar','household'].includes(name)?name:'ideas';render()},getFeatureScreen:()=>activeFeatureScreen,openModal,closeModal,openSyncModal:()=>openModal('syncOverlay'),closeSyncModal:()=>closeModal('syncOverlay')};
