@@ -686,7 +686,25 @@
     .bottom-nav[data-visible-count="5"]{grid-template-columns:repeat(5,minmax(0,1fr))!important;width:100%!important}
     .bottom-nav[data-visible-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-width:390px!important;margin:0 auto!important}
     .bottom-nav[data-visible-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:320px!important;margin:0 auto!important}
-    .nav-btn{min-height:56px;min-width:44px;gap:6px;font-size:12px;font-weight:700}.nav-btn svg{width:26px;height:26px;stroke-width:1.8}.nav-add{width:56px;height:56px;margin-top:-18px;border-radius:18px;font-size:30px;border-width:4px}.overlay{z-index:60;padding:10px}.sheet{max-height:min(92dvh,820px);padding:22px 20px calc(26px + var(--safe-bottom));border-radius:26px 26px 14px 14px}.sheet-title{font-size:22px}.close-btn{width:44px;height:44px;font-size:24px}.form-grid{gap:15px}.field label,.field-label{font-size:12px}.field input,.field select{height:52px;padding:0 14px;border-radius:14px;font-size:15px}.choice{min-height:50px;font-size:14px}.primary-btn{height:52px;border-radius:16px;font-size:14px}.secondary-btn{height:50px;border-radius:15px;font-size:13px}.toast{bottom:calc(106px + var(--safe-bottom));font-size:13px;padding:12px 16px;max-width:calc(100vw - 32px);white-space:normal;text-align:center}
+    .nav-btn{min-height:56px;min-width:44px;gap:6px;font-size:12px;font-weight:700}.nav-btn svg{width:26px;height:26px;stroke-width:1.8}.nav-add{width:56px;height:56px;margin-top:-18px;border-radius:18px;font-size:30px;border-width:4px}.overlay{z-index:60;padding:10px;overflow-x:hidden!important;touch-action:pan-y!important}.sheet{max-height:min(92dvh,820px);padding:22px 20px calc(26px + var(--safe-bottom));border-radius:26px 26px 14px 14px;overflow-x:hidden!important;overflow-y:auto!important;touch-action:pan-y!important}.sheet-title{font-size:22px}.close-btn{width:44px;height:44px;font-size:24px}.form-grid{gap:14px;width:100%!important;max-width:100%!important;overflow-x:hidden!important}.field label,.field-label{font-size:13.5px!important;font-weight:700!important;margin-bottom:6px}.field input,.field select{height:52px!important;padding:0 15px!important;border-radius:14px!important;font-size:15.5px!important}.choice{min-height:50px;font-size:14px}.primary-btn{height:52px;border-radius:16px;font-size:15px;font-weight:750}.secondary-btn{height:50px;border-radius:15px;font-size:13.5px}.toast{bottom:calc(106px + var(--safe-bottom));font-size:13px;padding:12px 16px;max-width:calc(100vw - 32px);white-space:normal;text-align:center}
+    .form-row-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .reminder-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 14px;background:var(--soft);border:1px solid var(--soft-line);border-radius:14px;min-height:50px}
+    .reminder-toggle-label{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;user-select:none}
+    .reminder-toggle-label input[type="checkbox"]{width:22px;height:22px;accent-color:var(--green);cursor:pointer}
+    .reminder-stepper{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px 6px;transition:opacity 160ms ease}
+    .reminder-stepper.disabled{opacity:.42;pointer-events:none}
+    .stepper-btn{width:34px;height:34px;display:grid;place-items:center;border:0;background:var(--soft);color:var(--ink);border-radius:9px;font-size:18px;font-weight:750;cursor:pointer;touch-action:manipulation;transition:transform 100ms ease}
+    .stepper-btn:active{transform:scale(.92)}
+    .stepper-value{font-size:13.5px;font-weight:750;color:var(--action-cta,var(--green));min-width:78px;text-align:center;font-variant-numeric:tabular-nums}
+    .optional-details{border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--card) 95%,var(--soft));box-shadow:0 2px 8px rgba(42,55,47,.04);overflow:hidden;margin-top:2px}
+    .optional-summary{display:flex;align-items:center;min-height:52px;padding:12px 15px;list-style:none;cursor:pointer;user-select:none}
+    .optional-summary::-webkit-details-marker{display:none}
+    .optional-summary:after{content:'＋';margin-left:auto;color:var(--green);font-size:18px;font-weight:750;transition:transform 180ms ease}
+    .optional-details[open]>.optional-summary:after{content:'−'}
+    .optional-summary-copy{display:flex;flex-direction:column;gap:2px}
+    .optional-summary-copy strong{font-size:14px;font-weight:750;color:var(--ink)}
+    .optional-summary-copy span{font-size:11.5px;color:var(--muted)}
+    .optional-body{display:grid;gap:13px;padding:0 15px 16px 15px;border-top:1px solid var(--soft-line);margin-top:4px;padding-top:14px}
     .bottom-nav,.wish-card,.sheet,.toast{will-change:transform,opacity}.nav-btn,.nav-add,.icon-btn,.wish-card{transition:transform 160ms var(--mobile-ease),opacity 160ms var(--mobile-ease),background-color 160ms ease,box-shadow 160ms ease}.nav-btn:active,.icon-btn:active{transform:scale(.97)}.wish-card:active{transform:scale(.992)}
     :root[data-mode="dark"] .brand-mark{background:#3b2b26;color:#efaa78;border-color:#694638;box-shadow:0 4px 12px rgba(0,0,0,.24)}
     @media(max-width:390px){.topbar{padding-left:14px;padding-right:14px}.hero{margin-left:14px;margin-right:14px;padding-left:20px;padding-right:20px}.content{padding-left:14px;padding-right:14px}.category-row{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}.wish-card{grid-template-columns:76px minmax(0,1fr) 42px;gap:10px}.wish-image{width:76px;height:76px}.hero h1{font-size:28px}.brand-copy strong{font-size:17px}.brand-copy span{font-size:11px}}
@@ -732,7 +750,8 @@
   </main>
   <div class="overlay" id="wishOverlay" role="dialog" aria-modal="true" aria-labelledby="wishModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div class="sheet-title" id="wishModalTitle">Новая идея</div><button class="close-btn" data-close="wishOverlay" aria-label="Закрыть">×</button></div>
     <form id="wishForm" class="form-grid">
-      <input type="hidden" name="id"><div class="field"><label for="wishTitle">Что хочется сделать?</label><input id="wishTitle" name="title" maxlength="90" placeholder="Например, увидеть море зимой" required></div>
+      <input type="hidden" name="id">
+      <div class="field"><label for="wishTitle">Что хочется сделать?</label><input id="wishTitle" name="title" maxlength="90" placeholder="Например, увидеть море зимой" required></div>
       <div class="field"><label for="wishCategory">Категория</label><select id="wishCategory" name="category"></select></div>
       <div class="field">
         <label for="wishScopeSelect">Для кого эта идея?</label>
@@ -744,37 +763,87 @@
         <input type="hidden" id="wishScopeHidden" name="scope" value="together">
         <input type="hidden" id="wishOwnerHidden" name="owner" value="both">
       </div>
-      <div class="field"><label for="wishNote">Заметка или место <span style="font-weight:400">· необязательно</span></label><input id="wishNote" name="note" maxlength="70" placeholder="Коротко, чтобы не забыть"></div>
-      <div class="field"><label for="wishTags">Теги <span style="font-weight:400">· через запятую</span></label><input id="wishTags" name="tags" maxlength="70" placeholder="например: лето, кафе, подарок"></div>
       <div class="field">
-        <label for="wishImageFile">Своя фотография <span style="font-weight:400">· с масштабом и подгонкой</span></label>
-        <input id="wishImageFile" type="file" accept="image/*" aria-describedby="wishImageHint">
-        <p class="media-hint" id="wishImageHint">Фото можно приблизить и подогнать прямо здесь перед сохранением.</p>
-        
-        <div class="wish-crop-container" id="wishCropContainer" hidden>
-          <div class="wish-crop-header">Передвигайте и приближайте фото:</div>
-          <div class="wish-crop-viewport" id="wishCropViewport">
-            <canvas id="wishCropCanvas" width="260" height="260"></canvas>
-          </div>
-          <div class="wish-crop-controls">
-            <span class="crop-zoom-label" aria-hidden="true">🔍</span>
-            <input type="range" id="wishCropZoom" min="1" max="3" step="0.05" value="1" aria-label="Масштаб фото">
-            <button type="button" class="primary-btn crop-apply-btn" id="wishCropApply">Готово</button>
-          </div>
-        </div>
-
-        <div class="wish-photo-preview" id="wishPhotoPreview" hidden>
-          <img id="wishPhotoPreviewImage" alt="Предпросмотр выбранного фото" title="Нажмите для просмотра на весь экран">
-          <div class="wish-photo-preview-details">
-            <span id="wishPhotoMeta"></span>
-            <button type="button" class="text-link-btn" id="recropWishPhoto">Подрезать заново</button>
-          </div>
-        </div>
-        <button class="secondary-btn photo-remove" id="clearWishPhoto" type="button" hidden>Убрать фото</button>
+        <label for="wishDate">Дата события <span style="font-weight:400">· когда планируете</span></label>
+        <input id="wishDate" name="date" type="date">
       </div>
-      <details class="media-details" id="wishLinkDetails"><summary>Добавить ссылку на место или товар</summary><div class="media-details-body"><div class="field"><label for="wishUrl">Ссылка</label><input id="wishUrl" name="url" type="url" maxlength="1200" inputmode="url" placeholder="https://…" autocomplete="url"></div><button class="secondary-btn" id="getLinkPreview" type="button">Загрузить карточку со страницы</button><p class="media-hint" id="linkPreviewHint">Автоматически находит название и фото по ссылке, чтобы красиво оформить карточку.</p><p class="link-preview-status" id="linkPreviewStatus" aria-live="polite"></p><div class="link-preview-card" id="linkPreviewCard" hidden><img id="linkPreviewImage" alt="" hidden><div class="link-preview-copy"><strong id="linkPreviewTitle"></strong><span id="linkPreviewDescription"></span></div><button class="secondary-btn link-preview-remove" id="clearLinkPreview" type="button">Убрать превью</button></div></div></details>
-      <details class="media-details" id="wishVisualDetails"><summary><span class="visual-summary-icon" id="wishArtSummaryIcon" aria-hidden="true"></span><span class="visual-summary-copy"><strong>Фон и иллюстрация</strong><small id="wishArtSummaryText">Выберите цвет фона и рисунок</small></span></summary><div class="media-details-body visual-body"><div class="wish-art-preview" id="wishArtPreview" aria-label="Предпросмотр оформления"></div><div class="field"><span class="field-label">Фон · 15 вариантов</span><div class="art-background-grid" id="wishBackgrounds"></div></div><div class="field"><span class="field-label">Рисунок · 15 вариантов</span><div class="art-illustration-grid" id="wishIllustrations"></div></div></div></details>
-      <button class="primary-btn" type="submit">Сохранить идею</button><button class="secondary-btn" id="deleteWish" type="button" hidden>Удалить идею</button>
+      <div class="reminder-row" id="wishReminderRow">
+        <label class="reminder-toggle-label" for="wishReminder">
+          <input id="wishReminder" name="reminder" type="checkbox" checked>
+          <span>Напомнить</span>
+        </label>
+        <div class="reminder-stepper" id="wishReminderStepper">
+          <button type="button" class="stepper-btn" id="reminderDaysMinus" aria-label="Уменьшить количество дней">−</button>
+          <span class="stepper-value" id="reminderDaysDisplay">за 1 день</span>
+          <input type="hidden" id="wishReminderDays" name="reminderDays" value="1">
+          <button type="button" class="stepper-btn" id="reminderDaysPlus" aria-label="Увеличить количество дней">＋</button>
+        </div>
+      </div>
+      <details class="optional-details" id="wishOptionalDetails">
+        <summary class="optional-summary">
+          <div class="optional-summary-copy">
+            <strong>Дополнительно</strong>
+            <span>Заметка, теги, своё фото, ссылка и фон</span>
+          </div>
+        </summary>
+        <div class="optional-body">
+          <div class="field"><label for="wishNote">Заметка или место <span style="font-weight:400">· коротко</span></label><input id="wishNote" name="note" maxlength="70" placeholder="Коротко, чтобы не забыть"></div>
+          <div class="field"><label for="wishTags">Теги <span style="font-weight:400">· через запятую</span></label><input id="wishTags" name="tags" maxlength="70" placeholder="например: лето, кафе, подарок"></div>
+          <div class="field">
+            <label for="wishImageFile">Своя фотография <span style="font-weight:400">· с подгонкой</span></label>
+            <input id="wishImageFile" type="file" accept="image/*" aria-describedby="wishImageHint">
+            <p class="media-hint" id="wishImageHint">Фото можно приблизить и подогнать прямо здесь перед сохранением.</p>
+            
+            <div class="wish-crop-container" id="wishCropContainer" hidden>
+              <div class="wish-crop-header">Передвигайте и приближайте фото:</div>
+              <div class="wish-crop-viewport" id="wishCropViewport">
+                <canvas id="wishCropCanvas" width="260" height="260"></canvas>
+              </div>
+              <div class="wish-crop-controls">
+                <span class="crop-zoom-label" aria-hidden="true">🔍</span>
+                <input type="range" id="wishCropZoom" min="1" max="3" step="0.05" value="1" aria-label="Масштаб фото">
+                <button type="button" class="primary-btn crop-apply-btn" id="wishCropApply">Готово</button>
+              </div>
+            </div>
+
+            <div class="wish-photo-preview" id="wishPhotoPreview" hidden>
+              <img id="wishPhotoPreviewImage" alt="Предпросмотр выбранного фото" title="Нажмите для просмотра на весь экран">
+              <div class="wish-photo-preview-details">
+                <span id="wishPhotoMeta"></span>
+                <button type="button" class="text-link-btn" id="recropWishPhoto">Подрезать заново</button>
+              </div>
+            </div>
+            <button class="secondary-btn photo-remove" id="clearWishPhoto" type="button" hidden>Убрать фото</button>
+          </div>
+          <details class="media-details" id="wishLinkDetails">
+            <summary>Ссылка на место или товар</summary>
+            <div class="media-details-body">
+              <div class="field"><label for="wishUrl">Ссылка</label><input id="wishUrl" name="url" type="url" maxlength="1200" inputmode="url" placeholder="https://…" autocomplete="url"></div>
+              <button class="secondary-btn" id="getLinkPreview" type="button">Загрузить карточку со страницы</button>
+              <p class="media-hint" id="linkPreviewHint">Автоматически находит название и фото по ссылке.</p>
+              <p class="link-preview-status" id="linkPreviewStatus" aria-live="polite"></p>
+              <div class="link-preview-card" id="linkPreviewCard" hidden>
+                <img id="linkPreviewImage" alt="" hidden>
+                <div class="link-preview-copy"><strong id="linkPreviewTitle"></strong><span id="linkPreviewDescription"></span></div>
+                <button class="secondary-btn link-preview-remove" id="clearLinkPreview" type="button">Убрать превью</button>
+              </div>
+            </div>
+          </details>
+          <details class="media-details" id="wishVisualDetails">
+            <summary>
+              <span class="visual-summary-icon" id="wishArtSummaryIcon" aria-hidden="true"></span>
+              <span class="visual-summary-copy"><strong>Фон и иллюстрация</strong><small id="wishArtSummaryText">Выберите цвет фона и рисунок</small></span>
+            </summary>
+            <div class="media-details-body visual-body">
+              <div class="wish-art-preview" id="wishArtPreview" aria-label="Предпросмотр оформления"></div>
+              <div class="field"><span class="field-label">Фон · 15 вариантов</span><div class="art-background-grid" id="wishBackgrounds"></div></div>
+              <div class="field"><span class="field-label">Рисунок · 15 вариантов</span><div class="art-illustration-grid" id="wishIllustrations"></div></div>
+            </div>
+          </details>
+        </div>
+      </details>
+      <button class="primary-btn" type="submit">Сохранить идею</button>
+      <button class="secondary-btn" id="deleteWish" type="button" hidden>Удалить идею</button>
     </form>
   </section></div>
   <div class="overlay" id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div><div class="sheet-title" id="profileModalTitle">Профили пары</div><div style="margin-top:3px;font-size:12.5px;color:var(--muted)">Имена, значки и аватары</div></div><button class="close-btn" data-close="profileOverlay" aria-label="Закрыть">×</button></div>
@@ -1069,6 +1138,59 @@
     $('#photoViewerOverlay')?.addEventListener('click',e=>{if(e.target===$('#photoViewerOverlay')||e.target===$('#photoViewerClose'))closeFullscreenPhoto()});
     $('#wishPhotoPreviewImage')?.addEventListener('click',()=>{const src=$('#wishPhotoPreviewImage')?.src;if(src)openFullscreenPhoto(src)});
 
+    const REMINDER_DAYS_STEPS=[1,2,3,5,7,10,14];
+    function getReminderLabel(days){
+      days=Number(days)||1;
+      if(days===1)return 'за 1 день';
+      if(days===2)return 'за 2 дня';
+      if(days===3)return 'за 3 дня';
+      if(days===5)return 'за 5 дней';
+      if(days===7)return 'за 1 неделю';
+      if(days===10)return 'за 10 дней';
+      if(days===14)return 'за 2 недели';
+      return `за ${days} дн.`;
+    }
+    function setReminderDays(days){
+      days=Number(days)||1;
+      const hidden=$('#wishReminderDays');
+      const display=$('#reminderDaysDisplay');
+      if(hidden)hidden.value=days;
+      if(display)display.textContent=getReminderLabel(days);
+    }
+    function updateReminderStepperState(){
+      const cb=$('#wishReminder'),stepper=$('#wishReminderStepper');
+      if(!cb||!stepper)return;
+      const on=cb.checked;
+      stepper.style.opacity=on?'1':'0.38';
+      stepper.style.pointerEvents=on?'auto':'none';
+    }
+    $('#reminderDaysMinus')?.addEventListener('click',()=>{
+      triggerHaptic('light');
+      const cur=Number($('#wishReminderDays')?.value)||1;
+      const idx=REMINDER_DAYS_STEPS.indexOf(cur);
+      if(idx>0){
+        setReminderDays(REMINDER_DAYS_STEPS[idx-1]);
+      }else if(idx===-1){
+        const prev=[...REMINDER_DAYS_STEPS].reverse().find(x=>x<cur);
+        setReminderDays(prev||REMINDER_DAYS_STEPS[0]);
+      }
+    });
+    $('#reminderDaysPlus')?.addEventListener('click',()=>{
+      triggerHaptic('light');
+      const cur=Number($('#wishReminderDays')?.value)||1;
+      const idx=REMINDER_DAYS_STEPS.indexOf(cur);
+      if(idx>=0&&idx<REMINDER_DAYS_STEPS.length-1){
+        setReminderDays(REMINDER_DAYS_STEPS[idx+1]);
+      }else if(idx===-1){
+        const next=REMINDER_DAYS_STEPS.find(x=>x>cur);
+        setReminderDays(next||REMINDER_DAYS_STEPS[REMINDER_DAYS_STEPS.length-1]);
+      }
+    });
+    $('#wishReminder')?.addEventListener('change',()=>{
+      triggerHaptic('light');
+      updateReminderStepperState();
+    });
+
     function openWish(item){
       activeFeatureScreen='ideas';render();
       if(item?._canEdit===false){showToast('Личную запись может редактировать только автор');return}
@@ -1082,6 +1204,9 @@
       f.elements.note.value=item?.note||'';
       if(f.elements.date)f.elements.date.value=item?.date||'';
       if(f.elements.reminder)f.elements.reminder.checked=item?.reminder!==false;
+      const rDays=Number(item?.reminderDays)||1;
+      setReminderDays(rDays);
+      updateReminderStepperState();
       f.elements.tags.value=(item?.tags||[]).join(', ');
       f.elements.url.value=item?.url||'';
       resetLinkPreview(item);
@@ -1094,6 +1219,11 @@
       cropperState.img=null;
       $('#wishVisualDetails').open=false;
       $('#wishLinkDetails').open=!!item?.url;
+      const optDetails=$('#wishOptionalDetails');
+      if(optDetails){
+        const hasOptional=!!(item&&(item.note||(item.tags&&item.tags.length>0)||item.imageData||item.url));
+        optDetails.open=hasOptional;
+      }
       const scopeSelect=$('#wishScopeSelect');
       if(scopeSelect){
         if(item?.scope==='personal'){
@@ -1147,6 +1277,7 @@
         done:existing?.done||false,
         date:f.elements.date?.value||null,
         reminder:f.elements.reminder?f.elements.reminder.checked:true,
+        reminderDays:parseInt(f.elements.reminderDays?.value,10)||1,
         image:selectedWishLegacyImage||'',
         imageData:selectedWishImageData||'',
         linkPreview:preview,

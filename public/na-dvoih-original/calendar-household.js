@@ -80,7 +80,7 @@
 
   function dueReminders(today = localDateString(new Date())) {
     return datedWishes()
-      .filter((item) => !item.done && item.reminder !== false && today >= shiftIsoDate(item.date, -1))
+      .filter((item) => !item.done && item.reminder !== false && today >= shiftIsoDate(item.date, -(Number(item.reminderDays) || 1)))
       .sort(compareDated);
   }
 
