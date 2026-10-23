@@ -23,6 +23,7 @@
   const savedPrefs = state.featurePrefs && typeof state.featurePrefs === "object" ? state.featurePrefs : {};
   state.featurePrefs = {
     calendar: typeof savedPrefs.calendar === "boolean" ? savedPrefs.calendar : true,
+    bigGoal: typeof savedPrefs.bigGoal === "boolean" ? savedPrefs.bigGoal : true,
     household: typeof savedPrefs.household === "boolean" ? savedPrefs.household : true,
   };
 
@@ -91,6 +92,7 @@
     style.textContent = `
       .bottom-nav{display:grid!important;align-items:center!important;justify-content:center!important;padding-left:12px!important;padding-right:12px!important;gap:6px!important;width:100%!important}
       .bottom-nav .nav-btn[hidden]{display:none!important}
+      .bottom-nav[data-visible-count="6"]{grid-template-columns:repeat(6,minmax(0,1fr))!important}
       .bottom-nav[data-visible-count="5"]{grid-template-columns:repeat(5,minmax(0,1fr))!important}
       .bottom-nav[data-visible-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-width:390px!important;margin:0 auto!important}
       .bottom-nav[data-visible-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:320px!important;margin:0 auto!important}
@@ -201,6 +203,14 @@
     calendarButton.type = "button";
     calendarButton.setAttribute("aria-label", "Календарь событий");
     calendarButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"></rect><path d="M7.5 3v4M16.5 3v4M4 9.5h16"></path><path d="M8 13h2M14 13h2M8 17h2"></path></svg><span>Календарь</span>';
+
+    const goalButton = document.createElement("button");
+    goalButton.className = "nav-btn";
+    goalButton.id = "navBigGoal";
+    goalButton.type = "button";
+    goalButton.setAttribute("aria-label", "Большая цель");
+    goalButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="m9 12 2 2 4-4"></path><path d="M12 3v3M12 18v3M3 12h3M18 12h3"></path></svg><span>Цель</span>';
+
     const householdButton = document.createElement("button");
     householdButton.className = "nav-btn";
     householdButton.id = "navHousehold";
@@ -210,8 +220,7 @@
     const ideas = q("#navIdeas", nav);
     const done = q("#navDone", nav);
     const add = q("#navAdd", nav);
-    const pair = q("#navPair", nav);
-    nav.replaceChildren(ideas, calendarButton, add, householdButton, done);
+    nav.replaceChildren(ideas, calendarButton, goalButton, add, householdButton, done);
   }
 
   function wrapIdeaScreen() {
@@ -272,6 +281,7 @@
       <h3 class="feature-settings-title" id="featureSettingsTitle">Разделы приложения</h3>
       <p class="feature-settings-note">Включите или скройте разделы, которые вам нужны.</p>
       <label class="feature-toggle" for="featureCalendarToggle"><span>Календарь событий</span><input id="featureCalendarToggle" type="checkbox"></label>
+      <label class="feature-toggle" for="featureBigGoalToggle"><span>Большая цель</span><input id="featureBigGoalToggle" type="checkbox"></label>
       <label class="feature-toggle" for="featureHouseholdToggle"><span>Наш быт</span><input id="featureHouseholdToggle" type="checkbox"></label>`;
     sheet.append(block);
     const trigger = q("#openThemes");
@@ -451,13 +461,16 @@
     if (!nav) return;
     const preferences = state.featurePrefs;
     const calBtn = q("#navCalendar");
+    const goalBtn = q("#navBigGoal");
     const houseBtn = q("#navHousehold");
     if (calBtn) calBtn.hidden = !preferences.calendar;
+    if (goalBtn) goalBtn.hidden = !preferences.bigGoal;
     if (houseBtn) houseBtn.hidden = !preferences.household;
     const visibleCount = Array.from(nav.children).filter((el) => !el.hidden && el.style.display !== "none").length;
     nav.dataset.visibleCount = String(visibleCount);
     nav.classList.toggle("household-enabled", !!preferences.household);
     nav.classList.toggle("calendar-enabled", !!preferences.calendar);
+    nav.classList.toggle("biggoal-enabled", !!preferences.bigGoal);
   }
 
   function renderScreens() {
@@ -471,11 +484,14 @@
     }
 
     if (!preferences.calendar && screen === "calendar") screen = "ideas";
+    if (!preferences.bigGoal && screen === "bigGoal") screen = "ideas";
     if (!preferences.household && screen === "household") screen = "ideas";
     q("#ideasScreen").hidden = screen !== "ideas";
     q("#calendarScreen").hidden = screen !== "calendar";
     q("#householdScreen").hidden = screen !== "household";
+    if (q("#bigGoalScreen")) q("#bigGoalScreen").hidden = screen !== "bigGoal";
     q("#navCalendar")?.classList.toggle("active", screen === "calendar");
+    q("#navBigGoal")?.classList.toggle("active", screen === "bigGoal");
     q("#navHousehold")?.classList.toggle("active", screen === "household");
     if (screen !== "ideas") {
       q("#navIdeas")?.classList.remove("active");
@@ -483,8 +499,9 @@
     }
     const hero = q(".hero");
     if (hero) hero.hidden = screen !== "ideas";
-    q("#featureCalendarToggle").checked = preferences.calendar;
-    q("#featureHouseholdToggle").checked = preferences.household;
+    if (q("#featureCalendarToggle")) q("#featureCalendarToggle").checked = preferences.calendar;
+    if (q("#featureBigGoalToggle")) q("#featureBigGoalToggle").checked = preferences.bigGoal;
+    if (q("#featureHouseholdToggle")) q("#featureHouseholdToggle").checked = preferences.household;
     renderCalendar();
     renderHousehold();
     decorateWishCards();
@@ -492,6 +509,7 @@
 
   function enterScreen(name) {
     if (name === "calendar" && !state.featurePrefs.calendar) return;
+    if (name === "bigGoal" && !state.featurePrefs.bigGoal) return;
     if (name === "household" && !state.featurePrefs.household) return;
     window.triggerHaptic?.('light');
     screen = name;
@@ -566,7 +584,7 @@
       showToast("Не удалось сохранить настройку; прежнее значение восстановлено.");
       return;
     }
-    if ((name === "calendar" && !enabled && screen === "calendar") || (name === "household" && !enabled && screen === "household")) {
+    if ((name === "calendar" && !enabled && screen === "calendar") || (name === "bigGoal" && !enabled && screen === "bigGoal") || (name === "household" && !enabled && screen === "household")) {
       screen = "ideas";
       app.setFeatureScreen("ideas");
     }
@@ -582,15 +600,17 @@
     addFeatureSettings();
     buildTaskOverlay();
 
-    q("#navCalendar").addEventListener("click", () => enterScreen("calendar"));
-    q("#navHousehold").addEventListener("click", () => enterScreen("household"));
-    q("#navIdeas").addEventListener("click", () => { screen = "ideas"; renderScreens(); });
-    q("#navDone").addEventListener("click", () => { screen = "ideas"; renderScreens(); });
-    q("#navAdd").addEventListener("click", () => { screen = "ideas"; renderScreens(); });
+    q("#navCalendar")?.addEventListener("click", () => enterScreen("calendar"));
+    q("#navBigGoal")?.addEventListener("click", () => enterScreen("bigGoal"));
+    q("#navHousehold")?.addEventListener("click", () => enterScreen("household"));
+    q("#navIdeas")?.addEventListener("click", () => { screen = "ideas"; renderScreens(); });
+    q("#navDone")?.addEventListener("click", () => { screen = "ideas"; renderScreens(); });
+    q("#navAdd")?.addEventListener("click", () => { screen = "ideas"; renderScreens(); });
     q("#heroAdd")?.addEventListener("click", () => { screen = "ideas"; renderScreens(); });
 
-    q("#featureCalendarToggle").addEventListener("change", (event) => setFeaturePreference("calendar", event.currentTarget.checked));
-    q("#featureHouseholdToggle").addEventListener("change", (event) => setFeaturePreference("household", event.currentTarget.checked));
+    q("#featureCalendarToggle")?.addEventListener("change", (event) => setFeaturePreference("calendar", event.currentTarget.checked));
+    q("#featureBigGoalToggle")?.addEventListener("change", (event) => setFeaturePreference("bigGoal", event.currentTarget.checked));
+    q("#featureHouseholdToggle")?.addEventListener("change", (event) => setFeaturePreference("household", event.currentTarget.checked));
 
     q("#calendarScreen").addEventListener("click", (event) => {
       const mode = event.target.closest("[data-calendar-mode]");
