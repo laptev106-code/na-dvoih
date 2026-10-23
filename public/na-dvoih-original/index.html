@@ -2,7 +2,7 @@
 <html lang="ru" data-theme="sage" data-mode="light" data-design-mode="mobile">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#f8f7f2">
   <meta name="description" content="Небольшое пространство для ваших общих и личных планов.">
   <link rel="icon" type="image/jpeg" href="assets/app-logo.jpg">
@@ -271,6 +271,323 @@
     .sync-conflict-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
     .sync-conflict-actions button{min-height:37px;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:10px;font-weight:700}
     .sync-conflict-actions button:disabled{opacity:1;color:var(--polish-muted);cursor:not-allowed}
+
+    /* 2026 Redesign & Mobile Ergonomics Overhaul */
+    html, body {
+      touch-action: pan-y;
+      overscroll-behavior-x: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    input, select, textarea, .sync-code-digits, [contenteditable="true"] {
+      user-select: auto;
+      -webkit-user-select: auto;
+    }
+    .field input:focus-visible, .field select:focus-visible, .search-wrap:focus-within, .scope-dropdown-wrap:focus-within {
+      border-color: var(--action-cta, var(--green)) !important;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--action-cta, var(--green)) 28%, transparent) !important;
+    }
+
+    /* Unified Subtitles Strictly Under Words */
+    .section-head {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 3px !important;
+      margin: 4px 2px 14px !important;
+    }
+    .section-title {
+      font-size: 22px !important;
+      letter-spacing: -.03em !important;
+      font-weight: 780 !important;
+      line-height: 1.2 !important;
+      color: var(--ink) !important;
+    }
+    .section-hint {
+      font-size: 12px !important;
+      color: var(--muted) !important;
+      font-weight: 550 !important;
+      line-height: 1.3 !important;
+    }
+
+    /* Unified Search & Author Scope Row */
+    .search-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      width: 100%;
+    }
+    .search-filter-row .search-wrap {
+      flex: 1 1 auto;
+      margin-bottom: 0 !important;
+      min-width: 0;
+      height: 48px;
+    }
+    .scope-dropdown-wrap {
+      flex: 0 0 auto;
+      position: relative;
+      height: 48px;
+      min-width: 116px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--field-bg);
+      box-shadow: 0 2px 7px rgba(42,50,42,.04);
+      display: flex;
+      align-items: center;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+    .scope-select {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      padding: 0 26px 0 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .scope-select-arrow {
+      position: absolute;
+      right: 10px;
+      pointer-events: none;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* Tactile 3D Category Chips */
+    .cat-chip {
+      min-height: 40px !important;
+      padding: 8px 14px !important;
+      border: 1px solid var(--chip-border) !important;
+      border-radius: 999px !important;
+      background: var(--card) !important;
+      color: var(--muted-strong) !important;
+      font-size: 12.5px !important;
+      font-weight: 650 !important;
+      box-shadow: 0 2px 6px rgba(42,55,47,.06), inset 0 1px 0 rgba(255,255,255,.85) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      transition: transform .14s ease, box-shadow .14s ease, background-color .14s ease, color .14s ease !important;
+    }
+    .cat-chip:active {
+      transform: translateY(1px) scale(.98) !important;
+      box-shadow: 0 1px 2px rgba(42,55,47,.08) !important;
+    }
+    .cat-chip.active {
+      background: var(--action-cta, var(--green)) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+      box-shadow: 0 4px 14px var(--action-cta-shadow, rgba(42,55,47,.28)), inset 0 1px 0 rgba(255,255,255,.28) !important;
+    }
+    .cat-chip.active .cat-emoji {
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.25));
+    }
+
+    /* Category Management List */
+    .category-manage-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 2px;
+    }
+    .cat-manage-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      font-size: 12px;
+      font-weight: 650;
+      color: var(--ink);
+    }
+    .cat-manage-name-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cat-manage-delete {
+      background: transparent;
+      border: 0;
+      color: #df5734;
+      font-size: 15px;
+      line-height: 1;
+      padding: 2px 6px;
+      cursor: pointer;
+      border-radius: 6px;
+      flex: none;
+    }
+    .cat-manage-delete:hover {
+      background: var(--soft);
+    }
+
+    /* Hero Dynamic Cover Showcase */
+    .hero[hidden] {
+      display: none !important;
+    }
+    .hero.has-cover {
+      background-size: cover !important;
+      background-position: center !important;
+      color: #fff !important;
+      position: relative;
+    }
+    .hero.has-cover::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15,20,18,.4) 0%, rgba(15,20,18,.78) 100%);
+      border-radius: inherit;
+      z-index: 0;
+    }
+    .hero.has-cover .hero-content, .hero.has-cover .hero-cta, .hero.has-cover .hero-people {
+      position: relative;
+      z-index: 2;
+    }
+    .hero.has-cover h1, .hero.has-cover p, .hero.has-cover .eyebrow, .hero.has-cover .hero-stats {
+      color: #fff !important;
+      text-shadow: 0 1px 4px rgba(0,0,0,.65);
+    }
+    .hero.has-cover .eyebrow .dot {
+      background: #6ee7b7;
+    }
+    .hero.has-cover .hero-stats strong {
+      color: #a7f3d0 !important;
+    }
+
+    /* Interactive Photo Cropper Container */
+    .wish-crop-container {
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .wish-crop-container[hidden] {
+      display: none !important;
+    }
+    .wish-crop-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted-strong);
+    }
+    .wish-crop-viewport {
+      width: 260px;
+      height: 260px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15), 0 0 0 2px var(--action-cta, var(--green));
+      background: #111;
+      cursor: grab;
+      touch-action: none;
+    }
+    .wish-crop-viewport:active {
+      cursor: grabbing;
+    }
+    #wishCropCanvas {
+      display: block;
+      width: 260px;
+      height: 260px;
+    }
+    .wish-crop-controls {
+      width: 100%;
+      max-width: 260px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .wish-crop-controls input[type="range"] {
+      flex: 1;
+      accent-color: var(--action-cta, var(--green));
+    }
+    .crop-apply-btn {
+      height: 38px !important;
+      padding: 0 12px !important;
+      font-size: 11.5px !important;
+      white-space: nowrap !important;
+      margin-top: 0 !important;
+    }
+    .wish-photo-preview-details {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+    .text-link-btn {
+      background: transparent;
+      border: 0;
+      color: var(--action-cta, var(--green));
+      font-size: 11px;
+      font-weight: 650;
+      text-decoration: underline;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+    .wish-photo-preview img, .wish-card .wish-art.has-photo img {
+      cursor: zoom-in;
+    }
+    .fullscreen-photo-overlay {
+      z-index: 100 !important;
+      background: rgba(0,0,0,.92) !important;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .fullscreen-photo-overlay.open {
+      display: flex !important;
+    }
+    .fullscreen-photo-wrapper {
+      max-width: 100%;
+      max-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fullscreen-photo-wrapper img {
+      max-width: 100%;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.5);
+    }
+    .fullscreen-close-btn {
+      position: absolute;
+      top: max(16px, env(safe-area-inset-top, 16px));
+      right: 18px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      color: #fff;
+      border: 0;
+      font-size: 24px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
@@ -336,11 +653,19 @@
       <button class="hero-cta" id="heroAdd" aria-label="Добавить идею">+</button><div class="hero-people" id="heroAvatars" aria-hidden="true"></div>
     </section>
     <section class="content">
-      <div class="section-head"><div class="section-title">Идеи</div><div class="section-hint" id="sectionHint">в планах</div></div>
-      <div class="segmented" id="scopeTabs" role="tablist" aria-label="Кому принадлежит идея">
-        <button class="scope-btn active" data-scope="all" role="tab">Все</button><button class="scope-btn" data-scope="together" role="tab">Вместе</button><button class="scope-btn" data-scope="me" role="tab">Мои</button><button class="scope-btn" data-scope="her" role="tab"><span id="partnerScopeLabel">Её</span></button>
+      <div class="section-head"><div class="section-title" id="sectionTitle">Идеи</div><div class="section-hint" id="sectionHint">Идеи на будущее</div></div>
+      <div class="search-filter-row">
+        <label class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7"></circle><path d="m16 16 4.5 4.5"></path></svg><input id="searchInput" type="search" placeholder="Найти идею или место…" autocomplete="off"><span class="sr-only">Поиск</span></label>
+        <div class="scope-dropdown-wrap">
+          <select id="scopeSelect" class="scope-select" aria-label="Фильтр по автору">
+            <option value="all">👥 Все</option>
+            <option value="together">💕 Вместе</option>
+            <option value="me">👤 Мои</option>
+            <option value="her" id="partnerScopeOption">🌸 Её</option>
+          </select>
+          <span class="scope-select-arrow" aria-hidden="true">▾</span>
+        </div>
       </div>
-      <label class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7"></circle><path d="m16 16 4.5 4.5"></path></svg><input id="searchInput" type="search" placeholder="Найти идею или место…" autocomplete="off"><span class="sr-only">Поиск</span></label>
       <div class="category-row" id="categoryTabs" aria-label="Категории"></div>
       <div class="list-caption"><strong id="listTitle">В планах</strong><span id="listCount"></span></div>
       <div class="cards" id="cards"></div>
@@ -357,11 +682,44 @@
     <form id="wishForm" class="form-grid">
       <input type="hidden" name="id"><div class="field"><label for="wishTitle">Что хочется сделать?</label><input id="wishTitle" name="title" maxlength="90" placeholder="Например, увидеть море зимой" required></div>
       <div class="field"><label for="wishCategory">Категория</label><select id="wishCategory" name="category"></select></div>
-      <div class="field"><span class="field-label">Для кого эта идея?</span><div class="choice-row"><label class="choice active" data-choice="together"><input type="radio" name="scope" value="together" checked><span>♡</span> Вместе</label><label class="choice" data-choice="personal"><input type="radio" name="scope" value="personal"><span>◌</span> Личное</label></div></div>
-      <div class="field owner-wrap" id="ownerWrap"><label for="wishOwner">Чья идея?</label><select id="wishOwner" name="owner"></select></div>
+      <div class="field">
+        <label for="wishScopeSelect">Для кого эта идея?</label>
+        <select id="wishScopeSelect" name="scopeSelect">
+          <option value="together">💕 Вместе (для двоих)</option>
+          <option value="me">👤 Личное (моё)</option>
+          <option value="her" id="wishScopePartnerOpt">🌸 Личное (для неё)</option>
+        </select>
+        <input type="hidden" id="wishScopeHidden" name="scope" value="together">
+        <input type="hidden" id="wishOwnerHidden" name="owner" value="both">
+      </div>
       <div class="field"><label for="wishNote">Заметка или место <span style="font-weight:400">· необязательно</span></label><input id="wishNote" name="note" maxlength="70" placeholder="Коротко, чтобы не забыть"></div>
       <div class="field"><label for="wishTags">Теги <span style="font-weight:400">· через запятую</span></label><input id="wishTags" name="tags" maxlength="70" placeholder="например: лето, кафе, подарок"></div>
-      <div class="field"><label for="wishImageFile">Своя фотография <span style="font-weight:400">· необязательно</span></label><input id="wishImageFile" type="file" accept="image/*" aria-describedby="wishImageHint"><p class="media-hint" id="wishImageHint">Фото оптимизируется на телефоне для быстрой работы.</p><div class="wish-photo-preview" id="wishPhotoPreview" hidden><img id="wishPhotoPreviewImage" alt="Предпросмотр выбранного фото"><span id="wishPhotoMeta"></span></div><button class="secondary-btn photo-remove" id="clearWishPhoto" type="button" hidden>Убрать фото</button></div>
+      <div class="field">
+        <label for="wishImageFile">Своя фотография <span style="font-weight:400">· с масштабом и подгонкой</span></label>
+        <input id="wishImageFile" type="file" accept="image/*" aria-describedby="wishImageHint">
+        <p class="media-hint" id="wishImageHint">Фото можно приблизить и подогнать прямо здесь перед сохранением.</p>
+        
+        <div class="wish-crop-container" id="wishCropContainer" hidden>
+          <div class="wish-crop-header">Передвигайте и приближайте фото:</div>
+          <div class="wish-crop-viewport" id="wishCropViewport">
+            <canvas id="wishCropCanvas" width="260" height="260"></canvas>
+          </div>
+          <div class="wish-crop-controls">
+            <span class="crop-zoom-label" aria-hidden="true">🔍</span>
+            <input type="range" id="wishCropZoom" min="1" max="3" step="0.05" value="1" aria-label="Масштаб фото">
+            <button type="button" class="primary-btn crop-apply-btn" id="wishCropApply">Готово</button>
+          </div>
+        </div>
+
+        <div class="wish-photo-preview" id="wishPhotoPreview" hidden>
+          <img id="wishPhotoPreviewImage" alt="Предпросмотр выбранного фото" title="Нажмите для просмотра на весь экран">
+          <div class="wish-photo-preview-details">
+            <span id="wishPhotoMeta"></span>
+            <button type="button" class="text-link-btn" id="recropWishPhoto">Подрезать заново</button>
+          </div>
+        </div>
+        <button class="secondary-btn photo-remove" id="clearWishPhoto" type="button" hidden>Убрать фото</button>
+      </div>
       <details class="media-details" id="wishLinkDetails"><summary>Добавить ссылку на место или товар</summary><div class="media-details-body"><div class="field"><label for="wishUrl">Ссылка</label><input id="wishUrl" name="url" type="url" maxlength="1200" inputmode="url" placeholder="https://…" autocomplete="url"></div><button class="secondary-btn" id="getLinkPreview" type="button">Загрузить карточку со страницы</button><p class="media-hint" id="linkPreviewHint">Автоматически находит название и фото по ссылке, чтобы красиво оформить карточку.</p><p class="link-preview-status" id="linkPreviewStatus" aria-live="polite"></p><div class="link-preview-card" id="linkPreviewCard" hidden><img id="linkPreviewImage" alt="" hidden><div class="link-preview-copy"><strong id="linkPreviewTitle"></strong><span id="linkPreviewDescription"></span></div><button class="secondary-btn link-preview-remove" id="clearLinkPreview" type="button">Убрать превью</button></div></div></details>
       <details class="media-details" id="wishVisualDetails"><summary><span class="visual-summary-icon" id="wishArtSummaryIcon" aria-hidden="true"></span><span class="visual-summary-copy"><strong>Фон и иллюстрация</strong><small id="wishArtSummaryText">Выберите цвет фона и рисунок</small></span></summary><div class="media-details-body visual-body"><div class="wish-art-preview" id="wishArtPreview" aria-label="Предпросмотр оформления"></div><div class="field"><span class="field-label">Фон · 15 вариантов</span><div class="art-background-grid" id="wishBackgrounds"></div></div><div class="field"><span class="field-label">Рисунок · 15 вариантов</span><div class="art-illustration-grid" id="wishIllustrations"></div></div></div></details>
       <button class="primary-btn" type="submit">Сохранить идею</button><button class="secondary-btn" id="deleteWish" type="button" hidden>Удалить идею</button>
@@ -371,7 +729,31 @@
     <form id="profileForm" class="form-grid"><div class="field"><label for="partnerGender">Вторая половинка</label><select id="partnerGender" name="partnerGender" aria-describedby="partnerGenderHint"><option value="female">Любимая · вкладка «Её»</option><option value="male">Любимый · вкладка «Его»</option></select><p class="partner-gender-hint" id="partnerGenderHint">Название вкладки для личных планов партнёра.</p></div><div class="avatar-profiles" id="profileEditors"></div><button class="primary-btn" type="submit">Сохранить профили</button></form>
   </section></div>
   <div class="overlay" id="themeOverlay" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle"><section class="sheet"><div class="sheet-head"><div><div class="sheet-title" id="themeModalTitle">Цвет оформления</div><div style="margin-top:2px;font-size:10px;color:var(--muted)">Двойные дуэты и моно-палитры</div></div><button class="close-btn" data-close="themeOverlay" aria-label="Закрыть">×</button></div><div class="theme-options" id="themeOptions"></div></section></div>
-  <div class="overlay" id="categoryOverlay" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle"><section class="sheet"><div class="sheet-head"><div><div class="sheet-title" id="categoryModalTitle">Новая категория</div></div><button class="close-btn" data-close="categoryOverlay" aria-label="Закрыть">×</button></div><form id="categoryForm" class="form-grid"><div class="field"><label for="categoryName">Название</label><input id="categoryName" name="name" maxlength="24" placeholder="Например, Спорт или Кино" required></div><div class="field"><span class="field-label">Значок</span><input type="hidden" name="icon" value="✦"><div class="emoji-options" id="categoryEmojiOptions" aria-label="Выбрать значок"></div></div><button class="primary-btn" type="submit">Добавить категорию</button></form></section></div>
+  <div class="overlay" id="categoryOverlay" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+    <section class="sheet">
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title" id="categoryModalTitle">Категории</div>
+          <div style="margin-top:2px;font-size:10px;color:var(--muted)">Управление и добавление новых</div>
+        </div>
+        <button class="close-btn" data-close="categoryOverlay" aria-label="Закрыть">×</button>
+      </div>
+      <div class="field-label" style="margin-bottom:6px">Текущие категории (нажмите ✕ чтобы удалить):</div>
+      <div class="category-manage-list" id="categoryManageList"></div>
+      <form id="categoryForm" class="form-grid" style="border-top:1px solid var(--line);padding-top:12px;margin-top:4px">
+        <div class="sheet-title" style="font-size:15px;margin-bottom:2px">＋ Новая категория</div>
+        <div class="field"><label for="categoryName">Название</label><input id="categoryName" name="name" maxlength="24" placeholder="Например, Спорт или Кино" required></div>
+        <div class="field"><span class="field-label">Значок</span><input type="hidden" name="icon" value="✦"><div class="emoji-options" id="categoryEmojiOptions" aria-label="Выбрать значок"></div></div>
+        <button class="primary-btn" type="submit">Добавить категорию</button>
+      </form>
+    </section>
+  </div>
+  <div class="overlay fullscreen-photo-overlay" id="photoViewerOverlay" role="dialog" aria-modal="true" aria-label="Просмотр фотографии">
+    <button class="fullscreen-close-btn" id="photoViewerClose" type="button" aria-label="Закрыть">×</button>
+    <div class="fullscreen-photo-wrapper">
+      <img id="photoViewerImg" src="" alt="Фотография на весь экран">
+    </div>
+  </div>
   <div class="overlay" id="syncOverlay" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
     <section class="sheet">
       <div class="sheet-head">
@@ -451,7 +833,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
   (()=>{
-    const DEFAULT_CATS=[{id:'trip',name:'Поездки',singular:'Поездка',icon:'↗',image:'assets/trip.jpg'},{id:'place',name:'Места',singular:'Место',icon:'⌖',image:'assets/cafe.jpg'},{id:'food',name:'Еда',singular:'Ресторан',icon:'◒',image:'assets/cafe.jpg'},{id:'event',name:'События',singular:'Событие',icon:'✳',image:'assets/event.jpg'},{id:'buy',name:'Покупки',singular:'Покупка',icon:'◌',image:''},{id:'other',name:'Другое',singular:'Идея',icon:'✦',image:''}];
+    const DEFAULT_CATS=[{id:'trip',name:'Поездки',singular:'Поездка',icon:'✈️',image:'assets/trip.jpg'},{id:'place',name:'Места',singular:'Место',icon:'⌖',image:'assets/cafe.jpg'},{id:'food',name:'Еда',singular:'Ресторан',icon:'🍽️',image:'assets/cafe.jpg'},{id:'event',name:'События',singular:'Событие',icon:'🎟️',image:'assets/event.jpg'},{id:'buy',name:'Покупки',singular:'Покупка',icon:'🛍️',image:''}];
     const THEMES=[
       {id:'duo-sage',type:'duo',name:'Шалфей & Терракота',hint:'Зелёный + Терракота',swatch:'linear-gradient(135deg,#345243 0 50%,#df5734 50% 100%)'},
       {id:'duo-denim',type:'duo',name:'Деним & Коралл',hint:'Индиго + Коралл',swatch:'linear-gradient(135deg,#2a4d78 0 50%,#eb4e34 50% 100%)'},
@@ -514,14 +896,15 @@
     let currentScope='all',currentCategory='all',showDone=false,activeFeatureScreen='ideas',toastTimer,dragSuppressClick=false;
     let selectedWishBackground='butter',selectedWishIllustration='ticket',selectedWishImageData='',selectedWishLegacyImage='',photoTaskId=0,currentLinkPreview=null,previewTaskId=0,linkPreviewAbort=null;
     const MAX_SOURCE_IMAGE_BYTES=12*1024*1024,MAX_COMPRESSED_IMAGE_BYTES=180*1024,MAX_TOTAL_IMAGE_CHARS=1800000;
-    function categories(){return [...DEFAULT_CATS,...state.categories]}
+    state.deletedCats = Array.isArray(state.deletedCats) ? state.deletedCats : [];
+    function categories(){return [...DEFAULT_CATS,...(state.categories||[])].filter(c=>!state.deletedCats.includes(c.id))}
     function applyTheme(){document.documentElement.dataset.theme=state.theme;document.documentElement.dataset.mode=state.mode;const browserColors={'duo-sage':'#f8f7f2','duo-denim':'#f2f6f9','duo-crimson':'#fcf5f5','duo-sapphire':'#f3f6fb','duo-cashmere':'#f9f6f1','duo-amethyst':'#f7f4f9',sage:'#f8f7f2',pink:'#fbf3f6',sky:'#f2f8fa',blue:'#f2f5fb',violet:'#f6f2fa',orange:'#fbf4ed'};document.querySelector('meta[name=theme-color]').content=state.mode==='dark'?'#17161a':(browserColors[state.theme]||browserColors['duo-sage']);const toggle=document.querySelector('#toggleMode');if(toggle){const dark=state.mode==='dark';toggle.querySelector('.mode-icon').textContent=dark?'☀':'☾';toggle.title=dark?'Включить светлое оформление':'Включить тёмное оформление';toggle.setAttribute('aria-label',toggle.title);toggle.setAttribute('aria-pressed',dark?'true':'false')}}
     applyTheme();
     const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const person=id=>state.profiles.find(p=>p.id===id)||state.profiles[0];const personLabel=p=>p?.name||(p?.id==='me'?'Я':'Партнёр');
     const partnerScopeLabel=()=>person('her').gender==='male'?'Его':'Её';
     function save(){try{localStorage.setItem(STORE,JSON.stringify(state));window.dispatchEvent(new Event('na-dvoih:local-save'));return true}catch(error){showToast('Не удалось сохранить данные в браузере. Проверьте свободное место и доступность хранилища.');return false}}
-    function category(id){return categories().find(c=>c.id===id)||DEFAULT_CATS.at(-1)}
+    function category(id){return categories().find(c=>c.id===id)||categories()[0]||DEFAULT_CATS[0]}
     function avatarContent(photo,emoji){const fallback=`<span class="avatar-fallback"${photo?' hidden':''}>${esc(emoji)}</span>`;return photo?`<img class="avatar-photo" src="${esc(photo)}" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false;this.parentElement.classList.remove('has-photo')">${fallback}`:fallback}
     function avatar(p,size='sm',preview=false){const photo=safeAvatarPhoto(p.photo);return `<span class="avatar ${size}${photo?' has-photo':''}" ${preview?'data-preview':''} style="background:${esc(p.color)}" title="${esc(p.name)}" aria-hidden="true">${avatarContent(photo,p.emoji)}</span>`}
     const backgroundById=id=>ART_BACKGROUNDS.find(x=>x.id===id)||ART_BACKGROUNDS[0];
@@ -546,10 +929,12 @@
     async function compressWishImage(file){if(!file.type.startsWith('image/'))throw new Error('Выберите файл изображения');if(file.size>MAX_SOURCE_IMAGE_BYTES)throw new Error('Фото слишком большое: выберите файл до 12 МБ');const decoded=await imageSource(file);try{if(!decoded.width||!decoded.height||decoded.width*decoded.height>40000000)throw new Error('У фото слишком высокое разрешение; выберите изображение поменьше');let scale=Math.min(1,1100/Math.max(decoded.width,decoded.height)),blob=null;const qualities=[.82,.72,.64,.56,.48];let mime='image/webp';for(let step=0;step<16;step++){const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(decoded.width*scale));canvas.height=Math.max(1,Math.round(decoded.height*scale));const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Не удалось обработать фото');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';if(mime==='image/jpeg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height)}else ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(decoded.source,0,0,canvas.width,canvas.height);const quality=qualities[step%qualities.length];blob=await canvasBlob(canvas,mime,quality);if(mime==='image/webp'&&blob.type!=='image/webp'){mime='image/jpeg';step--;continue}if(blob.size<=MAX_COMPRESSED_IMAGE_BYTES)break;if(step%qualities.length===qualities.length-1)scale*=.82}if(!blob||blob.size>MAX_COMPRESSED_IMAGE_BYTES)throw new Error('Не удалось уменьшить фото до 180 КБ; выберите изображение поменьше');return await blobDataUrl(blob)}finally{decoded.dispose()}}
     async function compressAvatarImage(file){if(!file.type.startsWith('image/'))throw new Error('Выберите файл изображения');if(file.size>MAX_AVATAR_SOURCE_BYTES)throw new Error('Фото слишком большое: выберите файл до 12 МБ');const decoded=await imageSource(file);try{if(!decoded.width||!decoded.height||decoded.width*decoded.height>40000000)throw new Error('У фото слишком высокое разрешение; выберите изображение поменьше');let scale=Math.min(1,320/Math.max(decoded.width,decoded.height)),quality=.82,blob=null;for(let step=0;step<20;step++){const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(decoded.width*scale));canvas.height=Math.max(1,Math.round(decoded.height*scale));const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Не удалось обработать фото');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(decoded.source,0,0,canvas.width,canvas.height);blob=await canvasBlob(canvas,'image/jpeg',quality);if(blob.size<=MAX_AVATAR_COMPRESSED_BYTES)break;if(step%3===2)scale*=.84;quality=Math.max(.42,quality-.07)}if(!blob||blob.size>MAX_AVATAR_COMPRESSED_BYTES)throw new Error('Не удалось уменьшить аватар до 70 КБ');const data=await blobDataUrl(blob);if(!safeAvatarPhoto(data))throw new Error('Сжатое фото превышает безопасный лимит для локального хранения');return data}finally{decoded.dispose()}}
     function imageBudgetWithoutCurrent(){const id=$('#wishForm').elements.id.value;return state.items.reduce((sum,item)=>sum+(item.id===id?0:(item.imageData||'').length+(item.linkPreview?.imageData||'').length),0)}
-    function renderPeople(){const pair=state.profiles.map(p=>avatar(p)).join('');$('#headerAvatars').innerHTML=pair;$('#heroAvatars').innerHTML=pair;$('#heroCount').textContent=`${state.items.filter(i=>!i.done).length} идей в планах`;$('#heroDone').textContent=`${state.items.filter(i=>i.done).length} уже сбылось`;$('#wishOwner').innerHTML=state.profiles.map(p=>`<option value="${p.id}">${esc(personLabel(p))}</option>`).join('')}
+    function renderPeople(){const pair=state.profiles.map(p=>avatar(p)).join('');if($('#headerAvatars'))$('#headerAvatars').innerHTML=pair;if($('#heroAvatars'))$('#heroAvatars').innerHTML=pair;if($('#heroCount'))$('#heroCount').textContent=`${state.items.filter(i=>!i.done).length} идей в планах`;if($('#heroDone'))$('#heroDone').textContent=`${state.items.filter(i=>i.done).length} уже сбылось`;if($('#wishOwner'))$('#wishOwner').innerHTML=state.profiles.map(p=>`<option value="${p.id}">${esc(personLabel(p))}</option>`).join('');const opt=$('#wishScopePartnerOpt');if(opt){const pl=partnerScopeLabel();opt.textContent=pl==='Его'?'👑 Личное (для него)':'🌸 Личное (для неё)';}}
+    function renderCategoryManageList(){const container=$('#categoryManageList');if(!container)return;const cats=categories();container.innerHTML=cats.map(c=>`<div class="cat-manage-item"><div class="cat-manage-name-wrap"><span>${esc(c.icon)}</span><span>${esc(c.name)}</span></div><button type="button" class="cat-manage-delete" data-delete-cat="${esc(c.id)}" aria-label="Удалить категорию ${esc(c.name)}" title="Удалить категорию">✕</button></div>`).join('')}
     function renderCategories(){const cats=categories();$('#categoryTabs').innerHTML=`<button class="cat-chip ${currentCategory==='all'?'active':''}" data-category="all"><span class="cat-emoji">✦</span> Все</button>`+cats.map(c=>`<button class="cat-chip ${currentCategory===c.id?'active':''}" data-category="${esc(c.id)}"><span class="cat-emoji">${esc(c.icon)}</span> ${esc(c.name)}</button>`).join('')+'<button class="cat-add" data-open-category type="button" aria-label="Создать категорию">＋ Категория</button>';$('#wishCategory').innerHTML=cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}
-    function renderCards(){const query=$('#searchInput').value.trim().toLocaleLowerCase('ru');let list=state.items.filter(i=>i.done===showDone);if(currentScope==='together')list=list.filter(i=>i.scope==='together');if(currentScope==='me')list=list.filter(i=>i.scope==='personal'&&i.owner==='me');if(currentScope==='her')list=list.filter(i=>i.scope==='personal'&&i.owner==='her');if(currentCategory!=='all')list=list.filter(i=>i.category===currentCategory);if(query)list=list.filter(i=>[i.title,i.note,...(i.tags||[])].join(' ').toLocaleLowerCase('ru').includes(query));$('#listTitle').textContent=showDone?'Сбылось':'В планах';$('#sectionHint').textContent=showDone?'приятные воспоминания':'идеи на будущее';$('#listCount').textContent=`${list.length} ${list.length===1?'идея':list.length>1&&list.length<5?'идеи':'идей'}`;const cards=$('#cards');if(!list.length){cards.innerHTML=`<div class="empty"><div class="empty-icon">${showDone?'♡':'✦'}</div><strong>${query?'Ничего не нашлось':showDone?'Пока ни одна идея не сбылась':'Здесь пока тихо'}</strong><p>${query?'Попробуйте другое слово или сбросьте фильтр.':'Добавьте сюда то, что однажды захочется сделать.'}</p></div>`;return}cards.innerHTML=list.map(i=>{const c=category(i.category),p=i.owner==='her'?person('her'):person('me'),who=i.scope==='together'?`<span class="tiny-pair">${state.profiles.map(x=>avatar(x)).join('')}</span><span class="ownership">Вместе</span>`:`${avatar(p)}<span class="ownership">${esc(personLabel(p))}</span>`,visual=i.visual||{background:'butter',illustration:DEFAULT_ILLUSTRATION[i.category]||'home'},link=safeWebUrl(i.url||''),preview=i.linkPreview&&i.linkPreview.url===link?i.linkPreview:null,photo=i.imageData||i.image||preview?.imageData||(!i.visual?(c.image||'assets/event.jpg'):'' );const art=artMarkup(visual,photo);const linkMarkup=link?`<a class="wish-link" href="${esc(link)}" target="_blank" rel="noopener noreferrer" aria-label="Открыть сохранённую ссылку в новой вкладке">↗ Открыть ссылку</a>`:'';const previewMarkup=preview&&(preview.title||preview.description)?`<div class="wish-link-preview-copy"><strong>${esc((preview.title||'').slice(0,180))}</strong>${preview.description?`<span>${esc(preview.description.slice(0,280))}</span>`:''}</div>`:'';return `<article class="wish-card ${i.done?'done':''}" data-id="${esc(i.id)}">${art}<div class="wish-main"><div class="wish-meta"><span class="cat-label">${esc(c.icon)} ${esc(c.singular)}</span>${i.tags?.[0]?`<span class="tag">${esc(i.tags[0])}</span>`:''}</div><div class="wish-title">${esc(i.title)}</div>${i.note?`<div class="wish-note">${esc(i.note)}</div>`:''}${previewMarkup}${linkMarkup}<div class="wish-bottom">${who}</div></div><div class="card-actions"><button class="icon-btn marked" data-action="toggle" ${i._canEdit===false?'disabled aria-disabled="true" title="Личную запись может менять только автор"':''} aria-label="${i.done?'Вернуть в планы':'Отметить как сбылось'}" title="${i.done?'Вернуть в планы':'Отметить как сбылось'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle>${i.done?'<path d="m8 12 2.5 2.5L16 9"></path>':''}</svg></button><button class="icon-btn" data-action="edit" ${i._canEdit===false?'disabled aria-disabled="true" title="Личную запись может менять только автор"':''} aria-label="Редактировать идею" title="Редактировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button></div></article>`}).join('')}
-    function render(){renderPeople();renderCategories();$('#partnerScopeLabel').textContent=partnerScopeLabel();renderCards();$('#navIdeas').classList.toggle('active',activeFeatureScreen==='ideas'&&!showDone);$('#navDone').classList.toggle('active',activeFeatureScreen==='ideas'&&showDone);$$('.scope-btn').forEach(b=>{b.classList.toggle('active',b.dataset.scope===currentScope);b.setAttribute('aria-selected',b.dataset.scope===currentScope?'true':'false')});window.dispatchEvent(new Event('na-dvoih:render'))}
+    function updateHeroShowcase(){const hero=$('.hero');if(!hero)return;const shouldShow=activeFeatureScreen==='ideas'&&!showDone;hero.hidden=!shouldShow;if(!shouldShow)return;const activeItems=state.items.filter(i=>!i.done);const withPhoto=activeItems.find(i=>i.imageData||i.image||i.linkPreview?.imageData);const featured=withPhoto||activeItems[0];const photo=featured?.imageData||featured?.image||featured?.linkPreview?.imageData;const heroTitle=hero.querySelector('h1');const heroP=hero.querySelector('p');const heroEyebrow=hero.querySelector('.eyebrow');if(featured&&photo){hero.classList.add('has-cover');hero.style.backgroundImage=`url("${photo}")`;if(heroTitle)heroTitle.textContent=featured.title;if(heroP)heroP.textContent=featured.note||(featured.date?`Событие: ${featured.date}`:'Ближайшая мечта для вас двоих');if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> БЛИЖАЙШАЯ МЕЧТА'}else if(featured){hero.classList.remove('has-cover');hero.style.backgroundImage='';if(heroTitle)heroTitle.textContent=featured.title;if(heroP)heroP.textContent=featured.note||'Планы на двоих: места и мечты';if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> НАШИ ПЛАНЫ'}else{hero.classList.remove('has-cover');hero.style.backgroundImage='';if(heroTitle)heroTitle.textContent='Планы на двоих';if(heroP)heroP.textContent='Места, свидания и мечты, которые хочется разделить.';if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> НАШИ ПЛАНЫ'}}
+    function renderCards(){const query=$('#searchInput').value.trim().toLocaleLowerCase('ru');let list=state.items.filter(i=>i.done===showDone);if(currentScope==='together')list=list.filter(i=>i.scope==='together');if(currentScope==='me')list=list.filter(i=>i.scope==='personal'&&i.owner==='me');if(currentScope==='her')list=list.filter(i=>i.scope==='personal'&&i.owner==='her');if(currentCategory!=='all')list=list.filter(i=>i.category===currentCategory);if(query)list=list.filter(i=>[i.title,i.note,...(i.tags||[])].join(' ').toLocaleLowerCase('ru').includes(query));$('#listTitle').textContent=showDone?'Сбылось':'В планах';if($('#sectionTitle'))$('#sectionTitle').textContent=showDone?'Сбылось':'Идеи';if($('#sectionHint'))$('#sectionHint').textContent=showDone?'Приятные воспоминания':'Идеи на будущее';$('#listCount').textContent=`${list.length} ${list.length===1?'идея':list.length>1&&list.length<5?'идеи':'идей'}`;const cards=$('#cards');if(!list.length){cards.innerHTML=`<div class="empty"><div class="empty-icon">${showDone?'♡':'✦'}</div><strong>${query?'Ничего не нашлось':showDone?'Пока ни одна идея не сбылась':'Здесь пока тихо'}</strong><p>${query?'Попробуйте другое слово или сбросьте фильтр.':'Добавьте сюда то, что однажды захочется сделать.'}</p></div>`;return}cards.innerHTML=list.map(i=>{const c=category(i.category),p=i.owner==='her'?person('her'):person('me'),who=i.scope==='together'?`<span class="tiny-pair">${state.profiles.map(x=>avatar(x)).join('')}</span><span class="ownership">Вместе</span>`:`${avatar(p)}<span class="ownership">${esc(personLabel(p))}</span>`,visual=i.visual||{background:'butter',illustration:DEFAULT_ILLUSTRATION[i.category]||'home'},link=safeWebUrl(i.url||''),preview=i.linkPreview&&i.linkPreview.url===link?i.linkPreview:null,photo=i.imageData||i.image||preview?.imageData||(!i.visual?(c.image||'assets/event.jpg'):'' );const art=artMarkup(visual,photo);const linkMarkup=link?`<a class="wish-link" href="${esc(link)}" target="_blank" rel="noopener noreferrer" aria-label="Открыть сохранённую ссылку в новой вкладке">↗ Открыть ссылку</a>`:'';const previewMarkup=preview&&(preview.title||preview.description)?`<div class="wish-link-preview-copy"><strong>${esc((preview.title||'').slice(0,180))}</strong>${preview.description?`<span>${esc(preview.description.slice(0,280))}</span>`:''}</div>`:'';return `<article class="wish-card ${i.done?'done':''}" data-id="${esc(i.id)}">${art}<div class="wish-main"><div class="wish-meta"><span class="cat-label">${esc(c.icon)} ${esc(c.singular)}</span>${i.tags?.[0]?`<span class="tag">${esc(i.tags[0])}</span>`:''}</div><div class="wish-title">${esc(i.title)}</div>${i.note?`<div class="wish-note">${esc(i.note)}</div>`:''}${previewMarkup}${linkMarkup}<div class="wish-bottom">${who}</div></div><div class="card-actions"><button class="icon-btn marked" data-action="toggle" ${i._canEdit===false?'disabled aria-disabled="true" title="Личную запись может менять только автор"':''} aria-label="${i.done?'Вернуть в планы':'Отметить как сбылось'}" title="${i.done?'Вернуть в планы':'Отметить как сбылось'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle>${i.done?'<path d="m8 12 2.5 2.5L16 9"></path>':''}</svg></button><button class="icon-btn" data-action="edit" ${i._canEdit===false?'disabled aria-disabled="true" title="Личную запись может менять только автор"':''} aria-label="Редактировать идею" title="Редактировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button></div></article>`}).join('')}
+    function render(){renderPeople();renderCategories();const pLabel=partnerScopeLabel();if($('#partnerScopeOption'))$('#partnerScopeOption').textContent=pLabel==='Его'?'👑 Его':'🌸 Её';if($('#scopeSelect'))$('#scopeSelect').value=currentScope;renderCards();$('#navIdeas').classList.toggle('active',activeFeatureScreen==='ideas'&&!showDone);$('#navDone').classList.toggle('active',activeFeatureScreen==='ideas'&&showDone);updateHeroShowcase();window.dispatchEvent(new Event('na-dvoih:render'))}
     function animateScreen(target){if(!target)return;target.classList.remove('screen-enter');if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;void target.offsetWidth;target.classList.add('screen-enter')}
     function showToast(text){const t=$('#toast');t.textContent=text;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2100)}
     const modalCloseTimers=new WeakMap(),modalOpeners=new WeakMap(),modalStack=[];
@@ -564,17 +949,178 @@
     function closeModal(id){if(id==='wishOverlay')cancelLinkPreview();const modal=$('#'+id);if(!modal||!modal.classList.contains('open'))return;modal.classList.remove('open');modal.classList.add('closing');const index=modalStack.indexOf(modal);if(index!==-1)modalStack.splice(index,1);restoreModalOpener(modalOpeners.get(modal));const timer=setTimeout(()=>{modal.classList.remove('closing');if(!activeModal())document.body.style.overflow=modalBodyOverflow},window.matchMedia('(prefers-reduced-motion: reduce)').matches?1:220);modalCloseTimers.set(modal,timer)}
     document.addEventListener('keydown',event=>{const modal=activeModal();if(!modal)return;if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();closeModal(modal.id);return}if(event.key!=='Tab')return;const stops=modalTabStops(modal);if(!stops.length){event.preventDefault();modal.focus({preventScroll:true});return}const first=stops[0],last=stops[stops.length-1],index=stops.indexOf(document.activeElement);if(event.shiftKey&&index<=0){event.preventDefault();last.focus({preventScroll:true})}else if(!event.shiftKey&&(index<0||index===stops.length-1)){event.preventDefault();first.focus({preventScroll:true})}},true);
     document.addEventListener('focusin',event=>{const modal=activeModal();if(modal&&!modal.contains(event.target))focusModal(modal)},true);
-    function setScopeForm(scope){$$('[data-choice]').forEach(x=>{const radio=x.querySelector('input');radio.checked=radio.value===scope;x.classList.toggle('active',radio.checked)});$('#ownerWrap').classList.toggle('visible',scope==='personal')}
-    function openWish(item){activeFeatureScreen='ideas';render();if(item?._canEdit===false){showToast('Личную запись может редактировать только автор');return}photoTaskId++;$('#wishImageHint').textContent='Фото уменьшается прямо на устройстве и сохраняется только в этом браузере.';const f=$('#wishForm');f.reset();f.elements.id.value=item?.id||'';f.elements.title.value=item?.title||'';f.elements.category.value=item?.category||'event';f.elements.note.value=item?.note||'';f.elements.date.value=item?.date||'';f.elements.reminder.checked=item?.reminder!==false;f.elements.tags.value=(item?.tags||[]).join(', ');f.elements.url.value=item?.url||'';resetLinkPreview(item);selectedWishBackground=backgroundById(item?.visual?.background).id;selectedWishIllustration=illustrationById(item?.visual?.illustration||DEFAULT_ILLUSTRATION[item?.category||'event']||'ticket').id;selectedWishImageData=item?.imageData||'';selectedWishLegacyImage=item?.image||'';$('#wishImageFile').value='';$('#wishVisualDetails').open=false;$('#wishLinkDetails').open=!!item?.url;setScopeForm(item?.scope==='personal'?'personal':'together');f.elements.owner.value=item?.owner==='her'?'her':'me';$('#wishModalTitle').textContent=item?'Редактировать идею':'Новая идея';$('#deleteWish').hidden=!item;renderVisualPicker();updateWishPhotoPreview();openModal('wishOverlay')}
-    $('#wishForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,id=f.elements.id.value,scope=f.elements.scope.value,existing=state.items.find(x=>x.id===id),url=safeWebUrl(f.elements.url.value.trim());if(existing?._canEdit===false){showToast('Личную запись может редактировать только автор');return}if(f.elements.url.value.trim()&&!url){showToast('Добавьте корректную ссылку http или https без логина и пароля');return}const preview=currentLinkPreview&&currentLinkPreview.url===url?{url,title:currentLinkPreview.title,description:currentLinkPreview.description,imageData:selectedWishImageData?'':currentLinkPreview.imageData}:null;if(imageBudgetWithoutCurrent()+(selectedWishImageData||'').length+(!selectedWishImageData?(preview?.imageData||'').length:0)>MAX_TOTAL_IMAGE_CHARS){showToast('Лимит локальных изображений почти исчерпан; уберите фото у старых идей');return}const next={id:id||`w${Date.now()}`,title:f.elements.title.value.trim(),category:f.elements.category.value,scope,owner:scope==='together'?'both':f.elements.owner.value,note:f.elements.note.value.trim(),tags:f.elements.tags.value.split(',').map(x=>x.trim()).filter(Boolean),done:existing?.done||false,date:f.elements.date.value||null,reminder:f.elements.reminder.checked,image:selectedWishLegacyImage||'',imageData:selectedWishImageData||'',linkPreview:preview,url,visual:{background:selectedWishBackground,illustration:selectedWishIllustration}};if(!next.title)return;const before=existing?{...existing,tags:[...(existing.tags||[])],visual:existing.visual?{...existing.visual}:undefined}:null;if(existing)Object.assign(existing,next);else state.items.unshift(next);if(!save()){if(existing)Object.assign(existing,before);else state.items.shift();return}render();closeModal('wishOverlay');showToast(existing?'Изменения сохранены':'Идея добавлена в копилку')});
+    function setScopeForm(scope){const sel=$('#wishScopeSelect');if(sel){sel.value=scope==='personal'?($('#wishOwnerHidden')?.value||'me'):'together';$('#wishScopeHidden').value=scope;$('#wishOwnerHidden').value=scope==='personal'?($('#wishOwnerHidden')?.value||'me'):'both'}}
+    
+    /* Interactive Canvas Cropper State */
+    let cropperState={img:null,zoom:1,offsetX:0,offsetY:0,isDragging:false,startX:0,startY:0};
+    function initCropperWithImage(img){cropperState.img=img;cropperState.zoom=1;cropperState.offsetX=0;cropperState.offsetY=0;const zoomInput=$('#wishCropZoom');if(zoomInput)zoomInput.value='1';$('#wishCropContainer').hidden=false;drawCropper()}
+    function drawCropper(){const canvas=$('#wishCropCanvas');if(!canvas||!cropperState.img)return;const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);const img=cropperState.img,baseScale=Math.max(w/img.width,h/img.height),currentScale=baseScale*cropperState.zoom,drawW=img.width*currentScale,drawH=img.height*currentScale;const maxOffsetX=Math.max(0,(drawW-w)/2),maxOffsetY=Math.max(0,(drawH-h)/2);cropperState.offsetX=Math.max(-maxOffsetX,Math.min(maxOffsetX,cropperState.offsetX));cropperState.offsetY=Math.max(-maxOffsetY,Math.min(maxOffsetY,cropperState.offsetY));const drawX=(w-drawW)/2+cropperState.offsetX,drawY=(h-drawH)/2+cropperState.offsetY;ctx.drawImage(img,drawX,drawY,drawW,drawH)}
+    const cropViewport=$('#wishCropViewport');
+    if(cropViewport){
+      cropViewport.addEventListener('pointerdown',e=>{cropperState.isDragging=true;cropperState.startX=e.clientX-cropperState.offsetX;cropperState.startY=e.clientY-cropperState.offsetY;cropViewport.setPointerCapture(e.pointerId)});
+      cropViewport.addEventListener('pointermove',e=>{if(!cropperState.isDragging)return;cropperState.offsetX=e.clientX-cropperState.startX;cropperState.offsetY=e.clientY-cropperState.startY;drawCropper()});
+      const stopCropDrag=e=>{if(cropperState.isDragging){cropperState.isDragging=false;try{cropViewport.releasePointerCapture(e.pointerId)}catch{}}};
+      cropViewport.addEventListener('pointerup',stopCropDrag);
+      cropViewport.addEventListener('pointercancel',stopCropDrag);
+      $('#wishCropZoom')?.addEventListener('input',e=>{cropperState.zoom=parseFloat(e.target.value)||1;drawCropper()});
+    }
+    $('#wishCropApply')?.addEventListener('click',()=>{
+      if(!cropperState.img)return;
+      const canvas=$('#wishCropCanvas'),exportCanvas=document.createElement('canvas');
+      exportCanvas.width=520;exportCanvas.height=520;
+      const ctx=exportCanvas.getContext('2d'),img=cropperState.img,baseScale=Math.max(520/img.width,520/img.height),currentScale=baseScale*cropperState.zoom,drawW=img.width*currentScale,drawH=img.height*currentScale;
+      const scaleRatio=520/canvas.width,drawX=(520-drawW)/2+(cropperState.offsetX*scaleRatio),drawY=(520-drawH)/2+(cropperState.offsetY*scaleRatio);
+      ctx.drawImage(img,drawX,drawY,drawW,drawH);
+      selectedWishImageData=exportCanvas.toDataURL('image/jpeg',0.82);
+      selectedWishLegacyImage='';
+      $('#wishCropContainer').hidden=true;
+      updateWishPhotoPreview('Фото подогнано и сжато');
+      showToast('Фото кадрировано');
+    });
+    $('#recropWishPhoto')?.addEventListener('click',()=>{if(cropperState.img){$('#wishCropContainer').hidden=false;drawCropper()}});
+
+    /* Fullscreen Photo Viewer */
+    function openFullscreenPhoto(src){if(!src)return;const overlay=$('#photoViewerOverlay'),img=$('#photoViewerImg');if(!overlay||!img)return;img.src=src;overlay.classList.add('open')}
+    function closeFullscreenPhoto(){const overlay=$('#photoViewerOverlay');if(overlay)overlay.classList.remove('open')}
+    $('#photoViewerClose')?.addEventListener('click',closeFullscreenPhoto);
+    $('#photoViewerOverlay')?.addEventListener('click',e=>{if(e.target===$('#photoViewerOverlay')||e.target===$('#photoViewerClose'))closeFullscreenPhoto()});
+    $('#wishPhotoPreviewImage')?.addEventListener('click',()=>{const src=$('#wishPhotoPreviewImage')?.src;if(src)openFullscreenPhoto(src)});
+
+    function openWish(item){
+      activeFeatureScreen='ideas';render();
+      if(item?._canEdit===false){showToast('Личную запись может редактировать только автор');return}
+      photoTaskId++;
+      $('#wishImageHint').textContent='Фото можно приблизить и подогнать прямо здесь перед сохранением.';
+      const f=$('#wishForm');
+      f.reset();
+      f.elements.id.value=item?.id||'';
+      f.elements.title.value=item?.title||'';
+      f.elements.category.value=item?.category||'event';
+      f.elements.note.value=item?.note||'';
+      if(f.elements.date)f.elements.date.value=item?.date||'';
+      if(f.elements.reminder)f.elements.reminder.checked=item?.reminder!==false;
+      f.elements.tags.value=(item?.tags||[]).join(', ');
+      f.elements.url.value=item?.url||'';
+      resetLinkPreview(item);
+      selectedWishBackground=backgroundById(item?.visual?.background).id;
+      selectedWishIllustration=illustrationById(item?.visual?.illustration||DEFAULT_ILLUSTRATION[item?.category||'event']||'ticket').id;
+      selectedWishImageData=item?.imageData||'';
+      selectedWishLegacyImage=item?.image||'';
+      $('#wishImageFile').value='';
+      $('#wishCropContainer').hidden=true;
+      cropperState.img=null;
+      $('#wishVisualDetails').open=false;
+      $('#wishLinkDetails').open=!!item?.url;
+      const scopeSelect=$('#wishScopeSelect');
+      if(scopeSelect){
+        if(item?.scope==='personal'){
+          scopeSelect.value=item.owner==='her'?'her':'me';
+          $('#wishScopeHidden').value='personal';
+          $('#wishOwnerHidden').value=item.owner||'me';
+        }else{
+          scopeSelect.value='together';
+          $('#wishScopeHidden').value='together';
+          $('#wishOwnerHidden').value='both';
+        }
+        const partnerOpt=$('#wishScopePartnerOpt');
+        if(partnerOpt)partnerOpt.textContent=partnerScopeLabel()==='Его'?'👑 Личное (для него)':'🌸 Личное (для неё)';
+      }
+      $('#wishModalTitle').textContent=item?'Редактировать идею':'Новая идея';
+      $('#deleteWish').hidden=!item;
+      renderVisualPicker();
+      updateWishPhotoPreview();
+      openModal('wishOverlay');
+    }
+    $('#wishScopeSelect')?.addEventListener('change',e=>{
+      const val=e.target.value;
+      if(val==='together'){
+        $('#wishScopeHidden').value='together';
+        $('#wishOwnerHidden').value='both';
+      }else{
+        $('#wishScopeHidden').value='personal';
+        $('#wishOwnerHidden').value=val;
+      }
+    });
+
+    $('#wishForm').addEventListener('submit',e=>{
+      e.preventDefault();
+      const f=e.currentTarget,id=f.elements.id.value,
+            scope=$('#wishScopeHidden')?.value||'together',
+            owner=$('#wishOwnerHidden')?.value||'both',
+            existing=state.items.find(x=>x.id===id),
+            url=safeWebUrl(f.elements.url.value.trim());
+      if(existing?._canEdit===false){showToast('Личную запись может редактировать только автор');return}
+      if(f.elements.url.value.trim()&&!url){showToast('Добавьте корректную ссылку http или https без логина и пароля');return}
+      const preview=currentLinkPreview&&currentLinkPreview.url===url?{url,title:currentLinkPreview.title,description:currentLinkPreview.description,imageData:selectedWishImageData?'':currentLinkPreview.imageData}:null;
+      if(imageBudgetWithoutCurrent()+(selectedWishImageData||'').length+(!selectedWishImageData?(preview?.imageData||'').length:0)>MAX_TOTAL_IMAGE_CHARS){showToast('Лимит локальных изображений почти исчерпан; уберите фото у старых идей');return}
+      const next={
+        id:id||`w${Date.now()}`,
+        title:f.elements.title.value.trim(),
+        category:f.elements.category.value,
+        scope,
+        owner,
+        note:f.elements.note.value.trim(),
+        tags:f.elements.tags.value.split(',').map(x=>x.trim()).filter(Boolean),
+        done:existing?.done||false,
+        date:f.elements.date?.value||null,
+        reminder:f.elements.reminder?f.elements.reminder.checked:true,
+        image:selectedWishLegacyImage||'',
+        imageData:selectedWishImageData||'',
+        linkPreview:preview,
+        url,
+        visual:{background:selectedWishBackground,illustration:selectedWishIllustration}
+      };
+      if(!next.title)return;
+      const before=existing?{...existing,tags:[...(existing.tags||[])],visual:existing.visual?{...existing.visual}:undefined}:null;
+      if(existing)Object.assign(existing,next);else state.items.unshift(next);
+      if(!save()){if(existing)Object.assign(existing,before);else state.items.shift();return}
+      render();
+      closeModal('wishOverlay');
+      showToast(existing?'Изменения сохранены':'Идея добавлена в копилку');
+    });
+
     $('#deleteWish').addEventListener('click',()=>{const id=$('#wishForm').elements.id.value;if(!id)return;const item=state.items.find(i=>i.id===id);if(item?._canEdit===false){showToast('Личную запись может удалить только автор');return}const before=state.items;state.items=state.items.filter(i=>i.id!==id);if(!save()){state.items=before;return}render();closeModal('wishOverlay');showToast('Идея удалена')});
     $('#wishVisualDetails').addEventListener('click',e=>{const bg=e.target.closest('[data-wish-background]'),ill=e.target.closest('[data-wish-illustration]');if(bg){selectedWishBackground=bg.dataset.wishBackground;$('#wishBackgrounds').querySelectorAll('[data-wish-background]').forEach(x=>{const yes=x===bg;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(ill){selectedWishIllustration=ill.dataset.wishIllustration;$('#wishIllustrations').querySelectorAll('[data-wish-illustration]').forEach(x=>{const yes=x===ill;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(bg||ill)updateWishArtPreview()});
-    $('#wishImageFile').addEventListener('change',async e=>{const file=e.currentTarget.files?.[0];if(!file)return;const task=++photoTaskId;$('#wishImageHint').textContent='Уменьшаем фото на устройстве…';try{const data=await compressWishImage(file);if(task!==photoTaskId)return;if(data.length>MAX_COMPRESSED_IMAGE_BYTES*1.4||imageBudgetWithoutCurrent()+data.length>MAX_TOTAL_IMAGE_CHARS)throw new Error('Лимит локальных фото почти исчерпан; уберите фото у старых идей');selectedWishImageData=data;selectedWishLegacyImage='';$('#wishImageHint').textContent='Фото сжато локально; отправки на сервер нет.';updateWishPhotoPreview(`Сжато до ${Math.max(1,Math.round(data.length*.75/1024))} КБ · только на этом устройстве`);showToast('Фото уменьшено и добавлено')}catch(error){if(task!==photoTaskId)return;$('#wishImageHint').textContent=error.message||'Не удалось обработать фото';$('#wishImageFile').value='';showToast(error.message||'Не удалось обработать фото')}});
-    $('#clearWishPhoto').addEventListener('click',()=>{photoTaskId++;selectedWishImageData='';selectedWishLegacyImage='';$('#wishImageFile').value='';$('#wishImageHint').textContent='Фото убрано; останется выбранная иллюстрация.';updateWishPhotoPreview();showToast('Фото убрано — останется рисунок')});
-    $$('.choice').forEach(x=>x.addEventListener('click',()=>setScopeForm(x.dataset.choice==='personal'?'personal':'together')));
-    $('#cards').addEventListener('click',e=>{const btn=e.target.closest('[data-action]');if(!btn)return;const card=e.target.closest('.wish-card'),item=state.items.find(x=>x.id===card?.dataset.id);if(!item)return;if(item._canEdit===false){showToast('Личную запись может менять только автор');return}if(btn.dataset.action==='edit'){openWish(item);return}const before=item.done;item.done=!item.done;if(!save()){item.done=before;return}render();showToast(item.done?'Отмечено как сбывшееся':'Вернули в планы')});
-    $('#scopeTabs').addEventListener('click',e=>{const b=e.target.closest('[data-scope]');if(!b)return;currentScope=b.dataset.scope;renderCards();animateScreen($('#cards'));$$('.scope-btn').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-selected',x===b?'true':'false')})});
-$('#searchInput').addEventListener('input',renderCards);
+
+    $('#wishImageFile').addEventListener('change',e=>{
+      const file=e.currentTarget.files?.[0];
+      if(!file)return;
+      if(!file.type.startsWith('image/')){showToast('Выберите файл изображения');return}
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const img=new Image();
+        img.onload=()=>{
+          initCropperWithImage(img);
+          $('#wishImageHint').textContent='Подгоните нужный фрагмент и нажмите «Готово».';
+        };
+        img.src=ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $('#clearWishPhoto').addEventListener('click',()=>{photoTaskId++;selectedWishImageData='';selectedWishLegacyImage='';$('#wishImageFile').value='';cropperState.img=null;$('#wishCropContainer').hidden=true;$('#wishImageHint').textContent='Фото убрано; останется выбранная иллюстрация.';updateWishPhotoPreview();showToast('Фото убрано — останется рисунок')});
+
+    $('#cards').addEventListener('click',e=>{
+      const photoEl=e.target.closest('.wish-art.has-photo img, .wish-image');
+      if(photoEl&&photoEl.src){
+        e.stopPropagation();
+        openFullscreenPhoto(photoEl.src);
+        return;
+      }
+      const btn=e.target.closest('[data-action]');
+      if(!btn)return;
+      const card=e.target.closest('.wish-card'),item=state.items.find(x=>x.id===card?.dataset.id);
+      if(!item)return;
+      if(item._canEdit===false){showToast('Личную запись может менять только автор');return}
+      if(btn.dataset.action==='edit'){openWish(item);return}
+      const before=item.done;item.done=!item.done;
+      if(!save()){item.done=before;return}
+      render();
+      showToast(item.done?'Отмечено как сбывшееся':'Вернули в планы');
+    });
+
+    $('#scopeSelect')?.addEventListener('change',e=>{currentScope=e.target.value;renderCards();animateScreen($('#cards'))});
+    $('#searchInput').addEventListener('input',renderCards);
     const profilesRoot=$('#profileEditors'),avatarPhotoDrafts=new Map(),avatarPhotoDirty=new Set(),avatarPhotoTasks=new Map();
     function updatePartnerGenderHint(){const g=$('#partnerGender')?.value;$('#partnerGenderHint').textContent=g==='male'?'Личный фильтр партнёра будет «Его». Вкладка «Мои» всегда остаётся вашим списком.':'Личный фильтр партнёра будет «Её». Вкладка «Мои» всегда остаётся вашим списком.'}
     function updateProfilePreview(wrap){const id=wrap.dataset.profile,p=person(id),emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji,color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color,photo=avatarPhotoDirty.has(id)?(avatarPhotoDrafts.get(id)||''):safeAvatarPhoto(p.photo),preview=wrap.querySelector('[data-preview]');preview.style.background=color;preview.classList.toggle('has-photo',!!photo);preview.innerHTML=avatarContent(photo,emoji);const meta=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`),clear=wrap.querySelector(`[data-avatar-clear="${id}"]`);if(meta&&avatarPhotoDirty.has(id)&&photo)meta.textContent=`Сжато до ${Math.max(1,Math.round(photo.length*.75/1024))} КБ · сохраните профили`;if(clear)clear.hidden=!photo}
@@ -590,12 +1136,29 @@ $('#searchInput').addEventListener('input',renderCards);
     $('#openThemes').addEventListener('click',()=>{renderThemeOptions();openModal('themeOverlay')});
     $('#toggleMode').addEventListener('click',()=>{const before=state.mode;state.mode=state.mode==='dark'?'light':'dark';applyTheme();if(!save()){state.mode=before;applyTheme()}});
     $('#themeOptions').addEventListener('click',e=>{const b=e.target.closest('[data-theme-id]');if(!b)return;const before=state.theme;state.theme=b.dataset.themeId;applyTheme();if(!save()){state.theme=before;applyTheme();renderThemeOptions();return}renderThemeOptions();showToast(`Тема «${THEMES.find(t=>t.id===state.theme).name}» включена`)});
-    function openCategory(){const f=$('#categoryForm');f.reset();f.elements.icon.value='✦';$('#categoryEmojiOptions').innerHTML=CATEGORY_EMOJIS.map((icon,i)=>`<button type="button" class="emoji-option ${i===0?'selected':''}" data-category-icon="${esc(icon)}" aria-label="Значок ${esc(icon)}">${esc(icon)}</button>`).join('');openModal('categoryOverlay')}
+    function openCategory(){const f=$('#categoryForm');f.reset();f.elements.icon.value='✦';renderCategoryManageList();$('#categoryEmojiOptions').innerHTML=CATEGORY_EMOJIS.map((icon,i)=>`<button type="button" class="emoji-option ${i===0?'selected':''}" data-category-icon="${esc(icon)}" aria-label="Значок ${esc(icon)}">${esc(icon)}</button>`).join('');openModal('categoryOverlay')}
     $('#categoryEmojiOptions').addEventListener('click',e=>{const b=e.target.closest('[data-category-icon]');if(!b)return;$('#categoryEmojiOptions').querySelectorAll('[data-category-icon]').forEach(x=>x.classList.toggle('selected',x===b));$('#categoryForm').elements.icon.value=b.dataset.categoryIcon});
-    $('#categoryForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,name=f.elements.name.value.trim();if(!name)return;if(categories().some(c=>c.name.toLocaleLowerCase('ru')===name.toLocaleLowerCase('ru'))){showToast('Такая категория уже есть');return}const id=`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`,beforeCategory=currentCategory,beforeDone=showDone;state.categories.push({id,name,singular:name,icon:f.elements.icon.value||'✦',image:''});currentCategory=id;showDone=false;if(!save()){state.categories.pop();currentCategory=beforeCategory;showDone=beforeDone;render();return}render();closeModal('categoryOverlay');showToast('Категория добавлена')});
+    $('#categoryOverlay').addEventListener('click',e=>{
+      const delBtn=e.target.closest('[data-delete-cat]');
+      if(!delBtn)return;
+      const catId=delBtn.dataset.deleteCat;
+      if(!catId)return;
+      if(DEFAULT_CATS.some(d=>d.id===catId)){
+        if(!state.deletedCats.includes(catId))state.deletedCats.push(catId);
+      }else{
+        state.categories=(state.categories||[]).filter(c=>c.id!==catId);
+      }
+      if(currentCategory===catId)currentCategory='all';
+      save();
+      renderCategories();
+      renderCards();
+      renderCategoryManageList();
+      showToast('Категория удалена');
+    });
+    $('#categoryForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,name=f.elements.name.value.trim();if(!name)return;if(categories().some(c=>c.name.toLocaleLowerCase('ru')===name.toLocaleLowerCase('ru'))){showToast('Такая категория уже есть');return}const id=`custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`,beforeCategory=currentCategory,beforeDone=showDone;state.categories.push({id,name,singular:name,icon:f.elements.icon.value||'✦',image:''});currentCategory=id;showDone=false;if(!save()){state.categories.pop();currentCategory=beforeCategory;showDone=beforeDone;render();return}render();renderCategoryManageList();closeModal('categoryOverlay');showToast('Категория добавлена')});
     $('#categoryTabs').addEventListener('click',e=>{if(e.target.closest('[data-open-category]')){openCategory();return}const b=e.target.closest('[data-category]');if(!b)return;currentCategory=b.dataset.category;renderCategories();renderCards();animateScreen($('#cards'))});
     // Native overflow handles touch swipes; pointer dragging adds the same gesture for a mouse.
-    $$('#scopeTabs,#categoryTabs').forEach(el=>{let startX=0,startScroll=0,pointerId=null,moved=false;el.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;pointerId=e.pointerId;startX=e.clientX;startScroll=el.scrollLeft;moved=false});el.addEventListener('pointermove',e=>{if(pointerId!==e.pointerId)return;const dx=e.clientX-startX;if(!moved&&Math.abs(dx)>5){moved=true;el.classList.add('dragging');el.setPointerCapture(e.pointerId)}if(moved){el.scrollLeft=startScroll-dx;e.preventDefault()}});const finish=e=>{if(pointerId!==e.pointerId)return;if(moved){dragSuppressClick=true;el.classList.remove('dragging');if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}pointerId=null};el.addEventListener('pointerup',finish);el.addEventListener('pointercancel',finish);el.addEventListener('click',e=>{if(dragSuppressClick){e.preventDefault();e.stopPropagation();dragSuppressClick=false}},true)});
+    $$('#categoryTabs').forEach(el=>{let startX=0,startScroll=0,pointerId=null,moved=false;el.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;pointerId=e.pointerId;startX=e.clientX;startScroll=el.scrollLeft;moved=false});el.addEventListener('pointermove',e=>{if(pointerId!==e.pointerId)return;const dx=e.clientX-startX;if(!moved&&Math.abs(dx)>5){moved=true;el.classList.add('dragging');el.setPointerCapture(e.pointerId)}if(moved){el.scrollLeft=startScroll-dx;e.preventDefault()}});const finish=e=>{if(pointerId!==e.pointerId)return;if(moved){dragSuppressClick=true;el.classList.remove('dragging');if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}pointerId=null};el.addEventListener('pointerup',finish);el.addEventListener('pointercancel',finish);el.addEventListener('click',e=>{if(dragSuppressClick){e.preventDefault();e.stopPropagation();dragSuppressClick=false}},true)});
     window.NaDvoihApp={getState:()=>state,storeKey:STORE,legacyStoreKey:BASE_STORE,telegramUserId,save,render,animateScreen,setFeatureScreen:(name)=>{activeFeatureScreen=['ideas','calendar','household'].includes(name)?name:'ideas';render()},getFeatureScreen:()=>activeFeatureScreen,openModal,closeModal,openSyncModal:()=>openModal('syncOverlay'),closeSyncModal:()=>closeModal('syncOverlay')};
     render();
   })();

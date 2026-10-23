@@ -7,12 +7,16 @@
   const q = (selector, root = document) => root.querySelector(selector);
   const qa = (selector, root = document) => [...root.querySelectorAll(selector)];
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
-  const categories = [
-    { id: "shopping", label: "Покупки" },
-    { id: "cleaning", label: "Уборка" },
-    { id: "home", label: "Дом и уют" },
-    { id: "other", label: "Другое" },
+  const DEFAULT_HOUSEHOLD_CATEGORIES = [
+    { id: "shopping", label: "Покупки", icon: "🛍️" },
+    { id: "cleaning", label: "Уборка", icon: "🧹" },
+    { id: "home", label: "Дом и уют", icon: "🪴" },
   ];
+  state.deletedHouseholdCats = Array.isArray(state.deletedHouseholdCats) ? state.deletedHouseholdCats : [];
+  state.householdCategories = Array.isArray(state.householdCategories) ? state.householdCategories : [];
+  function getHouseholdCategories() {
+    return [...DEFAULT_HOUSEHOLD_CATEGORIES, ...state.householdCategories].filter((c) => !state.deletedHouseholdCats.includes(c.id));
+  }
 
   if (!Array.isArray(state.items)) state.items = [];
   if (!Array.isArray(state.householdTasks)) state.householdTasks = [];
@@ -94,9 +98,9 @@
       .feature-page[hidden],.feature-settings[hidden],.feature-calendar-view[hidden]{display:none!important}
       .feature-page{min-width:0}
       .feature-page.screen-enter{animation:screen-enter var(--motion-duration) var(--motion-easing) both}
-      .feature-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:2px 3px 12px}
-      .feature-head h2{margin:0;font-size:17px;letter-spacing:-.035em;font-weight:750}
-      .feature-subtitle{margin:4px 0 0;color:var(--muted);font-size:10px;line-height:1.45}
+      .feature-head{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:3px!important;margin:4px 2px 14px!important}
+      .feature-head h2{margin:0!important;font-size:22px!important;letter-spacing:-.03em!important;font-weight:780!important;color:var(--ink)!important;line-height:1.2!important}
+      .feature-subtitle{margin:0!important;color:var(--muted)!important;font-size:12px!important;font-weight:550!important;line-height:1.3!important}
       .feature-note{padding:9px 11px;margin:0 0 12px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--muted-strong);font-size:10px;line-height:1.45}
       .feature-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin:0 0 13px;border:1px solid var(--soft-line);border-radius:13px;background:var(--soft)}
       .feature-tab{min-height:36px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:11px;font-weight:700}
@@ -247,7 +251,7 @@
     household.hidden = true;
     household.setAttribute("aria-labelledby", "householdTitle");
     household.innerHTML = `
-      <div class="feature-head"><div><h2 id="householdTitle">Наш быт</h2><p class="feature-subtitle">Совместные дела и заботы</p></div></div>
+      <div class="feature-head"><div><h2 id="householdTitle">Быт</h2><p class="feature-subtitle">Совместные дела и заботы</p></div></div>
       <div class="household-toolbar"><button class="household-add" id="householdAdd" type="button">＋ Новое дело</button><div class="household-filters" id="householdFilters" aria-label="Подкатегории бытовых дел"></div></div>
       <div class="household-list" id="householdList"></div>
       <div class="feature-status" id="householdSyncStatus" aria-live="polite">Синхронизировано</div>`;
@@ -286,7 +290,7 @@
       <section class="sheet"><div class="sheet-head"><div class="sheet-title" id="householdTaskTitle">Новое дело</div><button class="close-btn" id="householdTaskClose" type="button" aria-label="Закрыть">×</button></div>
       <form class="form-grid" id="householdTaskForm">
         <input type="hidden" name="id">
-        <div class="field"><label for="householdTaskCategory">Подкатегория</label><select id="householdTaskCategory" name="subcategory">${categories.map((category) => `<option value="${category.id}">${category.label}</option>`).join("")}</select></div>
+        <div class="field"><label for="householdTaskCategory">Подкатегория</label><select id="householdTaskCategory" name="subcategory">${getHouseholdCategories().map((category) => `<option value="${category.id}">${category.label}</option>`).join("")}</select></div>
         <div class="field"><label for="householdTaskName">Дело</label><input id="householdTaskName" name="title" maxlength="90" placeholder="Например, купить молоко" required></div>
         <button class="primary-btn" id="householdTaskSave" type="submit">Сохранить</button>
         <button class="secondary-btn" id="householdTaskDelete" type="button" hidden>Удалить дело</button>
@@ -409,9 +413,10 @@
 
   function renderHousehold() {
     if (!q("#householdScreen")) return;
+    const houseCats = getHouseholdCategories();
     const filters = q("#householdFilters");
     filters.innerHTML = `<button class="household-filter ${householdFilter === "all" ? "active" : ""}" type="button" data-household-filter="all">Все</button>`
-      + categories.map((category) => `<button class="household-filter ${householdFilter === category.id ? "active" : ""}" type="button" data-household-filter="${category.id}">${category.label}</button>`).join("");
+      + houseCats.map((category) => `<button class="household-filter ${householdFilter === category.id ? "active" : ""}" type="button" data-household-filter="${category.id}">${category.label}</button>`).join("");
     const tasks = state.householdTasks.filter((task) => householdFilter === "all" || task.subcategory === householdFilter)
       .sort((a, b) => Number(a.done) - Number(b.done) || String(a.title).localeCompare(String(b.title), "ru") || String(a.id).localeCompare(String(b.id), "en"));
     const list = q("#householdList");
@@ -419,7 +424,7 @@
       list.innerHTML = '<div class="feature-empty">Пока дел нет. Добавьте небольшую задачу для вас двоих.</div>';
       return;
     }
-    list.innerHTML = tasks.map((task) => `<article class="household-task ${task.done ? "done" : ""}" data-household-id="${escapeHtml(task.id)}"><input type="checkbox" data-household-toggle="${escapeHtml(task.id)}" aria-label="${task.done ? "Вернуть в дела" : "Отметить выполненным"}" ${task.done ? "checked" : ""}><div class="household-task-main"><strong>${escapeHtml(task.title)}</strong><small>${categories.find((category) => category.id === task.subcategory)?.label || "Другие дела"}</small></div><button type="button" data-household-edit="${escapeHtml(task.id)}" aria-label="Редактировать дело">✎</button><button type="button" data-household-delete="${escapeHtml(task.id)}" aria-label="Удалить дело">×</button></article>`).join("");
+    list.innerHTML = tasks.map((task) => `<article class="household-task ${task.done ? "done" : ""}" data-household-id="${escapeHtml(task.id)}"><input type="checkbox" data-household-toggle="${escapeHtml(task.id)}" aria-label="${task.done ? "Вернуть в дела" : "Отметить выполненным"}" ${task.done ? "checked" : ""}><div class="household-task-main"><strong>${escapeHtml(task.title)}</strong><small>${houseCats.find((category) => category.id === task.subcategory)?.label || "Другие дела"}</small></div><button type="button" data-household-edit="${escapeHtml(task.id)}" aria-label="Редактировать дело">✎</button><button type="button" data-household-delete="${escapeHtml(task.id)}" aria-label="Удалить дело">×</button></article>`).join("");
   }
 
   function decorateWishCards() {
@@ -453,6 +458,8 @@
       q("#navIdeas").classList.remove("active");
       q("#navDone").classList.remove("active");
     }
+    const hero = q(".hero");
+    if (hero) hero.hidden = screen !== "ideas";
     q("#featureCalendarToggle").checked = preferences.calendar;
     q("#featureHouseholdToggle").checked = preferences.household;
     renderCalendar();
@@ -475,7 +482,11 @@
     screen = "ideas";
     const targetNav = item.done ? q("#navDone") : q("#navIdeas");
     targetNav.click();
-    q('#scopeTabs [data-scope="all"]')?.click();
+    const scopeSelect = q("#scopeSelect");
+    if (scopeSelect) {
+      scopeSelect.value = "all";
+      scopeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     q('#categoryTabs [data-category="all"]')?.click();
     const search = q("#searchInput");
     if (search) {
