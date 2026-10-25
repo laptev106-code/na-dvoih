@@ -553,4 +553,48 @@ export function registerTelegramSyncRoutes(app: Express) {
 
   registerResource(app, "wishes");
   registerResource(app, "household");
+
+  // Flight Recorder telemetry buffer: in-memory ring buffer (last 200 events)
+  type TelemetryEvent = {
+    time: string;
+    userId?: string;
+    coupleId?: string;
+    type: string;
+    detail?: string;
+    data?: any;
+  };
+  const telemetryLogs: TelemetryEvent[] = [];
+
+  app.post("/api/telemetry", async (req, res) => {
+    try {
+      const { type, detail, data } = req.body || {};
+      let userId = "guest";
+      try {
+        const rawInit = String(req.header("X-Telegram-Init-Data") || req.body?.initData || "");
+        if (rawInit) {
+          const acc = parseTelegramInitData(rawInit);
+          userId = acc.user.id;
+        }
+      } catch {}
+      const item: TelemetryEvent = {
+        time: new Date().toISOString(),
+        userId,
+        type: String(type || "info"),
+        detail: String(detail || ""),
+        data: data || null
+      };
+      telemetryLogs.push(item);
+      if (telemetryLogs.length > 200) telemetryLogs.shift();
+      return json(res, 200, { ok: true });
+    } catch {
+      return json(res, 200, { ok: false });
+    }
+  });
+
+  app.get("/api/telemetry", async (_req, res) => {
+    return json(res, 200, {
+      count: telemetryLogs.length,
+      logs: telemetryLogs.slice(-100)
+    });
+  });
 }

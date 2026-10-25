@@ -240,25 +240,29 @@
 
     /* Enhanced Mobile Sync Sheet Styles */
     #syncOverlay .sheet{max-height:min(88dvh,720px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:22px 18px calc(24px + var(--safe-bottom));border-radius:26px 26px 0 0}
-    .sync-status-badge{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:10px 14px;border-radius:14px;background:var(--soft);border:1px solid var(--line);font-size:11.5px;color:var(--ink);line-height:1.4}
-    .sync-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--polish-shadow);display:flex;flex-direction:column;gap:10px}
-    .sync-card-title{font-size:13.5px;font-weight:750;color:var(--ink);display:flex;align-items:center;gap:7px}
-    .sync-card-desc{font-size:11px;color:var(--muted);margin:0;line-height:1.4}
-    .sync-code-container{background:var(--soft);border:1.5px dashed var(--line);border-radius:14px;padding:12px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0 2px}
-    .sync-code-digits{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace;font-size:32px;font-weight:850;letter-spacing:0.2em;color:var(--green);line-height:1.1;padding-left:0.2em;user-select:all}
-    .sync-code-hint{font-size:10.5px;color:var(--muted)}
-    .sync-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-    .sync-btn-telegram{background:#2aabee!important;color:white!important;font-weight:700!important}
-    .sync-text-btn{background:transparent;border:0;color:var(--green);font-size:11px;font-weight:650;padding:6px;text-decoration:underline;cursor:pointer;align-self:center}
-    .sync-divider{display:flex;align-items:center;gap:10px;margin:6px 0 14px;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+    .sync-status-badge{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:12px 16px;border-radius:16px;background:var(--soft);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.45;box-shadow:0 2px 8px rgba(42,55,47,.04)}
+    .sync-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 4px 16px rgba(44,55,47,.06);display:flex;flex-direction:column;gap:12px}
+    .sync-card-title{font-size:15px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px}
+    .sync-card-desc{font-size:12px;color:var(--muted);margin:0;line-height:1.45}
+    .sync-code-container{background:linear-gradient(135deg,rgba(48,78,69,.04),rgba(48,78,69,.08));border:1.5px dashed var(--line);border-radius:18px;padding:16px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;margin:6px 0 4px}
+    .sync-code-digits{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace;font-size:36px;font-weight:900;letter-spacing:0.22em;color:var(--green);line-height:1.15;padding-left:0.22em;user-select:all;cursor:pointer}
+    .sync-code-hint{font-size:11.5px;color:var(--muted)}
+    .sync-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+    .sync-btn-telegram{background:#2aabee!important;color:white!important;font-weight:750!important;height:48px!important;border-radius:14px!important;font-size:13px!important}
+    .sync-text-btn{background:transparent;border:0;color:var(--green);font-size:12px;font-weight:700;padding:8px;text-decoration:underline;cursor:pointer;align-self:center}
+    .sync-divider{display:flex;align-items:center;gap:10px;margin:10px 0 16px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em}
     .sync-divider::before,.sync-divider::after{content:"";flex:1;height:1px;background:var(--line)}
-    .sync-input-code{height:50px!important;font-size:20px!important;font-weight:750!important;letter-spacing:0.15em!important;text-align:center!important;border-radius:14px!important}
-    .sync-connected-card{background:linear-gradient(145deg,var(--card) 0%,var(--soft) 100%);border:1px solid var(--line);border-radius:20px;padding:22px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:var(--polish-shadow);margin-bottom:12px}
-    .sync-connected-icon{width:54px;height:54px;border-radius:50%;background:#e9eee6;display:grid;place-items:center;font-size:28px}
-    .sync-live-badge{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;color:var(--green)}
-    .sync-live-badge .dot{width:7px;height:7px;background:#22c55e;border-radius:50%;box-shadow:0 0 6px #22c55e}
-    .sync-disconnect-btn{background:transparent;border:0;color:#df5734;font-size:11.5px;font-weight:600;padding:8px;cursor:pointer}
-    .sync-join{display:flex;flex-direction:column;gap:10px}
+    .sync-input-code{height:54px!important;font-size:22px!important;font-weight:850!important;letter-spacing:0.18em!important;text-align:center!important;border-radius:16px!important;border:1.5px solid var(--line)!important;background:var(--card)!important}
+    .sync-connected-card{background:linear-gradient(145deg,var(--card) 0%,var(--soft) 100%);border:1px solid var(--line);border-radius:24px;padding:24px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;box-shadow:0 8px 28px rgba(44,55,47,.08);margin-bottom:14px}
+    .sync-connected-icon{width:62px;height:62px;border-radius:50%;background:#e9eee6;display:grid;place-items:center;font-size:32px;box-shadow:0 4px 14px rgba(48,78,69,.12)}
+    .sync-live-badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);padding:7px 16px;border-radius:999px;font-size:12px;font-weight:750;color:var(--green);box-shadow:0 2px 8px rgba(42,55,47,.05)}
+    .sync-live-badge .dot{width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e}
+    .sync-disconnect-btn{background:transparent;border:0;color:#df5734;font-size:12px;font-weight:650;padding:10px;cursor:pointer}
+    .sync-join{display:flex;flex-direction:column;gap:12px}
+
+    /* Diagnostics / Flight Recorder Modal */
+    #flightRecorderOverlay .sheet{max-height:min(86dvh,680px);overflow-y:auto;padding:22px 18px calc(24px + var(--safe-bottom));border-radius:26px 26px 0 0}
+    .flight-log-box{background:#1e1e24;color:#a7f3d0;font-family:monospace;font-size:11px;line-height:1.5;padding:14px;border-radius:14px;height:260px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;user-select:text}
 
     .sync-transfer-box,.sync-conflicts{display:grid;gap:8px;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
     .sync-transfer-box[hidden],.sync-conflicts[hidden],#syncInviteRevoke[hidden],#syncInviteRevokeNote[hidden]{display:none!important}
@@ -1082,9 +1086,54 @@
       </div>
     </section>
   </div>
+
+  <!-- Flight Recorder (Diagnostics) Modal -->
+  <div class="overlay" id="flightRecorderOverlay" role="dialog" aria-modal="true" aria-labelledby="flightRecorderTitle">
+    <section class="sheet">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title" id="flightRecorderTitle">Бортовой самописец 📡</div>
+          <div style="margin-top:3px;font-size:12px;color:var(--muted)">Скрытый диагностический лог приложения</div>
+        </div>
+        <button class="close-btn" id="flightRecorderClose" data-close="flightRecorderOverlay" aria-label="Закрыть">✕</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700;color:var(--muted)">События сессии:</span>
+        <button class="secondary-btn" id="flightRecorderCopy" type="button" style="padding:6px 12px;font-size:11px">📋 Скопировать лог для агента</button>
+      </div>
+
+      <div class="flight-log-box" id="flightRecorderLogs">Загрузка логов...</div>
+      <button class="secondary-btn" id="flightRecorderClear" type="button" style="margin-top:10px;width:100%;font-size:11.5px">Очистить локальный буфер</button>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
   (()=>{
+    window.NaDvoihTelemetry = {
+      logs: [],
+      log(type, detail, data) {
+        const entry = {
+          time: new Date().toLocaleTimeString('ru-RU', { hour12: false }) + '.' + String(Date.now() % 1000).padStart(3, '0'),
+          type,
+          detail: typeof detail === 'string' ? detail : JSON.stringify(detail),
+          data: data || null
+        };
+        this.logs.unshift(entry);
+        if (this.logs.length > 200) this.logs.pop();
+        try {
+          const initData = window.Telegram?.WebApp?.initData || '';
+          fetch('/api/telemetry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': initData },
+            body: JSON.stringify(entry)
+          }).catch(() => {});
+        } catch {}
+      },
+      getLogs() { return this.logs; },
+      clear() { this.logs = []; }
+    };
     window.triggerHaptic = function(type = 'light') {
       try {
         if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -1183,7 +1232,7 @@
     const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const person=id=>state.profiles.find(p=>p.id===id)||state.profiles[0];const personLabel=p=>p?.name||(p?.id==='me'?'Я':'Партнёр');
     const partnerScopeLabel=()=>person('her').gender==='male'?'Его':'Её';
-    function save(){try{localStorage.setItem(STORE,JSON.stringify(state));window.dispatchEvent(new Event('na-dvoih:local-save'));return true}catch(error){showToast('Не удалось сохранить данные в браузере. Проверьте свободное место и доступность хранилища.');return false}}
+    function save(reason){try{localStorage.setItem(STORE,JSON.stringify(state));window.dispatchEvent(new Event('na-dvoih:local-save'));window.NaDvoihTelemetry?.log?.('local_save',reason||'state_updated',{itemsCount:state.items?.length});return true}catch(error){window.NaDvoihTelemetry?.log?.('local_save_error',error.message);showToast('Не удалось сохранить данные в браузере. Проверьте свободное место и доступность хранилища.');return false}}
     function category(id){return categories().find(c=>c.id===id)||categories()[0]||DEFAULT_CATS[0]}
     function avatarContent(photo,emoji){const fallback=`<span class="avatar-fallback"${photo?' hidden':''}>${esc(emoji)}</span>`;return photo?`<img class="avatar-photo" src="${esc(photo)}" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false;this.parentElement.classList.remove('has-photo')">${fallback}`:fallback}
     function avatar(p,size='sm',preview=false){const photo=safeAvatarPhoto(p.photo);return `<span class="avatar ${size}${photo?' has-photo':''}" ${preview?'data-preview':''} style="background:${esc(p.color)}" title="${esc(p.name)}" aria-hidden="true">${avatarContent(photo,p.emoji)}</span>`}
@@ -1553,6 +1602,88 @@
     $('#categoryTabs').addEventListener('click',e=>{if(e.target.closest('[data-open-category]')){triggerHaptic('light');openCategory();return}const b=e.target.closest('[data-category]');if(!b)return;triggerHaptic('light');currentCategory=b.dataset.category;renderCategories();renderCards();animateScreen($('#cards'))});
     // Native overflow handles touch swipes; pointer dragging adds the same gesture for a mouse.
     $$('#categoryTabs').forEach(el=>{let startX=0,startScroll=0,pointerId=null,moved=false;el.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;pointerId=e.pointerId;startX=e.clientX;startScroll=el.scrollLeft;moved=false});el.addEventListener('pointermove',e=>{if(pointerId!==e.pointerId)return;const dx=e.clientX-startX;if(!moved&&Math.abs(dx)>5){moved=true;el.classList.add('dragging');el.setPointerCapture(e.pointerId)}if(moved){el.scrollLeft=startScroll-dx;e.preventDefault()}});const finish=e=>{if(pointerId!==e.pointerId)return;if(moved){dragSuppressClick=true;el.classList.remove('dragging');if(el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}pointerId=null};el.addEventListener('pointerup',finish);el.addEventListener('pointercancel',finish);el.addEventListener('click',e=>{if(dragSuppressClick){e.preventDefault();e.stopPropagation();dragSuppressClick=false}},true)});
+    // Diagnostics / Flight Recorder (Triple tap on brand logo)
+    let brandTapCount = 0;
+    let brandTapTimer = null;
+    const brandEl = $('.brand');
+    async function openFlightRecorder() {
+      openModal('flightRecorderOverlay');
+      const box = $('#flightRecorderLogs');
+      if (!box) return;
+      box.textContent = 'Сбор бортовых данных и логов...';
+      
+      let serverEvents = [];
+      try {
+        const initData = window.Telegram?.WebApp?.initData || '';
+        const res = await fetch('/api/telemetry?limit=50', {
+          headers: { 'X-Telegram-Init-Data': initData }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          serverEvents = json.logs || json.events || [];
+        }
+      } catch (err) {
+        serverEvents = [{ time: new Date().toISOString(), type: 'fetch_error', detail: String(err) }];
+      }
+
+      const localLogs = window.NaDvoihTelemetry?.logs || [];
+      const report = [
+        '=== БОРТОВОЙ САМОПИСЕЦ «НА ДВОИХ» ===',
+        'Время отчёта: ' + new Date().toISOString(),
+        'Telegram User ID: ' + (telegramUserId || 'не в Telegram'),
+        'User Agent: ' + navigator.userAgent,
+        'Записей в локальном стейте: ' + (state.items?.length || 0),
+        'Активный экран: ' + activeFeatureScreen,
+        'Текущая тема: ' + state.theme + ' (' + state.mode + ')',
+        'Синхронизация активна: ' + !!localStorage.getItem('na-dvoih:sync-active'),
+        'Код пары: ' + (localStorage.getItem('na-dvoih:sync-pair-code') || 'нет'),
+        '\n--- ЛОКАЛЬНЫЕ СОБЫТИЯ КЛИЕНТА (' + localLogs.length + ') ---',
+        ...(localLogs.length ? localLogs.slice(0, 30).map(l => '[' + l.time + '] [' + l.type + '] ' + (l.detail || '') + (l.data ? ' ' + JSON.stringify(l.data) : '')) : ['(нет локальных событий)']),
+        '\n--- СЕРВЕРНЫЕ СОБЫТИЯ ТЕЛЕМЕТРИИ (' + serverEvents.length + ') ---',
+        ...(serverEvents.length ? serverEvents.slice(0, 25).map(s => '[' + new Date(s.time).toLocaleTimeString() + '] [' + s.type + '] ' + (s.detail || '') + ' (uid: ' + (s.userId || 'anon') + ')' + (s.data ? ' ' + JSON.stringify(s.data) : '')) : ['(нет серверных событий)'])
+      ].join('\n');
+
+      box.textContent = report;
+    }
+
+    if (brandEl) {
+      brandEl.style.cursor = 'pointer';
+      brandEl.addEventListener('click', async () => {
+        brandTapCount++;
+        if (brandTapTimer) clearTimeout(brandTapTimer);
+        brandTapTimer = setTimeout(() => { brandTapCount = 0; }, 800);
+        if (brandTapCount >= 3) {
+          brandTapCount = 0;
+          triggerHaptic('success');
+          await openFlightRecorder();
+        }
+      });
+    }
+
+    $('#flightRecorderCopy')?.addEventListener('click', async () => {
+      const box = $('#flightRecorderLogs');
+      if (!box) return;
+      try {
+        await navigator.clipboard.writeText(box.textContent);
+        triggerHaptic('success');
+        showToast('Лог скопирован! Отправьте его разработчику.');
+      } catch {
+        showToast('Не удалось скопировать лог');
+      }
+    });
+
+    $('#flightRecorderClear')?.addEventListener('click', () => {
+      window.NaDvoihTelemetry?.clear?.();
+      const box = $('#flightRecorderLogs');
+      if (box) box.textContent = 'Локальный буфер логов очищен.';
+      triggerHaptic('light');
+      showToast('Буфер логов очищен');
+    });
+
+    $('#flightRecorderClose')?.addEventListener('click', () => {
+      closeModal('flightRecorderOverlay');
+    });
+
     window.NaDvoihApp={getState:()=>state,storeKey:STORE,legacyStoreKey:BASE_STORE,telegramUserId,save,render,animateScreen,setFeatureScreen:(name)=>{activeFeatureScreen=['ideas','calendar','household','bigGoal'].includes(name)?name:'ideas';render()},getFeatureScreen:()=>activeFeatureScreen,openModal,closeModal,openSyncModal:()=>openModal('syncOverlay'),closeSyncModal:()=>closeModal('syncOverlay')};
     render();
   })();

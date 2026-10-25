@@ -132,9 +132,15 @@
         if (data.authorTelegramId && String(data.authorTelegramId) !== localUserId) {
           window.NaDvoihHaptics?.impact?.("light");
           showPartnerToast("Партнёр обновил общее пространство 💌");
+          window.NaDvoihTelemetry?.log?.("partner_wishes_event", e.type, data);
         }
 
-        window.NaDvoihWishesSync?.sync?.();
+        // Apply instant delta if item is included in payload
+        if (data.item && window.NaDvoihWishesSync?.applyDelta) {
+          window.NaDvoihWishesSync.applyDelta(data.item, e.type === "wishes:deleted");
+        } else {
+          window.NaDvoihWishesSync?.sync?.();
+        }
       };
 
       eventSource.addEventListener("wishes:created", onWishesEvent);

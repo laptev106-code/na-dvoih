@@ -408,7 +408,7 @@
     if (shareBtn) {
       shareBtn.onclick = () => {
         const link = `https://t.me/${botUsername}/app?startapp=join_${clean}`;
-        const text = `Присоединяйся ко мне в приложении «На двоих»! Наш код синхронизации: ${clean} 💕`;
+        const text = `Присоединяйся ко мне в приложении «На двоих»! 💕\n\nТвой код для синхронизации:\n\`${clean}\`\n(нажми на код, чтобы скопировать)`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
         if (telegram && typeof telegram.openTelegramLink === "function") {
           telegram.openTelegramLink(shareUrl);
@@ -862,7 +862,11 @@
           local._serverVersion = remoteItem.version;
           nextMetaItems[id] = { version: remoteItem.version, hash: serverHash };
         } else {
-          recordConflict(id, remoteItem, null);
+          // Auto-merge: prefer online version to prevent endless conflict popups on initial pairing
+          const index = nextItems.findIndex((item) => String(item.id) === id);
+          if (index >= 0) nextItems[index] = toLocal(remoteItem);
+          nextMetaItems[id] = { version: remoteItem.version, hash: serverHash };
+          changed = true;
         }
       } else if (base.deleted) {
         recordConflict(id, remoteItem, null);
@@ -1018,8 +1022,39 @@
   updateControls();
   if (initData) refreshSession();
 
+  // Instant Delta applicator for SSE events
+  function applyDelta(remoteItem, isDeleted = false) {
+    if (!remoteItem || !remoteItem.id) return;
+    const id = String(remoteItem.id);
+    const currentState = app.getState();
+    const currentItems = currentState.items || [];
+    const index = currentItems.findIndex((it) => String(it.id) === id);
+
+    if (isDeleted) {
+      if (index >= 0) {
+        currentItems.splice(index, 1);
+        app.save();
+        app.render();
+      }
+      return;
+    }
+
+    const localItem = toLocal(remoteItem);
+    if (index >= 0) {
+      currentItems[index] = localItem;
+    } else {
+      currentItems.unshift(localItem);
+    }
+    app.save();
+    app.render();
+    if (!metadata.items) metadata.items = {};
+    metadata.items[id] = { version: remoteItem.version, hash: "" };
+    persistMetadata();
+  }
+
   window.NaDvoihWishesSync = {
     sync: syncCycle,
-    refreshSession: refreshSession
+    refreshSession: refreshSession,
+    applyDelta: applyDelta
   };
 })();
