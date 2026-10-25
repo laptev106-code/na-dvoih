@@ -78,6 +78,59 @@ function configuredLocalExpoWebOrigins(): Set<string> {
   return origins;
 }
 
+function isOriginAllowed(origin: string, req: any, allowedOrigins: Set<string>): boolean {
+  if (!origin) return true;
+  try {
+    const originUrl = new URL(origin);
+    const originHost = originUrl.host.toLowerCase();
+    const originHostname = originUrl.hostname.toLowerCase();
+    const reqHost = ((typeof req.get === "function" ? req.get("host") : req.headers?.host) || req.hostname || "").toLowerCase();
+
+    // 1. Same-host request (standard web app / Telegram Mini App calling its own API)
+    if (originHost === reqHost || originHostname === (req.hostname || "").toLowerCase()) {
+      return true;
+    }
+
+    // 2. Loopback / local development (localhost, 127.0.0.1, ::1)
+    if (isLoopbackApiHost(originHostname)) {
+      return true;
+    }
+
+    // 3. Render deployment domains (*.onrender.com)
+    if (originHostname.endsWith(".onrender.com")) {
+      return true;
+    }
+
+    // 4. Telegram Web and Mini App hostnames
+    if (
+      originHostname === "web.telegram.org" ||
+      originHostname.endsWith(".telegram.org") ||
+      originHostname === "t.me" ||
+      originHostname.endsWith(".t.me")
+    ) {
+      return true;
+    }
+
+    // 5. Configured origins from env / parameters
+    if (allowedOrigins.has(origin)) {
+      return true;
+    }
+
+    // 6. Public dev tunnels
+    if (
+      originHostname.endsWith(".loca.lt") ||
+      originHostname.endsWith(".ngrok-free.app") ||
+      originHostname.endsWith(".ngrok.io") ||
+      originHostname.endsWith(".trycloudflare.com")
+    ) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 export function createCorsMiddleware(
   allowedOrigins = trustedExpoWebOrigins(),
   localApiRequest = (hostname: string) => isLoopbackApiHost(hostname),
@@ -91,12 +144,8 @@ export function createCorsMiddleware(
       next();
       return;
     }
-    const loopbackOrigin = originHasLoopbackHostname(origin);
-    const allowedLocalOrigin =
-      localApiRequest(req.hostname) && configuredLocalExpoWebOrigins().has(origin);
-    const allowedConfiguredOrigin =
-      !loopbackOrigin && allowedOrigins.has(origin);
-    if (!allowedConfiguredOrigin && !allowedLocalOrigin) {
+
+    if (!isOriginAllowed(origin, req, allowedOrigins)) {
       res.status(403).json({ error: "origin_not_allowed" });
       return;
     }
