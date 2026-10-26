@@ -555,6 +555,24 @@
       return false;
     }
     app.render();
+
+    // Field-Level LWW sync mutation
+    if (window.syncEngine) {
+      const nextMap = new Map(nextTasks.map((t) => [String(t.id), t]));
+      const oldMap = new Map(oldTasks.map((t) => [String(t.id), t]));
+      for (const [id, t] of oldMap) {
+        if (!nextMap.has(id)) {
+          window.syncEngine.mutate("chore", id, t, true);
+        }
+      }
+      for (const [id, t] of nextMap) {
+        const oldT = oldMap.get(id);
+        if (!oldT || JSON.stringify(oldT) !== JSON.stringify(t)) {
+          window.syncEngine.mutate("chore", id, t, false);
+        }
+      }
+    }
+
     if (successMessage) showToast(successMessage);
     return true;
   }
@@ -641,7 +659,11 @@
         if (!item || item._canEdit === false) return;
         const old = { ...item };
         item.done = true;
-        if (!app.save()) Object.assign(item, old);
+        if (!app.save()) {
+          Object.assign(item, old);
+        } else if (window.syncEngine) {
+          window.syncEngine.mutate("wish", String(item.id), item, false);
+        }
         window.triggerHaptic?.('success');
         app.render();
         return;
@@ -671,7 +693,11 @@
       if (!task) return;
       const old = task.done;
       task.done = checkbox.checked;
-      if (!app.save()) task.done = old;
+      if (!app.save()) {
+        task.done = old;
+      } else if (window.syncEngine) {
+        window.syncEngine.mutate("chore", String(task.id), task, false);
+      }
       window.triggerHaptic?.(checkbox.checked ? 'success' : 'light');
       app.render();
     });

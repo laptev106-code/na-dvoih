@@ -398,6 +398,23 @@
     if (inviteNode) {
       inviteNode.textContent = clean.length === 6 ? `${clean.slice(0, 3)} ${clean.slice(3)}` : clean;
       inviteNode.dataset.rawCode = clean;
+      inviteNode.style.cursor = "pointer";
+      inviteNode.title = "Нажмите, чтобы скопировать код";
+      inviteNode.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(clean);
+          window.triggerHaptic?.("success");
+          setStatus(`Код ${clean} скопирован в буфер обмена! 📋`);
+          const toast = byId("toast");
+          if (toast) {
+            toast.textContent = `Код ${clean} скопирован! 📋`;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2000);
+          }
+        } catch {
+          setStatus(`Код: ${clean}`);
+        }
+      };
     }
     const box = byId("syncInviteBox");
     if (box) box.hidden = false;
@@ -408,7 +425,7 @@
     if (shareBtn) {
       shareBtn.onclick = () => {
         const link = `https://t.me/${botUsername}/app?startapp=join_${clean}`;
-        const text = `Присоединяйся ко мне в приложении «На двоих»! 💕\n\nТвой код для синхронизации:\n\`${clean}\`\n(нажми на код, чтобы скопировать)`;
+        const text = `Присоединяйся ко мне в приложении «На двоих»! 💕\n\nКод для пары:\n\`${clean}\`\n(нажми на код, чтобы скопировать)\n\nИли открой ссылку:\n${link}`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
         if (telegram && typeof telegram.openTelegramLink === "function") {
           telegram.openTelegramLink(shareUrl);

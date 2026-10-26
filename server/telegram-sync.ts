@@ -12,18 +12,55 @@ const RATE_WINDOW_MS = 60_000;
 const RATE_LIMIT_PER_IP = 300;
 const rateLimits = new Map<string, { count: number; resetAt: number }>();
 
-// Active SSE connections per couple: Map<coupleId, Set<Response>>
-const activeRooms = new Map<string, Set<Response>>();
+// Stateless Session Token Secret (HMAC-SHA256)
+const SESSION_SECRET =
+  process.env.SESSION_SECRET ||
+  (ENV.telegramBotToken
+    ? crypto.createHash("sha256").update(ENV.telegramBotToken + "_session_salt_2026").digest("hex")
+    : "dev_secret_na_dvoih_salt_2026");
+
+export function signSessionToken(payload: { uid: string; cid: string | null; name?: string }): string {
+  const exp = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+  const data = Buffer.from(JSON.stringify({ ...payload, exp })).toString("base64url");
+  const sig = crypto.createHmac("sha256", SESSION_SECRET).update(data).digest("base64url");
+  return `${data}.${sig}`;
+}
+
+export function verifySessionToken(token: string): { uid: string; cid: string | null; name?: string; exp: number } | null {
+  if (!token || !token.includes(".")) return null;
+  const [data, sig] = token.split(".");
+  if (!data || !sig) return null;
+  const expectedSig = crypto.createHmac("sha256", SESSION_SECRET).update(data).digest("base64url");
+  const sigBuf = Buffer.from(sig);
+  const expBuf = Buffer.from(expectedSig);
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+    return null;
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(data, "base64url").toString("utf8"));
+    if (!payload.exp || Date.now() > payload.exp) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// In-Memory Fast Cache: userId -> coupleId
+export const userCoupleCache = new Map<string, string | null>();
+
+// In-Memory Presence & SSE Streams: coupleId -> (userId -> Response)
+const coupleClients = new Map<string, Map<string, Response>>();
+const presenceTimers = new Map<string, NodeJS.Timeout>();
 
 export async function broadcastToCouple(coupleId: string, eventType: string, data: unknown) {
   try {
     const eventId = await syncDb.recordSyncEvent(coupleId, eventType, data);
-    const clients = activeRooms.get(coupleId);
-    if (!clients || clients.size === 0) return;
+    const userMap = coupleClients.get(coupleId);
+    if (!userMap || userMap.size === 0) return;
 
     const payload = JSON.stringify(data);
     const sseMessage = `id: ${eventId}\nevent: ${eventType}\ndata: ${payload}\n\n`;
-    for (const client of clients) {
+    for (const client of userMap.values()) {
       try {
         client.write(sseMessage);
       } catch {
@@ -36,7 +73,7 @@ export async function broadcastToCouple(coupleId: string, eventType: string, dat
 }
 
 export type TelegramUser = { id: string; first_name?: string; last_name?: string; username?: string };
-export type TelegramAccount = { user: TelegramUser; authDate: number };
+export type TelegramAccount = { user: TelegramUser; coupleId?: string | null; authDate: number };
 type SyncName = "wishes" | "household";
 type TableName = "synced_wishes" | "synced_household_tasks";
 
@@ -59,7 +96,6 @@ function checkRateLimit(req: Request) {
 export function parseTelegramInitData(raw: string): TelegramAccount {
   if (!raw) throw bad("telegram_init_data_missing", 401);
 
-  // If raw was URL-encoded (as sent by safeHeader or URL params), decode it safely
   let workingRaw = raw;
   if (workingRaw.includes("%")) {
     try {
@@ -69,8 +105,11 @@ export function parseTelegramInitData(raw: string): TelegramAccount {
     }
   }
 
-  // Dev / web user fallback for testing or non-telegram environments
+  // Dev / test user fallback ONLY allowed when not in strict production with configured bot
   if (workingRaw.startsWith("dev_user:") || workingRaw.startsWith("web_user:")) {
+    if (ENV.isProduction && ENV.telegramBotToken) {
+      throw bad("dev_auth_disabled_in_production", 403);
+    }
     const parts = workingRaw.split(":");
     const id = parts[1] || "10000001";
     let name = parts[2] ? decodeURIComponent(parts[2]) : (id === "10000002" ? "Партнёр" : "Геннадий");
@@ -92,7 +131,7 @@ export function parseTelegramInitData(raw: string): TelegramAccount {
     throw bad("telegram_init_data_invalid", 401);
   }
 
-  // If bot token is configured, enforce cryptographic signature check
+  // Cryptographic signature check via HMAC-SHA256
   if (ENV.telegramBotToken) {
     const dataCheckString = [...params.entries()]
       .filter(([key]) => key !== "hash")
@@ -108,8 +147,8 @@ export function parseTelegramInitData(raw: string): TelegramAccount {
       console.warn("[Telegram Auth] Hash verification failed with configured token");
       throw bad("telegram_init_data_invalid", 401);
     }
-  } else {
-    // Development / unconfigured token mode: extract user safely
+  } else if (ENV.isProduction) {
+    throw bad("bot_token_not_configured_in_production", 500);
   }
 
   const age = Date.now() / 1000 - authDate;
@@ -128,21 +167,52 @@ export function parseTelegramInitData(raw: string): TelegramAccount {
   return { user: { ...user, id: String(user.id) }, authDate };
 }
 
-async function auth(req: Request, res: Response) {
+async function auth(req: Request, res: Response): Promise<TelegramAccount | null> {
   try {
     checkRateLimit(req);
-    const initDataHeader = String(req.header("X-Telegram-Init-Data") || req.query.initData || "").trim();
-    const clientUserId = String(req.header("X-Client-User-Id") || "").trim();
 
+    // 1. Session Token in Authorization Header (Primary / Zero Cross-Pair Leakage)
+    const authHeader = req.header("Authorization") || "";
+    if (authHeader.startsWith("Bearer ")) {
+      const token = authHeader.slice(7).trim();
+      const verified = verifySessionToken(token);
+      if (verified) {
+        return {
+          user: { id: verified.uid, first_name: verified.name || "Пользователь" },
+          coupleId: verified.cid,
+          authDate: Math.floor(Date.now() / 1000),
+        };
+      }
+    }
+
+    // 2. Query param token (used by native EventSource)
+    const queryToken = String(req.query.token || "").trim();
+    if (queryToken) {
+      const verified = verifySessionToken(queryToken);
+      if (verified) {
+        return {
+          user: { id: verified.uid, first_name: verified.name || "Пользователь" },
+          coupleId: verified.cid,
+          authDate: Math.floor(Date.now() / 1000),
+        };
+      }
+    }
+
+    // 3. Telegram initData header or param
+    const initDataHeader = String(req.header("X-Telegram-Init-Data") || req.query.initData || req.body?.initData || "").trim();
     if (initDataHeader) {
       return parseTelegramInitData(initDataHeader);
     }
 
-    if (clientUserId && /^[A-Za-z0-9_.-]{4,64}$/.test(clientUserId)) {
-      return {
-        user: { id: clientUserId, first_name: "Пользователь", username: `web_${clientUserId.slice(0, 8)}` },
-        authDate: Math.floor(Date.now() / 1000),
-      };
+    // 4. Dev Mode only: allow client user ID if NOT in production
+    if (!ENV.isProduction) {
+      const clientUserId = String(req.header("X-Client-User-Id") || "").trim();
+      if (clientUserId && /^[A-Za-z0-9_.-]{4,64}$/.test(clientUserId)) {
+        return {
+          user: { id: clientUserId, first_name: "Пользователь", username: `dev_${clientUserId.slice(0, 8)}` },
+          authDate: Math.floor(Date.now() / 1000),
+        };
+      }
     }
 
     throw bad("telegram_init_data_missing", 401);
@@ -346,27 +416,99 @@ export function registerTelegramSyncRoutes(app: Express) {
     });
   });
 
-  // Server-Sent Events (SSE) Real-Time Stream Endpoint
-  app.get("/api/stream", async (req, res) => {
-    const rawInitData = String(req.query.initData || req.header("X-Telegram-Init-Data") || "").trim();
-    const clientUserId = String(req.header("X-Client-User-Id") || req.query.clientUserId || "").trim();
-    let account: TelegramAccount | null = null;
-    if (rawInitData) {
-      try {
-        account = parseTelegramInitData(rawInitData);
-      } catch {
-        account = null;
+  // Session Token Exchange: POST /api/sync/session
+  app.post("/api/sync/session", async (req, res) => {
+    const account = await auth(req, res);
+    if (!account) return;
+    try {
+      const couple = await syncDb.getCoupleForUser(account.user.id);
+      const token = signSessionToken({
+        uid: account.user.id,
+        cid: couple ? couple.id : null,
+        name: account.user.first_name,
+      });
+
+      return json(res, 200, {
+        ok: true,
+        token,
+        user: account.user,
+        pair: couple
+          ? {
+              id: couple.id,
+              role: couple.ownerTelegramId === account.user.id ? "owner" : "partner",
+              memberCount: couple.partnerTelegramId ? 2 : 1,
+              partnerTelegramId: couple.partnerTelegramId,
+              inviteCode: couple.inviteCode,
+            }
+          : null,
+      });
+    } catch (error) {
+      return json(res, (error as any).status || 500, { error: (error as any).code || "auth_session_failed" });
+    }
+  });
+
+  // Unified Outbox Batch Mutation: POST /api/sync/batch
+  app.post("/api/sync/batch", async (req, res) => {
+    const account = await auth(req, res);
+    if (!account) return;
+    try {
+      const couple = await syncDb.getCoupleForUser(account.user.id);
+      if (!couple) throw bad("pair_required", 409);
+
+      const mutations = req.body?.mutations;
+      if (!Array.isArray(mutations) || mutations.length === 0) {
+        return json(res, 200, { ok: true, processedIds: [] });
       }
+
+      if (mutations.length > 200) throw bad("too_many_mutations", 400);
+
+      const result = await syncDb.mergeEntityMutations(couple.id, mutations);
+
+      // Broadcast changes to partner over SSE
+      if (result.deltas && result.deltas.length > 0) {
+        broadcastToCouple(couple.id, "entity:delta", {
+          deltas: result.deltas,
+          authorId: account.user.id,
+        });
+      }
+
+      return json(res, 200, {
+        ok: true,
+        processedIds: result.processedIds,
+      });
+    } catch (error) {
+      return json(res, (error as any).status || 500, { error: (error as any).code || "batch_sync_failed" });
     }
-    if (!account && clientUserId && /^[A-Za-z0-9_.-]{4,64}$/.test(clientUserId)) {
-      account = {
-        user: { id: clientUserId, first_name: "Пользователь", username: `web_${clientUserId.slice(0, 8)}` },
-        authDate: Math.floor(Date.now() / 1000),
-      };
+  });
+
+  // Unified Pull: GET /api/sync/pull?since=timestamp
+  app.get("/api/sync/pull", async (req, res) => {
+    const account = await auth(req, res);
+    if (!account) return;
+    try {
+      const couple = await syncDb.getCoupleForUser(account.user.id);
+      if (!couple) {
+        return json(res, 200, { ok: true, entities: [], maxEventId: 0 });
+      }
+
+      const since = Number(req.query.since || 0);
+      const entities = await syncDb.pullEntities(couple.id, since);
+      const maxEventId = await syncDb.getMaxSyncEventId(couple.id);
+
+      return json(res, 200, {
+        ok: true,
+        entities,
+        maxEventId,
+      });
+    } catch (error) {
+      return json(res, (error as any).status || 500, { error: (error as any).code || "pull_failed" });
     }
-    if (!account) {
-      return json(res, 401, { error: "telegram_auth_failed" });
-    }
+  });
+
+  // Server-Sent Events (SSE) Real-Time Stream Endpoint with Lightweight Presence
+  app.get("/api/stream", async (req, res) => {
+    const account = await auth(req, res);
+    if (!account) return;
 
     const couple = await syncDb.getCoupleForUser(account.user.id);
     if (!couple) {
@@ -374,6 +516,7 @@ export function registerTelegramSyncRoutes(app: Express) {
     }
 
     const coupleId = couple.id;
+    const userId = account.user.id;
     const lastEventId = parseInt(
       String(req.headers["last-event-id"] || req.query.lastEventId || "0"),
       10
@@ -386,10 +529,40 @@ export function registerTelegramSyncRoutes(app: Express) {
       "X-Accel-Buffering": "no",
     });
 
-    if (!activeRooms.has(coupleId)) {
-      activeRooms.set(coupleId, new Set());
+    // Room registration
+    if (!coupleClients.has(coupleId)) {
+      coupleClients.set(coupleId, new Map());
     }
-    activeRooms.get(coupleId)!.add(res);
+    const room = coupleClients.get(coupleId)!;
+    room.set(userId, res);
+
+    // Cancel pending disconnect timer for this user if any
+    const timerKey = `${coupleId}:${userId}`;
+    if (presenceTimers.has(timerKey)) {
+      clearTimeout(presenceTimers.get(timerKey)!);
+      presenceTimers.delete(timerKey);
+    }
+
+    // Check if partner is also connected in room
+    const otherUserId = couple.ownerTelegramId === userId ? couple.partnerTelegramId : couple.ownerTelegramId;
+    const isPartnerOnline = Boolean(otherUserId && room.has(otherUserId));
+
+    // Send connection state
+    const maxId = await syncDb.getMaxSyncEventId(coupleId);
+    res.write(
+      `id: ${maxId}\nevent: connected\ndata: ${JSON.stringify({
+        status: "ok",
+        coupleId,
+        partnerOnline: isPartnerOnline,
+      })}\n\n`
+    );
+
+    // Notify room that this user joined
+    if (otherUserId && room.has(otherUserId)) {
+      try {
+        room.get(otherUserId)!.write(`event: presence:update\ndata: ${JSON.stringify({ partnerOnline: true })}\n\n`);
+      } catch {}
+    }
 
     // Replay missed events if client reconnected with lastEventId
     if (lastEventId > 0) {
@@ -401,28 +574,141 @@ export function registerTelegramSyncRoutes(app: Express) {
       } catch (err: any) {
         console.error("[SSE Replay Error]", err.message);
       }
-    } else {
-      const maxId = await syncDb.getMaxSyncEventId(coupleId);
-      res.write(`id: ${maxId}\nevent: connected\ndata: ${JSON.stringify({ status: "ok", coupleId })}\n\n`);
     }
 
-    // Heartbeat every 25 seconds
+    // Heartbeat every 20 seconds
     const heartbeat = setInterval(() => {
       try {
         res.write(": ping\n\n");
       } catch {
         clearInterval(heartbeat);
       }
-    }, 25000);
+    }, 20000);
 
     req.on("close", () => {
       clearInterval(heartbeat);
-      const room = activeRooms.get(coupleId);
-      if (room) {
-        room.delete(res);
-        if (room.size === 0) activeRooms.delete(coupleId);
+      const currentRoom = coupleClients.get(coupleId);
+      if (currentRoom) {
+        currentRoom.delete(userId);
+        if (currentRoom.size === 0) {
+          coupleClients.delete(coupleId);
+        }
       }
+
+      // Debounce disconnect notification by 3 seconds (protect against cell tower transitions)
+      const disconnectTimer = setTimeout(() => {
+        presenceTimers.delete(timerKey);
+        const checkRoom = coupleClients.get(coupleId);
+        if (!checkRoom || !checkRoom.has(userId)) {
+          if (otherUserId && checkRoom && checkRoom.has(otherUserId)) {
+            try {
+              checkRoom.get(otherUserId)!.write(`event: presence:update\ndata: ${JSON.stringify({ partnerOnline: false })}\n\n`);
+            } catch {}
+          }
+        }
+      }, 3000);
+
+      presenceTimers.set(timerKey, disconnectTimer);
     });
+  });
+
+  // Link Preview for Quick Add / Smart Paste: GET /api/link-preview?url=...
+  app.get("/api/link-preview", async (req, res) => {
+    try {
+      const targetUrl = String(req.query.url || "").trim();
+      if (!targetUrl || (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://"))) {
+        return json(res, 400, { error: "invalid_url" });
+      }
+
+      // Prevent SSRF: block localhost/private IPs
+      const parsed = new URL(targetUrl);
+      const host = parsed.hostname.toLowerCase();
+      if (
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host.startsWith("192.168.") ||
+        host.startsWith("10.") ||
+        host.endsWith(".local")
+      ) {
+        return json(res, 400, { error: "forbidden_host" });
+      }
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+
+      const resp = await fetch(targetUrl, {
+        signal: controller.signal,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; NaDvoihBot/1.0; +https://t.me/Na_dvoix2bot)",
+          "Accept": "text/html,application/xhtml+xml",
+        },
+      });
+      clearTimeout(timeout);
+
+      const html = await resp.text();
+
+      // Quick regex-based OpenGraph & HTML meta tag extraction
+      const getMeta = (prop: string) => {
+        const match =
+          html.match(new RegExp(`<meta[^>]+(?:property|name)=["'](?:og:)?${prop}["'][^>]+content=["']([^"']+)["']`, "i")) ||
+          html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:)?${prop}["']`, "i"));
+        return match ? match[1].trim() : null;
+      };
+
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      const title = getMeta("title") || (titleMatch ? titleMatch[1].trim() : parsed.hostname);
+      const description = getMeta("description") || "";
+      let image = getMeta("image") || "";
+
+      if (image && !image.startsWith("http")) {
+        try {
+          image = new URL(image, targetUrl).toString();
+        } catch {
+          image = "";
+        }
+      }
+
+      const siteName = getMeta("site_name") || parsed.hostname;
+
+      return json(res, 200, {
+        ok: true,
+        url: targetUrl,
+        title,
+        description,
+        image,
+        siteName,
+      });
+    } catch {
+      return json(res, 200, { ok: false, error: "preview_fetch_failed" });
+    }
+  });
+
+  // Feedback Submission: POST /api/feedback
+  app.post("/api/feedback", async (req, res) => {
+    try {
+      const { message, meta } = req.body || {};
+      if (!message || typeof message !== "string" || message.trim().length === 0) {
+        return json(res, 400, { error: "message_required" });
+      }
+
+      let userId = "anonymous";
+      let coupleId: string | null = null;
+      try {
+        const account = await auth(req, res);
+        if (account) {
+          userId = account.user.id;
+          const couple = await syncDb.getCoupleForUser(account.user.id);
+          coupleId = couple ? couple.id : null;
+        }
+      } catch {}
+
+      const id = await syncDb.saveFeedback(userId, coupleId, message.trim(), meta);
+      console.log(`[Feedback Received #${id}] From User ${userId}: ${message.trim().slice(0, 100)}`);
+
+      return json(res, 200, { ok: true, id });
+    } catch (err: any) {
+      return json(res, 500, { error: err.message || "feedback_failed" });
+    }
   });
 
   app.get("/api/session", async (req, res) => {

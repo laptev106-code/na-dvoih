@@ -848,8 +848,8 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <div class="brand"><div class="brand-mark" aria-hidden="true"><img class="brand-logo-img" src="assets/app-logo.jpg" alt="Логотип «На двоих»"></div><div class="brand-copy"><strong>На двоих</strong></div></div>
-      <div class="topbar-actions"><button class="theme-trigger" id="openThemes" aria-label="Выбрать цвет темы" title="Цвет оформления">◒</button><button class="mode-trigger" id="toggleMode" aria-label="Включить тёмное оформление" title="Тёмный режим" aria-pressed="false"><span class="mode-icon" aria-hidden="true">☾</span></button><button class="mode-trigger" id="openSync" aria-label="Открыть синхронизацию пары" title="Пара и синхронизация">↔</button><button class="people-button" id="openProfiles" aria-label="Настроить профили пары, имена и фотоаватары"><span class="avatar-pair" id="headerAvatars"></span></button></div>
+      <div class="brand"><div class="brand-mark" aria-hidden="true"><img class="brand-logo-img" src="assets/app-logo.jpg" alt="Логотип «На двоих»"></div><div class="brand-copy"><strong>На двоих</strong><span id="realtimeSyncBadge" style="display:none;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--green);margin-top:2px;cursor:pointer"></span></div></div>
+      <div class="topbar-actions"><button class="theme-trigger" id="openThemes" aria-label="Выбрать цвет темы" title="Цвет оформления">◒</button><button class="mode-trigger" id="toggleMode" aria-label="Включить тёмное оформление" title="Тёмный режим" aria-pressed="false"><span class="mode-icon" aria-hidden="true">☾</span></button><button class="mode-trigger" id="openFeedback" aria-label="Связь с разработчиком" title="Обратная связь">💬</button><button class="mode-trigger" id="openSync" aria-label="Открыть синхронизацию пары" title="Пара и синхронизация">↔</button><button class="people-button" id="openProfiles" aria-label="Настроить профили пары, имена и фотоаватары"><span class="avatar-pair" id="headerAvatars"></span></button></div>
     </header>
     <section class="hero" aria-label="Планы на двоих">
       <div class="hero-content"><div class="eyebrow"><span class="dot"></span> НАШИ ПЛАНЫ</div><h1>Планы на двоих</h1><p>Места, свидания и мечты, которые хочется разделить.</p><div class="hero-stats"><strong id="heroCount">0 идей</strong><span>·</span><span id="heroDone">0 сбылось</span></div></div>
@@ -1083,6 +1083,36 @@
       <div class="sync-conflicts" id="syncConflictBox" hidden>
         <strong>Выберите версию для конфликтующей записи</strong>
         <div id="syncConflictList"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Feedback / Связь с разработчиком Modal -->
+  <div class="overlay" id="feedbackOverlay" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+    <section class="sheet">
+      <div class="sheet-drag-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title" id="feedbackTitle">Связь с разработчиком 💬</div>
+          <div style="margin-top:3px;font-size:12px;color:var(--muted)">Предложения, идеи и обратная связь</div>
+        </div>
+        <button class="close-btn" id="feedbackClose" data-close="feedbackOverlay" aria-label="Закрыть">✕</button>
+      </div>
+
+      <div style="margin-top:12px;display:grid;gap:13px">
+        <p style="font-size:13px;line-height:1.45;color:var(--muted);margin:0">
+          Мы постоянно улучшаем «На двоих». Если у вас есть идея новой функции, предложение или вы заметили неточность — напишите нам напрямую:
+        </p>
+        <textarea id="feedbackText" rows="4" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--ink);font-size:13px;resize:vertical;outline:none;font-family:inherit" placeholder="Например: добавьте возможность прикреплять аудиосообщения или напоминания..."></textarea>
+        
+        <label style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);cursor:pointer">
+          <input type="checkbox" id="feedbackIncludeLogs" checked style="accent-color:var(--green)">
+          <span>Прикрепить анонимную диагностику для быстрой помощи</span>
+        </label>
+
+        <button class="primary-btn" id="feedbackSendBtn" type="button" style="height:48px;font-weight:750">
+          Отправить сообщение 🚀
+        </button>
       </div>
     </section>
   </div>
@@ -1466,13 +1496,14 @@
       const before=existing?{...existing,tags:[...(existing.tags||[])],visual:existing.visual?{...existing.visual}:undefined}:null;
       if(existing)Object.assign(existing,next);else state.items.unshift(next);
       if(!save()){if(existing)Object.assign(existing,before);else state.items.shift();return}
+      if(window.syncEngine){window.syncEngine.mutate('wish',next.id,next,false)}
       render();
       closeModal('wishOverlay');
       triggerHaptic('success');
       showToast(existing?'Изменения сохранены':'Идея добавлена в копилку');
     });
 
-    $('#deleteWish').addEventListener('click',()=>{const id=$('#wishForm').elements.id.value;if(!id)return;const item=state.items.find(i=>i.id===id);if(item?._canEdit===false){showToast('Личную запись может удалить только автор');return}const before=state.items;state.items=state.items.filter(i=>i.id!==id);if(!save()){state.items=before;return}render();closeModal('wishOverlay');triggerHaptic('medium');showToast('Идея удалена')});
+    $('#deleteWish').addEventListener('click',()=>{const id=$('#wishForm').elements.id.value;if(!id)return;const item=state.items.find(i=>i.id===id);if(item?._canEdit===false){showToast('Личную запись может удалить только автор');return}const before=state.items;state.items=state.items.filter(i=>i.id!==id);if(!save()){state.items=before;return}if(window.syncEngine){window.syncEngine.mutate('wish',id,{},true)}render();closeModal('wishOverlay');triggerHaptic('medium');showToast('Идея удалена')});
     $('#wishVisualDetails').addEventListener('click',e=>{const bg=e.target.closest('[data-wish-background]'),ill=e.target.closest('[data-wish-illustration]');if(bg){selectedWishBackground=bg.dataset.wishBackground;$('#wishBackgrounds').querySelectorAll('[data-wish-background]').forEach(x=>{const yes=x===bg;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(ill){selectedWishIllustration=ill.dataset.wishIllustration;$('#wishIllustrations').querySelectorAll('[data-wish-illustration]').forEach(x=>{const yes=x===ill;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(bg||ill)updateWishArtPreview()});
 
     $('#wishImageFile').addEventListener('change',e=>{
@@ -1508,6 +1539,7 @@
       if(btn.dataset.action==='edit'){openWish(item);return}
       const before=item.done;item.done=!item.done;
       if(!save()){item.done=before;return}
+      if(window.syncEngine){window.syncEngine.mutate('wish',item.id,item,false)}
       render();
       triggerHaptic(item.done?'success':'light');
       showToast(item.done?'Отмечено как сбывшееся':'Вернули в планы');
@@ -1524,6 +1556,32 @@
     $('#partnerGender').addEventListener('change',updatePartnerGenderHint);
     $('#profileForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,before=structuredClone(state);state.profiles.forEach(p=>{const wrap=profilesRoot.querySelector(`[data-profile="${p.id}"]`);p.name=f.elements[`name-${p.id}`].value.trim()||p.name;p.emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji;p.color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color;if(avatarPhotoDirty.has(p.id))p.photo=avatarPhotoDrafts.get(p.id)||''});person('her').gender=f.elements.partnerGender.value==='male'?'male':'female';if(!save()){state=before;renderProfileForm();return}render();closeModal('profileOverlay');triggerHaptic('success');showToast('Профили обновлены')});
     $('#openProfiles').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navPair').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});$('#heroAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});
+    $('#openFeedback')?.addEventListener('click',()=>{triggerHaptic('light');openModal('feedbackOverlay')});
+    $('#realtimeSyncBadge')?.addEventListener('click',()=>{triggerHaptic('light');openModal('syncOverlay')});
+    $('#feedbackSendBtn')?.addEventListener('click',async()=>{
+      const txt=$('#feedbackText')?.value?.trim();
+      if(!txt){showToast('Напишите текст отзыва');return}
+      const includeLogs=$('#feedbackIncludeLogs')?.checked;
+      const meta=includeLogs?{logs:window.NaDvoihTelemetry?.getLogs?.()?.slice(0,25)}:null;
+      try{
+        const token=sessionStorage.getItem('na_dvoix_session_token_v2')||localStorage.getItem('na_dvoix_session_token_v2')||'';
+        const res=await fetch('/api/feedback',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+          body:JSON.stringify({message:txt,meta})
+        });
+        if(res.ok){
+          triggerHaptic('success');
+          showToast('Спасибо! Сообщение отправлено разработчику 💌');
+          $('#feedbackText').value='';
+          closeModal('feedbackOverlay');
+        }else{
+          showToast('Не удалось отправить отзыв, попробуйте позже');
+        }
+      }catch{
+        showToast('Не удалось отправить отзыв');
+      }
+    });
     $('#navIdeas').addEventListener('click',()=>{triggerHaptic('light');activeFeatureScreen='ideas';showDone=false;render();animateScreen($('#ideasScreen'))});$('#navDone').addEventListener('click',()=>{triggerHaptic('light');activeFeatureScreen='ideas';showDone=true;render();animateScreen($('#ideasScreen'))});
     $$('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));$$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id)}));
     function renderThemeOptions(){
@@ -1688,6 +1746,7 @@
     render();
   })();
   </script>
+  <script src="./sync-engine.js"></script>
   <script src="./sync-client.js"></script>
   <script src="./calendar-household.js"></script>
   <script src="./big-goal.js"></script>

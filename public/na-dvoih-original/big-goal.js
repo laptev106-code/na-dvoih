@@ -451,6 +451,13 @@
     qa("[data-close]", msOverlay).forEach((b) => b.addEventListener("click", () => app.closeModal("goalMilestoneOverlay")));
   }
 
+  function saveBigGoal() {
+    app.save();
+    if (window.syncEngine) {
+      window.syncEngine.mutate("goal", "bg-main", state.bigGoal, false);
+    }
+  }
+
   function bindBigGoalEvents() {
     const root = q("#bigGoalScreen");
     if (!root) return;
@@ -501,7 +508,7 @@
         const item = state.bigGoal.milestones.find((m) => m.id === id);
         if (item) {
           item.done = toggle.checked;
-          app.save();
+          saveBigGoal();
           renderBigGoal();
           window.triggerHaptic?.(item.done ? "success" : "light");
         }
@@ -514,7 +521,7 @@
         window.triggerHaptic?.("medium");
         const id = delMs.dataset.delMilestone;
         state.bigGoal.milestones = state.bigGoal.milestones.filter((m) => m.id !== id);
-        app.save();
+        saveBigGoal();
         renderBigGoal();
         return;
       }
@@ -551,7 +558,7 @@
         date: today
       });
 
-      app.save();
+      saveBigGoal();
       app.closeModal("goalContributeOverlay");
       renderBigGoal();
       window.triggerHaptic?.("success");
@@ -574,7 +581,7 @@
       state.bigGoal.deadline = form.elements.deadline.value;
       state.bigGoal.note = form.elements.note.value.trim();
 
-      app.save();
+      saveBigGoal();
       app.closeModal("goalEditOverlay");
       renderBigGoal();
       window.triggerHaptic?.("success");
@@ -596,7 +603,7 @@
         by
       });
 
-      app.save();
+      saveBigGoal();
       app.closeModal("goalMilestoneOverlay");
       renderBigGoal();
       window.triggerHaptic?.("success");

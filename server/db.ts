@@ -111,7 +111,69 @@ function initSqliteTables(db: Database.Database) {
       createdAt INTEGER DEFAULT (unixepoch())
     );
     CREATE INDEX IF NOT EXISTS idx_sync_log_couple ON sync_log(coupleId, id);
+
+    -- Unified entities table (Argon Field-Level LWW Schema)
+    CREATE TABLE IF NOT EXISTS entities (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      data TEXT NOT NULL,
+      field_ts TEXT NOT NULL,
+      deleted_at INTEGER DEFAULT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_entities_couple_updated ON entities(couple_id, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_entities_couple_type ON entities(couple_id, type);
+
+    CREATE TABLE IF NOT EXISTS processed_mutations (
+      mutation_id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_mutations_couple ON processed_mutations(couple_id);
+
+    CREATE TABLE IF NOT EXISTS feedbacks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      couple_id TEXT,
+      message TEXT NOT NULL,
+      meta TEXT,
+      created_at INTEGER DEFAULT (unixepoch())
+    );
   `);
+
+  // Auto-migration: if entities table is empty, copy existing wishes and household tasks
+  try {
+    const entityCount = (db.prepare("SELECT count(*) as count FROM entities").get() as any)?.count || 0;
+    if (entityCount === 0) {
+      const wishes = db.prepare("SELECT * FROM synced_wishes").all() as any[];
+      const tasks = db.prepare("SELECT * FROM synced_household_tasks").all() as any[];
+      const insertEntity = db.prepare(`
+        INSERT OR IGNORE INTO entities (id, couple_id, type, data, field_ts, deleted_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      const now = Date.now();
+      for (const w of wishes) {
+        let payloadObj = {};
+        try { payloadObj = JSON.parse(w.payload); } catch {}
+        const fieldTs: Record<string, number> = {};
+        for (const k of Object.keys(payloadObj)) fieldTs[k] = now;
+        insertEntity.run(w.id, w.coupleId, "wish", JSON.stringify(payloadObj), JSON.stringify(fieldTs), w.deleted ? now : null, now);
+      }
+      for (const t of tasks) {
+        let payloadObj = {};
+        try { payloadObj = JSON.parse(t.payload); } catch {}
+        const fieldTs: Record<string, number> = {};
+        for (const k of Object.keys(payloadObj)) fieldTs[k] = now;
+        insertEntity.run(t.id, t.coupleId, "chore", JSON.stringify(payloadObj), JSON.stringify(fieldTs), t.deleted ? now : null, now);
+      }
+      if (wishes.length > 0 || tasks.length > 0) {
+        console.log(`[Database Migration] Migrated ${wishes.length} wishes and ${tasks.length} chores to unified entities table.`);
+      }
+    }
+  } catch (err: any) {
+    console.warn("[Database Migration Error]", err.message);
+  }
 }
 
 export async function getDb() {
@@ -337,6 +399,151 @@ export const syncDb = {
     const db = getSqliteDb();
     const row = db.prepare("SELECT MAX(id) as maxId FROM sync_log WHERE coupleId = ?").get(coupleId) as { maxId: number | null } | undefined;
     return row?.maxId || 0;
+  },
+
+  /** Unified Entity API with Field-Level LWW */
+  async mergeEntityMutations(
+    coupleId: string,
+    mutations: Array<{
+      mutationId: string;
+      entityId: string;
+      entityType: string;
+      patch: Record<string, unknown>;
+      clientFieldTs?: Record<string, number>;
+      isDelete?: boolean;
+    }>
+  ): Promise<{ processedIds: string[]; deltas: any[] }> {
+    const db = getSqliteDb();
+    const processedIds: string[] = [];
+    const deltas: any[] = [];
+
+    const tx = db.transaction(() => {
+      const checkMutStmt = db.prepare("SELECT 1 FROM processed_mutations WHERE mutation_id = ?");
+      const insertMutStmt = db.prepare("INSERT INTO processed_mutations (mutation_id, couple_id, created_at) VALUES (?, ?, ?)");
+      const getEntityStmt = db.prepare("SELECT data, field_ts, deleted_at FROM entities WHERE id = ? AND couple_id = ?");
+      const upsertEntityStmt = db.prepare(`
+        INSERT INTO entities (id, couple_id, type, data, field_ts, deleted_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          data = excluded.data,
+          field_ts = excluded.field_ts,
+          deleted_at = excluded.deleted_at,
+          updated_at = excluded.updated_at
+      `);
+      const logStmt = db.prepare("INSERT INTO sync_log (coupleId, eventType, payload) VALUES (?, 'entity:delta', ?)");
+
+      const now = Date.now();
+
+      for (const m of mutations) {
+        if (!m.mutationId || !m.entityId || !m.entityType) continue;
+
+        // 1. Idempotency check
+        const already = checkMutStmt.get(m.mutationId);
+        if (already) {
+          processedIds.push(m.mutationId);
+          continue;
+        }
+
+        const existing = getEntityStmt.get(m.entityId, coupleId) as { data: string; field_ts: string; deleted_at: number | null } | undefined;
+        let currentData: Record<string, unknown> = {};
+        let currentFieldTs: Record<string, number> = {};
+        let deletedAt: number | null = null;
+
+        if (existing) {
+          try { currentData = JSON.parse(existing.data); } catch {}
+          try { currentFieldTs = JSON.parse(existing.field_ts); } catch {}
+          deletedAt = existing.deleted_at;
+        }
+
+        if (m.isDelete) {
+          deletedAt = Math.max(now, deletedAt || 0);
+        } else {
+          // If entity was resurrected or created
+          if (deletedAt) deletedAt = null;
+
+          const patch = m.patch || {};
+          const clientFieldTs = m.clientFieldTs || {};
+
+          // Field-Level LWW with clock drift clamp (now + 5000ms)
+          for (const [key, val] of Object.entries(patch)) {
+            const incomingTs = Math.min(clientFieldTs[key] || now, now + 5000);
+            const existingTs = currentFieldTs[key] || 0;
+
+            if (incomingTs >= existingTs) {
+              currentData[key] = val;
+              currentFieldTs[key] = incomingTs;
+            }
+          }
+        }
+
+        // Upsert entity
+        upsertEntityStmt.run(
+          m.entityId,
+          coupleId,
+          m.entityType,
+          JSON.stringify(currentData),
+          JSON.stringify(currentFieldTs),
+          deletedAt,
+          now
+        );
+
+        // Record processed mutation
+        insertMutStmt.run(m.mutationId, coupleId, now);
+        processedIds.push(m.mutationId);
+
+        const deltaItem = {
+          entityId: m.entityId,
+          entityType: m.entityType,
+          data: currentData,
+          fieldTs: currentFieldTs,
+          deletedAt,
+          updatedAt: now,
+        };
+        deltas.push(deltaItem);
+
+        // Record in sync_log for SSE replay
+        logStmt.run(coupleId, JSON.stringify(deltaItem));
+      }
+    });
+
+    tx();
+    return { processedIds, deltas };
+  },
+
+  async pullEntities(coupleId: string, since = 0): Promise<Array<{ id: string; type: string; data: any; fieldTs: any; deletedAt: number | null; updatedAt: number }>> {
+    const db = getSqliteDb();
+    const rows = db.prepare(`
+      SELECT id, type, data, field_ts, deleted_at, updated_at
+      FROM entities
+      WHERE couple_id = ? AND updated_at > ?
+      ORDER BY updated_at ASC
+    `).all(coupleId, since) as any[];
+
+    return rows.map((r) => {
+      let data = {};
+      let fieldTs = {};
+      try { data = JSON.parse(r.data); } catch {}
+      try { fieldTs = JSON.parse(r.field_ts); } catch {}
+      return {
+        id: r.id,
+        type: r.type,
+        data,
+        fieldTs,
+        deletedAt: r.deleted_at,
+        updatedAt: r.updated_at,
+      };
+    });
+  },
+
+  async saveFeedback(userId: string, coupleId: string | null, message: string, meta?: any): Promise<number> {
+    const db = getSqliteDb();
+    const info = db.prepare("INSERT INTO feedbacks (user_id, couple_id, message, meta) VALUES (?, ?, ?, ?)").run(
+      userId,
+      coupleId,
+      message,
+      meta ? JSON.stringify(meta) : null
+    );
+    return Number(info.lastInsertRowid);
   },
 };
 

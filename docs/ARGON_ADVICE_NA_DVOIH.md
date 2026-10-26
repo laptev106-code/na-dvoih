@@ -1,506 +1,362 @@
-1. Мгновенная синхронизация (Real-Time Sync)
+1. Real-Time транспорт: SSE + REST против WebSocket (ws)
 
-Для связки Node.js + Express + better-sqlite3 оптимальный выбор — Server-Sent Events (SSE) + стандартные REST-мутации (POST/PATCH/DELETE).
+Для мобильного Telegram WebView (особенно WKWebView на iOS) при хостинге на Render связка SSE + единый батч-эндпоинт мутаций (POST /api/sync/mutate) выигрывает у WebSocket по надежности, хотя уступает в красивом трекинге присутствия (Presence).
 
-Сравнение подходов для вашего стека
-Решение	Плюсы	Минусы	Вердикт
-SSE + REST	Нативный авто-реконнект в браузере (EventSource), поддержка Last-Event-ID, работает поверх обычного HTTP без проблем с прокси и Nginx, ноль сторонних библиотек.	Односторонний канал (сервер -> клиент), мутации идут обычным fetch.	Оптимально. Идеально ложится на Express и мобильные сети.
-WebSocket (ws)	Двусторонний канал с минимальным оверхедом.	Нужно вручную писать логику реконнекта, пинг-понгов, буферизации пропущенных пакетов и настраивать Upgrade-заголовки в Nginx.	Избыточно для задач/заметок на двоих (нет высокочастотного стриминга координат).
-Supabase / Turso	Готовый инфраструктурный слой.	Требует переписывания синхронного слоя better-sqlite3 на асинхронные SDK, привязка к внешним лимитам и задержкам сети до облачной БД.	Неоправданный рефакторинг при наличии рабочего better-sqlite3.
-Реализация Room-based SSE с поддержкой обрывов связи
+Критерий	SSE (/api/stream) + REST	WebSocket (ws)
+Поведение при сне (iOS/Android)	Браузер сам управляет пулом HTTP/2. При пробуждении нативно кидает реконнект с заголовком Last-Event-ID.	Сокет «замерзает» без закрытия (half-open). Требует кастомного пинг-понга на клиенте, иначе мутации уходят в черную дыру до таймаута TCP.
+Переключение Wi-Fi ⇄ LTE	REST-мутация атомарна: либо дошла, либо упала по таймауту (сразу понятен статус для Outbox).	Пакет, отправленный в ws.send() в момент смены сети, теряется в буфере ОС без колбэка ошибки. Приходится писать свой протокол ACK-подтверждений поверх сокета.
+Память на Render (Node.js)	1 открытый http.ServerResponse в памяти на юзера (~15–20 КБ).	Инстанс ws + буферы фреймов (~40–60 КБ на соединение).
+Контроль онлайна партнера	Требует редких heartbeat-запросов или привязки к активности (мутациям).	Мгновенный (по событию close + пинг каждые 15–20 сек).
 
-Для защиты от потери данных при переключении Wi-Fi <-> LTE на смартфонах используется кольцевой буфер событий или таблица sync_events в SQLite. Браузерный EventSource при обрыве сам переподключается и автоматически отправляет заголовок Last-Event-ID.
+Архитектурный вердикт:
+Не переписывайте транспорт на WebSocket. Переход на ws заставит вас вручную изобретать поверх него то, что уже есть в HTTP: идемпотентные ретраи, таймауты запросов и подтверждения доставки (ACK) для Outbox-очереди.
 
-Бэкенд (Express + better-sqlite3):
+Как докрутить текущий SSE до идеала:
+
+Единый мультиплексированный стрим: один /api/stream на все 4 сущности.
+
+Легковесный Presence без сокетов: когда клиент открывает /api/stream, сервер пишет в память Map<coupleId, Set<userId>> и шлет в стрим пары ивент partner_online: true. При срабатывании req.on('close') на SSE-коннекте — ждет 3 секунды (защита от мигания сети при переключении вышек) и, если реконнекта не было, шлет partner_online: false.
+
+Защита от переполнения sync_log: используйте кольцевую зачистку в SQLite (хранить только последние 500 записей на пару или записи за 7 дней). Если клиент присылает Last-Event-ID, который уже удален из sync_log, сервер отвечает специальным SSE-событием event: force_full_pull, и клиент стягивает актуальный слепок таблиц.
+
+2. Модель бесконфликтного слияния (Unified Sync Engine)
+
+Тащить полноценные CRDT (Yjs / Automerge) ради карточек быта, вишлиста и дат — оверкилл. Они раздуют бандл и потребуют хранения бинарных векторов состояний. Ваша задача решается паттерном Field-Level LWW (Last-Write-Wins на уровне отдельных полей) + мягкое удаление (Tombstones).
+
+Почему возникают конфликты сейчас
+
+Вы версионируете карточку целиком ({ version, hash, payload }). Если Партнер А меняет title, а Партнер Б — date, базовая версия разъезжается.
+
+Как устроена схема Field-Level LWW
+
+Вместо перезаписи всего объекта клиент отправляет дельту измененных полей с меткой времени каждого поля. Сервер в рамках одной синхронной транзакции better-sqlite3 сравнивает таймстампы по каждому ключу отдельно.
+
+Единая таблица сущностей в SQLite (entities):
+Все 4 сущности (wish, chore, calendar_date, main_goal) ложатся в одну таблицу. Это убивает зоопарк из sync-client.js и household-sync.js.
+
+SQL
+CREATE TABLE entities (
+    id TEXT PRIMARY KEY,               -- UUID v4 (генерируется на клиенте)
+    couple_id TEXT NOT NULL,
+    type TEXT NOT NULL,                -- 'wish' | 'chore' | 'date' | 'goal'
+    data JSON NOT NULL,                -- {"title": "Отпуск", "amount": 100000}
+    field_ts JSON NOT NULL,            -- {"title": 172998000100, "amount": 172998000500}
+    deleted_at INTEGER DEFAULT NULL,   -- Tombstone (мягкое удаление)
+    updated_at INTEGER NOT NULL
+);
+CREATE INDEX idx_entities_couple_updated ON entities(couple_id, updated_at);
+
+Защита от рассинхрона часов (Clock Drift)
+
+На телефонах партнеров часы могут спешить или отставать на пару минут. Чтобы не городить полноценные Hybrid Logical Clocks (HLC), используйте Monotonic Server-Clamped Timestamp:
 
 JavaScript
-// Таблица для лога событий (позволяет дослать пропущенное при реконнекте)
-db.exec(`
-  CREATE TABLE IF NOT EXISTS sync_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    workspace_id TEXT NOT NULL,
-    event_type TEXT NOT NULL,
-    payload TEXT NOT NULL,
-    created_at INTEGER DEFAULT (unixepoch())
-  );
-  CREATE INDEX IF NOT EXISTS idx_sync_ws_id ON sync_log(workspace_id, id);
-`);
+// Серверная функция слияния в better-sqlite3 (внутри db.transaction)
+const mergeEntityMutation = db.transaction((coupleId, mutation) => {
+  const { entityId, entityType, patch, clientFieldTs, isDelete, mutationId } = mutation;
+  
+  // 1. Защита от дублей (идемпотентность Outbox)
+  const alreadyProcessed = db.prepare(
+    'SELECT 1 FROM processed_mutations WHERE mutation_id = ?'
+  ).get(mutationId);
+  if (alreadyProcessed) return { status: 'duplicate' };
 
-// Хранилище активных подключений: Map<workspaceId, Set<Response>>
-const rooms = new Map();
+  const now = Date.now();
+  const existing = db.prepare(
+    'SELECT data, field_ts, deleted_at FROM entities WHERE id = ? AND couple_id = ?'
+  ).get(entityId, coupleId);
 
-// SSE-эндпоинт
-app.get('/api/stream', authMiddleware, (req, res) => {
-  const { workspaceId } = req.user;
-  // Поддержка заголовка при авто-реконнекте или query-параметра при первом старте
-  const lastEventId = parseInt(req.headers['last-event-id'] || req.query.lastEventId || '0', 10);
+  let currentData = existing ? JSON.parse(existing.data) : {};
+  let currentFieldTs = existing ? JSON.parse(existing.field_ts) : {};
+  let deletedAt = existing ? existing.deleted_at : null;
 
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache, no-transform',
-    'Connection': 'keep-alive',
-    'X-Accel-Buffering': 'no' // Критично для Nginx: отключает буферизацию ответа
-  });
-
-  // Регистрация клиента в комнате
-  if (!rooms.has(workspaceId)) rooms.set(workspaceId, new Set());
-  rooms.get(workspaceId).add(res);
-
-  // Досылка пропущенных за время оффлайна событий
-  if (lastEventId > 0) {
-    const missedEvents = db.prepare(
-      'SELECT id, event_type, payload FROM sync_log WHERE workspace_id = ? AND id > ? ORDER BY id ASC LIMIT 100'
-    ).all(workspaceId, lastEventId);
-
-    for (const ev of missedEvents) {
-      res.write(`id: ${ev.id}\nevent: ${ev.event_type}\ndata: ${ev.payload}\n\n`);
-    }
+  if (isDelete) {
+    // Удаление всегда выигрывает, если его timestamp свежее создания
+    deletedAt = Math.max(now, deletedAt || 0);
   } else {
-    // Отправка текущего максимального ID при свежем подключении
-    const lastRow = db.prepare('SELECT MAX(id) as maxId FROM sync_log WHERE workspace_id = ?').get(workspaceId);
-    res.write(`id: ${lastRow?.maxId || 0}\nevent: connected\ndata: {"status":"ok"}\n\n`);
+    // Поэлементное слияние полей (Field-Level LWW)
+    for (const [key, value] of Object.entries(patch)) {
+      // Ограничиваем клиентский таймстамп сверху серверным временем + 5 сек (защита от часов в будущем)
+      const incomingTs = Math.min(clientFieldTs[key] || now, now + 5000);
+      const existingTs = currentFieldTs[key] || 0;
+
+      if (incomingTs >= existingTs) {
+        currentData[key] = value;
+        currentFieldTs[key] = incomingTs;
+      }
+    }
   }
 
-  // Heartbeat каждые 25 сек, чтобы мобильный оператор или Nginx не закрыли сокет по таймауту
-  const heartbeat = setInterval(() => {
-    res.write(': ping\n\n');
-  }, 25000);
+  // Сохраняем сущность
+  db.prepare(`
+    INSERT INTO entities (id, couple_id, type, data, field_ts, deleted_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      data = excluded.data,
+      field_ts = excluded.field_ts,
+      deleted_at = COALESCE(excluded.deleted_at, entities.deleted_at),
+      updated_at = excluded.updated_at
+  `).run(entityId, coupleId, entityType, JSON.stringify(currentData), JSON.stringify(currentFieldTs), deletedAt, now);
 
-  req.on('close', () => {
-    clearInterval(heartbeat);
-    const room = rooms.get(workspaceId);
-    if (room) {
-      room.delete(res);
-      if (room.size === 0) rooms.delete(workspaceId);
-    }
-  });
+  // Фиксируем мутацию и пишем в sync_log для SSE
+  db.prepare('INSERT INTO processed_mutations (mutation_id, couple_id, created_at) VALUES (?, ?, ?)').run(mutationId, coupleId, now);
+  
+  const logResult = db.prepare(`
+    INSERT INTO sync_log (couple_id, event_type, payload, created_at)
+    VALUES (?, 'ENTITY_DELTA', ?, ?)
+  `).run(coupleId, JSON.stringify({ entityId, entityType, data: currentData, fieldTs: currentFieldTs, deletedAt }), now);
+
+  return { status: 'applied', eventId: logResult.lastInsertRowid, mergedData: currentData };
 });
 
-// Функция бродкаста (вызывается внутри POST/PATCH/DELETE роутов)
-function broadcastToWorkspace(workspaceId, eventType, data) {
-  const payload = JSON.stringify(data);
-  
-  // 1. Записываем событие в БД (синхронно за доли миллисекунды)
-  const info = db.prepare(
-    'INSERT INTO sync_log (workspace_id, event_type, payload) VALUES (?, ?, ?)'
-  ).run(workspaceId, eventType, payload);
-  
-  const eventId = info.lastInsertRowid;
 
-  // 2. Отправляем активным клиентам в комнате
-  const clients = rooms.get(workspaceId);
-  if (!clients) return;
+Результат: Один партнер в метро меняет название цели, второй дома меняет сумму. Оба пакета приходят на сервер с разными ключами в patch. Слияние проходит автоматически, оба получают по SSE итоговый объединенный JSON. Никаких модалок конфликта.
 
-  const message = `id: ${eventId}\nevent: ${eventType}\ndata: ${payload}\n\n`;
-  for (const clientRes of clients) {
-    clientRes.write(message);
-  }
-}
+3. Транзакционная Outbox-очередь и защита от «зомби»-записей
 
-// Очистка старых логов раз в сутки (оставляем только последние 24 часа)
-setInterval(() => {
-  db.prepare('DELETE FROM sync_log WHERE created_at < unixepoch() - 86400').run();
-}, 3600000);
+Причина «воскрешения» удаленных карточек при перезагрузке страницы в офлайне — хранение dirtyIds и deleteIds в памяти (Set) отдельно от основного стейта и попытка синхронизировать состояние, а не журнал операций.
 
+Правильная архитектура на клиенте
 
-Фронтенд (Vanilla JS):
+Даже если вы остаетесь на localStorage (для 4 текстовых сущностей пары его лимита в 5 МБ хватит с головой, а синхронный API проще IndexedDB), структуру нужно разделить на два ключа:
+
+app_state_v2 — локальная проекция данных (для мгновенного рендера UI).У удаленных в офлайне карточек ставится флаг _deleted: true прямо внутри app_state_v2, а не в оперативной памяти. UI просто фильтрует items.filter(x => !x._deleted).
+
+sync_outbox_v2 — строго упорядоченный массив (FIFO) несинхронизированных мутаций.
+
+Компактификация очереди (Queue Compaction) на клиенте
+
+Если юзер в метро создал задачу, 3 раза переименовал её и потом удалил, не нужно слать 5 запросов после выхода на связь:
+
+При добавлении новой мутации в sync_outbox_v2 ищем в очереди еще не отправленную мутацию с тем же entityId.
+
+Если в очереди лежит CREATE или UPDATE, а новая операция — UPDATE, просто мержим их patch и обновляем clientFieldTs в существующей записи очереди.
+
+Если в очереди лежит CREATE (запись создана в этом же офлайн-сеансе и сервер о ней вообще не знает), а юзер жмет DELETE — просто удаляем CREATE из очереди и стираем запись из app_state_v2.
 
 JavaScript
-class SyncManager {
-  constructor(initData, onUpdate) {
-    this.initData = initData;
-    this.onUpdate = onUpdate;
-    this.es = null;
-    this.lastEventId = localStorage.getItem('last_sync_id') || 0;
-    this.connect();
+// sync-engine.js (Клиентский единый движок)
+class UnifiedSyncEngine {
+  constructor() {
+    this.outboxKey = 'na_dvoix_outbox';
+    this.stateKey = 'na_dvoix_state';
+    this.isFlushing = false;
+    this.retryCount = 0;
 
-    // При сворачивании/разворачивании Telegram WebView на iOS сокет часто засыпает
+    window.addEventListener('online', () => this.flush());
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && (!this.es || this.es.readyState === EventSource.CLOSED)) {
-        this.connect();
-      }
+      if (document.visibilityState === 'visible') this.flush();
     });
   }
 
-  connect() {
-    if (this.es) this.es.close();
-    const url = `/api/stream?initData=${encodeURIComponent(this.initData)}&lastEventId=${this.lastEventId}`;
-    this.es = new EventSource(url);
-
-    const handleEvent = (e) => {
-      if (e.lastEventId) {
-        this.lastEventId = e.lastEventId;
-        localStorage.setItem('last_sync_id', e.lastEventId);
-      }
-      this.onUpdate(e.type, JSON.parse(e.data));
-    };
-
-    ['todo:updated', 'note:created', 'calendar:changed'].forEach(type => {
-      this.es.addEventListener(type, handleEvent);
-    });
-
-    this.es.onerror = () => {
-      // Браузер сам переподключится через ~3 секунды, передав Last-Event-ID
-    };
-  }
-}
-
-2. Выбор хостинга для 24/7 Production
-
-Для стека Node.js + better-sqlite3 + постоянные соединения (SSE/WS) архитектура бессерверных функций (Vercel) не подходит.
-
-Сравнение вариантов
-Критерий	а) Render / Railway / Fly.io	б) Vercel + Turso	в) Дешевый VPS (1 vCPU, 1GB RAM)
-Поддержка SQLite	Нативная только при платном подключении Persistent Volume (на Free-тарифах диск стирается при ребилде или засыпании).	Требует отказа от better-sqlite3 и переписывания всех запросов на асинхронный @libsql/client.	Идеальная. Локальный SSD, режим PRAGMA journal_mode = WAL, нулевая сетевая задержка до БД.
-Работа с SSE / WS	На бесплатных тарифах контейнер засыпает через 15 минут простоя — холодный старт занимает до 30–50 секунд.	Serverless-функции имеют жесткий таймаут выполнения и не держат долгие SSE/WS-соединения.	Без ограничений. Процесс живет постоянно в памяти, отклик мгновенный.
-Доступность из РФ	Fly.io и Render периодически попадают под блокировки подсетей ТСПУ (Cloudflare/Fastly диапазоны).	Частые проблемы с доступностью edge-узлов без VPN.	Любой локальный или европейский хостер с чистым IP работает стабильно.
-Бюджет	$5–7/мес за отсутствие сна и диск.	$0, но требует смены архитектуры БД и отказа от SSE.	150–300 ₽/мес ($2–3).
-Рекомендуемая конфигурация: Вариант В (VPS + Nginx + PM2)
-
-Для приложения на двоих 1 vCPU и 1 GB RAM выдержат тысячи подобных комнат, так как Node.js + better-sqlite3 потребляют около 45–60 МБ RAM.
-
-Настройка SQLite для продакшена (при старте сервера):
-
-JavaScript
-db.pragma('journal_mode = WAL'); // Неблокирующее чтение и запись одновременно
-db.pragma('synchronous = NORMAL');
-db.pragma('foreign_keys = ON');
-
-
-Конфигурация Nginx для корректной работы SSE и статики:
-
-Nginx
-server {
-    listen 443 ssl http2;
-    server_name app.yourdomain.ru;
-
-    # SSL сертификаты от Let's Encrypt (Certbot)
-
-    root /var/www/tma-planner/public;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api/ {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Connection "";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-
-        # Настройки специально для SSE (/api/stream)
-        proxy_buffering off;
-        proxy_cache off;
-        proxy_read_timeout 86400s;
-    }
-}
-
-
-Автоматический бэкап SQLite:
-Добавьте в crontab -e команду безопасного горячего бэкапа без остановки сервера:
-
-Bash
-0 4 * * * sqlite3 /var/www/tma-planner/data/app.db ".backup '/var/backups/app_$(date +\%F).db'" && find /var/backups/ -mtime +7 -delete
-
-3. Продуктовые Retention-механики и фоновые уведомления
-
-Главный враг уведомлений в совместных списках — спам. Если один партнер отмечает в магазине 10 купленных продуктов подряд, второй не должен получить 10 отдельных сообщений в Telegram.
-
-4 эффективные Retention-механики для двоих
-
-Умная агрегация уведомлений (Debounced Batching + Edit-in-Place):
-Когда партнер меняет список покупок или закрывает задачи, сервер ждет 45 секунд тишины (debounce) и отправляет одно сводное сообщение. Если в течение следующих 15 минут партнер снова что-то меняет — бот не шлет новое сообщение, а вызывает editMessageText у предыдущего, дополняя сводку.
-
-Silence-on-Active (Подавление пушей при открытом WebApp):
-Бэкенд проверяет таблицу активных SSE-соединений (rooms.get(workspaceId)). Если у второго партнера прямо сейчас открыт Mini App (в комнате 2 активных соединения), пуш в чат бота не отправляется — партнер и так видит изменения на экране в реальном времени.
-
-Контекстный «Пинг одной кнопкой» (Quick Nudge):
-Внутри интерфейса списка покупок кнопка «Я в магазине — проверь список». Отправляет партнеру сообщение в Telegram с Inline-кнопкой web_app, которая сразу открывает приложение на вкладке покупок (?startapp=shopping).
-
-Еженедельная капсула / Дайджест по воскресеньям:
-Раз в неделю крон-скрипт собирает статистику из БД: сколько задач закрыто вместе, какое событие близко в календаре, и достает 1 случайное фото/запись из модуля «Таймлайн воспоминаний» («Ровно 3 месяца назад: ...»).
-
-Техническая реализация Debounced-уведомлений с Edit-in-Place
-
-Не требует сторонних очередей (Redis/BullMQ), реализуется нативным Map в памяти Node.js и встроенным fetch (Node 18+):
-
-JavaScript
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const pendingBatches = new Map(); // Key: `${workspaceId}:${targetTelegramId}`
-
-/**
- * Вызывается при любом действии пользователя
- * @param {Object} params - { workspaceId, actorName, targetChatId, actionText }
- */
-function queuePartnerNotification({ workspaceId, actorName, targetChatId, actionText }) {
-  // 1. Если партнер сейчас онлайн в приложении (в комнате >= 2 человек) — не шлем пуш в ТГ
-  const activeClients = rooms.get(workspaceId);
-  if (activeClients && activeClients.size >= 2) return;
-
-  const key = `${workspaceId}:${targetChatId}`;
-  const now = Date.now();
-
-  if (!pendingBatches.has(key)) {
-    pendingBatches.set(key, {
-      actions: [],
-      timer: null,
-      lastMessageId: null,
-      lastSentAt: 0
-    });
+  getOutbox() {
+    return JSON.parse(localStorage.getItem(this.outboxKey) || '[]');
   }
 
-  const batch = pendingBatches.get(key);
-  batch.actions.push(actionText);
+  saveOutbox(queue) {
+    localStorage.setItem(this.outboxKey, JSON.stringify(queue));
+  }
 
-  if (batch.timer) clearTimeout(batch.timer);
-
-  // Ждем 30 секунд после последнего действия перед отправкой
-  batch.timer = setTimeout(async () => {
-    const lines = batch.actions.map(a => `• ${a}`).join('\n');
-    const text = `🔔 <b>${actorName}</b> обновил(а) планер:\n\n${lines}`;
+  // Вызывается из UI при любом изменении любой из 4-х сущностей
+  mutate(entityType, entityId, patch, isDelete = false) {
+    const now = Date.now();
     
-    const replyMarkup = {
-      inline_keyboard: [[
-        { text: 'Открыть планер', web_app: { url: process.env.WEBAPP_URL } }
-      ]]
-    };
+    // 1. Оптимистичное обновление локального стейта (переживает F5)
+    const state = JSON.parse(localStorage.getItem(this.stateKey) || '{}');
+    const current = state[entityId] || { id: entityId, type: entityType, data: {}, fieldTs: {} };
+
+    if (isDelete) {
+      current._deleted = true; // Tombstone прямо в localStorage!
+      current.deletedAt = now;
+    } else {
+      for (const [k, v] of Object.entries(patch)) {
+        current.data[k] = v;
+        current.fieldTs[k] = now;
+      }
+    }
+    state[entityId] = current;
+    localStorage.setItem(this.stateKey, JSON.stringify(state));
+
+    // 2. Компактификация и запись в Outbox
+    const queue = this.getOutbox();
+    const existingIdx = queue.findIndex(m => m.entityId === entityId && !m.inFlight);
+
+    if (existingIdx !== -1 && !isDelete) {
+      // Склеиваем дельты для одной и той же карточки в офлайне
+      Object.assign(queue[existingIdx].patch, patch);
+      for (const k of Object.keys(patch)) queue[existingIdx].clientFieldTs[k] = now;
+    } else {
+      const clientFieldTs = {};
+      if (patch) for (const k of Object.keys(patch)) clientFieldTs[k] = now;
+
+      queue.push({
+        mutationId: crypto.randomUUID(),
+        entityId,
+        entityType,
+        patch: patch || {},
+        clientFieldTs,
+        isDelete,
+        createdAt: now
+      });
+    }
+
+    this.saveOutbox(queue);
+    this.renderUI();
+    this.flush();
+  }
+
+  async flush() {
+    if (this.isFlushing || !navigator.onLine) return;
+    const queue = this.getOutbox();
+    if (queue.length === 0) return;
+
+    this.isFlushing = true;
 
     try {
-      // Если с момента прошлого пуша прошло меньше 10 минут — редактируем старое сообщение
-      const canEdit = batch.lastMessageId && (Date.now() - batch.lastSentAt < 600000);
-      const method = canEdit ? 'editMessageText' : 'sendMessage';
-      const body = {
-        chat_id: targetChatId,
-        text,
-        parse_mode: 'HTML',
-        reply_markup: replyMarkup,
-        ...(canEdit && { message_id: batch.lastMessageId })
-      };
-
-      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, {
+      // Отправляем всю очередь одним батчем (строго FIFO на сервере)
+      const res = await fetch('/api/sync/batch', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('jwt')}`
+        },
+        body: JSON.stringify({ mutations: queue })
       });
-      
-      const result = await res.json();
-      if (result.ok && !canEdit) {
-        batch.lastMessageId = result.result.message_id;
-        batch.lastSentAt = Date.now();
-        // Сохраняем накопленные действия на случай последующего редактирования
-      } else if (!canEdit) {
-        batch.actions = [];
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { processedIds } = await res.json();
+
+      // Удаляем из очереди только подтвержденные сервером mutationId
+      const currentQueue = this.getOutbox();
+      const remaining = currentQueue.filter(m => !processedIds.includes(m.mutationId));
+      this.saveOutbox(remaining);
+
+      // Зачищаем локальные Tombstones после подтверждения сервера
+      const state = JSON.parse(localStorage.getItem(this.stateKey) || '{}');
+      for (const id of Object.keys(state)) {
+        if (state[id]._deleted && !remaining.some(m => m.entityId === id)) {
+          delete state[id];
+        }
       }
+      localStorage.setItem(this.stateKey, JSON.stringify(state));
+      this.retryCount = 0;
+
     } catch (err) {
-      console.error('TG Notify Error:', err.message);
-      batch.actions = [];
-    }
-  }, 30000);
-}
-
-4. Нативная интеграция Telegram WebApp API
-4.1. Обертка над HapticFeedback
-
-Вызовы виброотклика нужно оборачивать в хелпер с проверкой версии API, чтобы избежать ошибок в десктопном клиенте или старых версиях.
-
-JavaScript
-const tg = window.Telegram.WebApp;
-
-export const Haptic = {
-  // Клик по чекбоксу задачи, переключение вкладки
-  tap: () => tg.HapticFeedback?.impactOccurred('light'),
-  // Перетаскивание элемента, смена дуо-темы
-  medium: () => tg.HapticFeedback?.impactOccurred('medium'),
-  // Завершение всех покупок в списке, создание важного события
-  success: () => tg.HapticFeedback?.notificationOccurred('success'),
-  // Удаление заметки или отмена действия
-  warning: () => tg.HapticFeedback?.notificationOccurred('warning'),
-  // Ошибка валидации или сети
-  error: () => tg.HapticFeedback?.notificationOccurred('error'),
-  // Прокрутка пикера дат/времени
-  selection: () => tg.HapticFeedback?.selectionChanged()
-};
-
-4.2. Контроллер стека навигации для BackButton и MainButton
-
-В SPA без фреймворков частая ошибка — навешивать несколько onClick слушателей на MainButton, которые начинают срабатывать одновременно при переходе между экранами. Решается единым контроллером состояния.
-
-JavaScript
-class UIController {
-  constructor() {
-    this.historyStack = [];
-    this.mainBtnCallback = null;
-
-    tg.BackButton.onClick(() => this.popView());
-    tg.MainButton.onClick(() => {
-      if (this.mainBtnCallback) {
-        Haptic.tap();
-        this.mainBtnCallback();
-      }
-    });
-  }
-
-  // Вызывать при открытии модалки, заметки или вложенного экрана
-  pushView(onBackCallback) {
-    this.historyStack.push(onBackCallback);
-    tg.BackButton.show();
-  }
-
-  popView() {
-    const fn = this.historyStack.pop();
-    if (fn) {
-      Haptic.tap();
-      fn();
-    }
-    if (this.historyStack.length === 0) {
-      tg.BackButton.hide();
-    }
-  }
-
-  // Безопасная установка главной кнопки (заменяет предыдущий обработчик)
-  setMainButton({ text, color, textColor, onClick, isVisible = true }) {
-    this.mainBtnCallback = onClick;
-    if (!isVisible) {
-      tg.MainButton.hide();
+      // Экспоненциальный бэкофф с джиттером (1s, 2s, 4s, 8s... max 30s)
+      const delay = Math.min(30000, (1000 * Math.pow(2, this.retryCount)) + Math.random() * 500);
+      this.retryCount++;
+      setTimeout(() => { this.isFlushing = false; this.flush(); }, delay);
       return;
     }
-    tg.MainButton.setParams({
-      text,
-      color: color || tg.themeParams.button_color,
-      text_color: textColor || tg.themeParams.button_text_color,
-      is_active: true,
-      is_visible: true
-    });
-  }
 
-  hideMainButton() {
-    this.mainBtnCallback = null;
-    tg.MainButton.hide();
+    this.isFlushing = false;
   }
 }
 
-export const ui = new UIController();
+Как защититься от «воскрешения» при входящем Pull / SSE
 
-4.3. Стратегия работы с CloudStorage
+Когда клиент делает GET /api/sync/pull?since=timestamp, сервер возвращает в том числе записи с deleted_at IS NOT NULL. Клиент, видя deleted_at, удаляет ключ из localStorage. Но если в sync_outbox_v2 прямо сейчас лежит неотправленная операция isDelete: true по карточке X, а с сервера пришел старый стейт карточки X — локальный Outbox всегда имеет приоритет над входящим Pull до тех пор, пока мутация не подтверждена.
 
-У Telegram.WebApp.CloudStorage жесткие лимиты: максимум 1024 ключа на пользователя, значение до 4096 байт. Он привязан к конкретному user_id, а не к вашему общему workspace_id.
+4. Защищенная сессионная авторизация в TMA (Zero Cross-Pair Leakage)
 
-Что хранить в CloudStorage: Персональные настройки отображения (выбранная дуо-тема, стартовая вкладка по умолчанию, состояние онбординга, сохраненный workspace_id и last_sync_id для кросс-девайс входа с телефона и ПК).
+Валидировать initData при каждом запросе — плохая практика: строка initData длинная (гонять лишний трафик в каждом заголовке), плюс её auth_date протухает, если юзер не закрывал мини-апп сутки. Использование HttpOnly Cookie в Telegram WebView на iOS часто ломается из-за политики ITP (Intelligent Tracking Prevention блокирует куки в сторонних WebView/iframe).
 
-Что хранить в localStorage / IndexedDB: Полный JSON-слепок списков покупок, заметок и календаря для мгновенного старта (Offline-First рендер за 0 мс до ответа сервера) и черновики недописанных заметок.
+Оптимальный паттерн: Обмен initData один раз при старте аппа (POST /api/auth/session) на короткоживущий Stateless JWT (или HMAC-подписанный токен), который передается в заголовке Authorization: Bearer <token> и для SSE — через query-параметр /api/stream?token=<token> (нативный EventSource не умеет ставить кастомные заголовки).
 
-Промисифицированная обертка для CloudStorage:
+Архитектура Zero Cross-Pair Leakage
+
+Главное правило безопасности для парных приложений: клиент НИКОГДА не передает coupleId или userId в теле запроса или URL мутаций. Они зашиты внутрь подписанного серверного токена.
 
 JavaScript
-export const CloudStore = {
-  get(key) {
-    return new Promise((resolve, reject) => {
-      tg.CloudStorage.getItem(key, (err, value) => {
-        if (err) return reject(err);
-        try { resolve(value ? JSON.parse(value) : null); }
-        catch { resolve(value); }
-      });
-    });
-  },
-  set(key, value) {
-    return new Promise((resolve, reject) => {
-      const payload = typeof value === 'string' ? value : JSON.stringify(value);
-      tg.CloudStorage.setItem(key, payload, (err, saved) => {
-        if (err) return reject(err);
-        resolve(saved);
-      });
-    });
+// auth.js (Node.js Валидация + Выпуск токена)
+import crypto from 'node:crypto';
+
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const JWT_SECRET = process.env.JWT_SECRET; // 32+ байт криптостойкой строки
+
+// 1. Проверка подписи Telegram WebApp initData
+export function verifyTelegramInitData(initDataRaw) {
+  const params = new URLSearchParams(initDataRaw);
+  const hash = params.get('hash');
+  if (!hash) return null;
+
+  // Защита от Replay-атак: initData старше 1 часа не принимаем для логина
+  const authDate = Number(params.get('auth_date'));
+  if (Math.floor(Date.now() / 1000) - authDate > 3600) return null;
+
+  params.delete('hash');
+  const dataCheckString = Array.from(params.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('\n');
+
+  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
+  const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+
+  // Сравнение за константное время (защита от timing attacks)
+  const hashBuf = Buffer.from(hash, 'hex');
+  const calcBuf = Buffer.from(calculatedHash, 'hex');
+  if (hashBuf.length !== calcBuf.length || !crypto.timingSafeEqual(hashBuf, calcBuf)) {
+    return null;
   }
-};
 
-4.4. Обработка Safe Area (iOS Dynamic Island, Home Indicator, Android Cutouts)
-
-Начиная с Bot API 7.7 / 8.0+, Telegram предоставляет отдельные CSS-переменные для системных отступов экрана (--tg-safe-area-inset-*) и для нативных кнопок шапки самого Telegram (--tg-content-safe-area-inset-*).
-
-Инициализация при старте (app.js):
-
-JavaScript
-tg.ready();
-tg.expand();
-// Отключаем случайное закрытие приложения свайпом вниз при скролле списков (Bot API 7.7+)
-if (tg.isVersionAtLeast('7.7')) {
-  tg.disableVerticalSwipes();
+  return JSON.parse(params.get('user'));
 }
 
-
-Универсальный CSS для полноэкранного режима и нижних таббаров (styles.css):
-
-CSS
-:root {
-  /* Системные вырезы (челка iPhone, полоска Home снизу) с фоллбэком на стандартные env() */
-  --safe-top: var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px));
-  --safe-bottom: var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+// 2. Сверхбыстрый нативный токен без внешних зависимостей (быстрее jsonwebtoken)
+export function signSessionToken(payload) {
+  const data = Buffer.from(JSON.stringify({
+    ...payload,
+    exp: Date.now() + 1000 * 60 * 60 * 24 // 24 часа
+  })).toString('base64url');
   
-  /* Отступ под нативные кнопки Telegram (Закрыть / Три точки) в режиме Fullscreen */
-  --content-top: var(--tg-content-safe-area-inset-top, 0px);
+  const signature = crypto.createHmac('sha256', JWT_SECRET).update(data).digest('base64url');
+  return `${data}.${signature}`;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  /* Привязка к стабильной высоте вьюпорта Telegram (не прыгает при открытии клавиатуры) */
-  height: var(--tg-viewport-stable-height, 100dvh);
-  overflow: hidden;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+export function verifySessionToken(token) {
+  if (!token || !token.includes('.')) return null;
+  const [data, sig] = token.split('.');
+  const expectedSig = crypto.createHmac('sha256', JWT_SECRET).update(data).digest('base64url');
+  
+  if (sig.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+    return null;
+  }
+  const payload = JSON.parse(Buffer.from(data, 'base64url').toString('utf8'));
+  if (Date.now() > payload.exp) return null;
+  return payload; // { uid: 123456, cid: "couple_uuid_88", ver: 1 }
 }
 
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  /* Верхний отступ суммирует системный статус-бар и шапку элементов управления ТГ */
-  padding-top: calc(var(--safe-top) + var(--content-top));
-}
+Нюанс смены пары (Token Invalidation при связывании)
 
-.scrollable-content {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
+Когда юзер заходит впервые, он одиночка (cid: null). Когда партнер принимает инвайт, в БД у обоих меняется couple_id. Чтобы не делать запрос в БД на каждый чих, но и не держать старый cid в токене:
 
-.bottom-nav {
-  display: flex;
-  /* Нижний таббар никогда не перекрывается полоской Home на iOS */
-  padding-bottom: max(var(--safe-bottom), 12px);
-  background: var(--surface-color);
-  border-top: 1px solid var(--border-color);
-}
+Храните в памяти Node.js легкий Map<userId, coupleId> (кэш связок).
 
-5. Пошаговый план внедрения
+В middleware авторизации сверяйте req.user.cid с этим in-memory Map (операция занимает наносекунды, 0 дискового I/O).
 
-База данных и SSE-шина (День 1):
+Безопасное разделение Dev и Prod без бэкдоров
 
-Включить WAL-режим в better-sqlite3.
+Никогда не делайте в коде проверок вида if (req.headers['x-dev-user-id']) — рано или поздно переменная окружения на Render слетит или забудется, и любой школьник сможет читать чужие пары, подставив заголовок.
 
-Добавить таблицу sync_log и эндпоинт /api/stream.
+Как сделать железобетонно:
 
-Встроить вызов broadcastToWorkspace() во все существующие мутирующие роуты (POST/PATCH/DELETE).
+На проде и в деве работает один и тот же пайплайн проверки криптографической подписи verifyTelegramInitData.Никаких обходных веток if (isDev) в middleware авторизации!
 
-Клиентский слой синхронизации и кэша (День 2):
+Для локальной разработки в браузере (вне Telegram) напишите маленький npm-скрипт npm run gen:dev-initdata, который берет ваш тестовый BOT_TOKEN_DEV из локального .env.development и генерирует по стандарту Telegram валидную подписанную строку initData для фейковых юзеров id: 111 и id: 222.
 
-При старте приложения рендерить данные из localStorage мгновенно, параллельно открывая EventSource с lastEventId.
+На Render в переменных окружения лежит боевой BOT_TOKEN. Даже если кто-то попытается скормить проду сгенерированную дев-строку, HMAC-подпись не сойдется, потому что токены ботов разные.
 
-Перенести хранение дуо-темы и настроек пользователя в CloudStorage.
+План миграции без даунтайма (Cutover Checklist)
 
-Нативный UX и Safe Area (День 3):
+На сервере: Создайте таблицы entities и processed_mutations. Напишите одноразовый скрипт миграции при старте сервера, который перегонит старые таблицы вишлиста и быта в entities, выставив всем полям текущий Date.now() в field_ts.
 
-Подключить tg.disableVerticalSwipes(), прописать CSS-переменные --tg-safe-area-inset-* и --tg-viewport-stable-height.
+На клиенте (первый запуск после апдейта):
 
-Внедрить UIController для BackButton/MainButton и расставить вызовы Haptic на чекбоксы и кнопки удаления.
+Проверьте наличие старых ключей localStorage для «Календаря дат» и «Главной цели».
 
-Фоновые уведомления бота (День 4):
+Если они есть и флаг migrated_to_v2 не стоит — прогоните их через syncEngine.mutate(), чтобы они попали в новый sync_outbox_v2 и автоматически улетели на сервер при первом flush().
 
-Внедрить модуль queuePartnerNotification с проверкой rooms.get(workspaceId).size < 2 и 30-секундным дебаунсом.
+Поставьте localStorage.setItem('migrated_to_v2', 'true').
 
-Деплой на VPS (День 5):
-
-Поднять VPS (Ubuntu 24.04), настроить Nginx с proxy_buffering off для /api/, выпустить SSL через Certbot, запустить приложение через pm2 start ecosystem.config.js и добавить ежедневный .backup SQLite в cron.
+Удалите sync-client.js и household-sync.js, заменив их вызовы на syncEngine.mutate(type, id, patch). Архитектура сожмется в один предсказуемый конечный автомат.
