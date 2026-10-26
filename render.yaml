@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: na-dvoih
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
