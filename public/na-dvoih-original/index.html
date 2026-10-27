@@ -814,11 +814,11 @@
     .optional-body{display:grid;gap:13px;padding:0 15px 16px 15px;border-top:1px solid var(--soft-line);margin-top:4px;padding-top:14px}
     /* App Background Customization: Aura Gradients & Telegram Wallpaper Pattern */
     :root {
-      --doodle-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140' fill='none' stroke='%2328322b' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.05'%3E%3Cpath d='M25 18c-3-3.5-7-3-8.8 0-2.3 4.2 2.3 9 8.8 13.2 6.5-4.2 11.1-9 8.8-13.2-1.8-3-5.8-3.5-8.8 0z'/%3E%3Cpath d='M95 24v7M91.5 27.5h7M115 95v5M112.5 97.5h5'/%3E%3Cpath d='M108 48l5 8h-10l5-8v7m0 0v5m-4 0h8'/%3E%3Cpath d='M22 85h12a3.5 3.5 0 0 1 3.5 3.5v2.5a7 7 0 0 1-7 7h-5a7 7 0 0 1-7-7v-2.5a3.5 3.5 0 0 1 3.5-3.5zm15.5 3.5h2.5a2.5 2.5 0 0 1 2.5 2.5v0a2.5 2.5 0 0 1-2.5 2.5h-2.5'/%3E%3Cpath d='M62 26a7 7 0 1 0 8 8 5.6 5.6 0 0 1-8-8z'/%3E%3Cpath d='M58 92h14a2.5 2.5 0 0 1 2.5 2.5v9a2.5 2.5 0 0 1-2.5 2.5H58a2.5 2.5 0 0 1-2.5-2.5v-9a2.5 2.5 0 0 1 2.5-2.5zm4 0v-2.5h6v2.5m-3 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z'/%3E%3Cpath d='M96 112l12-5-4-5-8 3-4-2-2 1.5 2.5 2.5-2.5 1.5z'/%3E%3Ccircle cx='58' cy='58' r='6'/%3E%3Ccircle cx='67' cy='58' r='6'/%3E%3C/svg%3E");
+      --doodle-svg: url("assets/tg-seamless-pattern-light.svg");
       --bg-aura: radial-gradient(120% 90% at 10% 5%, color-mix(in srgb, var(--green) 12%, transparent) 0%, transparent 60%), radial-gradient(90% 70% at 90% 90%, color-mix(in srgb, var(--action-cta, var(--coral, var(--green))) 10%, transparent) 0%, transparent 60%), linear-gradient(180deg, var(--paper) 0%, color-mix(in srgb, var(--paper) 92%, var(--outer)) 100%);
     }
     :root[data-mode="dark"] {
-      --doodle-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140' fill='none' stroke='%23ffffff' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.045'%3E%3Cpath d='M25 18c-3-3.5-7-3-8.8 0-2.3 4.2 2.3 9 8.8 13.2 6.5-4.2 11.1-9 8.8-13.2-1.8-3-5.8-3.5-8.8 0z'/%3E%3Cpath d='M95 24v7M91.5 27.5h7M115 95v5M112.5 97.5h5'/%3E%3Cpath d='M108 48l5 8h-10l5-8v7m0 0v5m-4 0h8'/%3E%3Cpath d='M22 85h12a3.5 3.5 0 0 1 3.5 3.5v2.5a7 7 0 0 1-7 7h-5a7 7 0 0 1-7-7v-2.5a3.5 3.5 0 0 1 3.5-3.5zm15.5 3.5h2.5a2.5 2.5 0 0 1 2.5 2.5v0a2.5 2.5 0 0 1-2.5 2.5h-2.5'/%3E%3Cpath d='M62 26a7 7 0 1 0 8 8 5.6 5.6 0 0 1-8-8z'/%3E%3Cpath d='M58 92h14a2.5 2.5 0 0 1 2.5 2.5v9a2.5 2.5 0 0 1-2.5 2.5H58a2.5 2.5 0 0 1-2.5-2.5v-9a2.5 2.5 0 0 1 2.5-2.5zm4 0v-2.5h6v2.5m-3 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z'/%3E%3Cpath d='M96 112l12-5-4-5-8 3-4-2-2 1.5 2.5 2.5-2.5 1.5z'/%3E%3Ccircle cx='58' cy='58' r='6'/%3E%3Ccircle cx='67' cy='58' r='6'/%3E%3C/svg%3E");
+      --doodle-svg: url("assets/tg-seamless-pattern-dark.svg");
       --bg-aura: radial-gradient(120% 90% at 10% 5%, color-mix(in srgb, var(--green) 16%, transparent) 0%, transparent 60%), radial-gradient(90% 70% at 90% 90%, color-mix(in srgb, var(--action-cta, var(--coral, var(--green))) 13%, transparent) 0%, transparent 60%), linear-gradient(180deg, #1d1c22 0%, #151418 100%);
     }
     :root[data-bg-style="gradient"] .app {
@@ -827,13 +827,33 @@
     :root[data-bg-style="doodle"] .app {
       background-image: var(--doodle-svg), var(--bg-aura) !important;
       background-repeat: repeat, no-repeat !important;
-      background-size: 140px 140px, 100% 100% !important;
+      background-size: 320px 320px, 100% 100% !important;
       background-attachment: local, local !important;
+    }
+    :root[data-bg-style="sunset-silk"] .app {
+      background: url("assets/wallpaper-sunset-silk.jpg") center top / cover no-repeat fixed !important;
+    }
+    :root[data-bg-style="midnight-aurora"] .app {
+      background: url("assets/wallpaper-midnight-aurora.jpg") center top / cover no-repeat fixed !important;
+    }
+    :root[data-bg-style="pastel-sage"] .app {
+      background: url("assets/wallpaper-pastel-sage.jpg") center top / cover no-repeat fixed !important;
+    }
+    :root[data-bg-style="tg-romantic"] .app {
+      background: url("assets/wallpaper-tg-romantic.jpg") center top / cover no-repeat fixed !important;
     }
     :root[data-bg-style="plain"] .app {
       background: var(--paper) !important;
     }
-    .bg-style-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:6px}
+    :root[data-bg-style="sunset-silk"] .wish-card,
+    :root[data-bg-style="midnight-aurora"] .wish-card,
+    :root[data-bg-style="pastel-sage"] .wish-card,
+    :root[data-bg-style="tg-romantic"] .wish-card {
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: color-mix(in srgb, var(--card) 92%, transparent) !important;
+    }
+    .bg-style-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:7px;margin-top:6px}
     .bg-style-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:9px 6px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);cursor:pointer;text-align:center;transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
     .bg-style-choice:active{transform:scale(.97)}
     .bg-style-choice.selected{border-color:var(--green);box-shadow:0 0 0 2px var(--green2);background:color-mix(in srgb,var(--green2) 42%,var(--card))}
@@ -1307,7 +1327,7 @@
     ];
     const seed={profiles:[{id:'me',name:'',emoji:'✨',color:'#dbe5d9',photo:''},{id:'her',name:'',emoji:'🌿',color:'#ead9df',gender:'female',photo:''}],items:[]};
     const BASE_STORE='na-dvoih-prototype-v1';const telegramUserId=(()=>{const t=window.Telegram?.WebApp;try{const u=JSON.parse(new URLSearchParams(String(t?.initData||'')).get('user')||'null'),n=Number(u?.id);if(Number.isSafeInteger(n)&&n>0)return String(n)}catch{}const n=Number(t?.initDataUnsafe?.user?.id);return Number.isSafeInteger(n)&&n>0?String(n):''})();const STORE=telegramUserId?`${BASE_STORE}:telegram:${telegramUserId}`:BASE_STORE;let state;try{state=JSON.parse(localStorage.getItem(STORE))||structuredClone(seed)}catch(e){state=structuredClone(seed)}
-    state.categories=Array.isArray(state.categories)?state.categories:[];state.theme=THEMES.some(t=>t.id===state.theme)?state.theme:'duo-sage';state.mode=state.mode==='dark'?'dark':'light';state.bgStyle=['gradient','doodle','plain'].includes(state.bgStyle)?state.bgStyle:'gradient';state.profiles=Array.isArray(state.profiles)?state.profiles.filter(p=>p&&typeof p==='object'):[];for(const fallback of seed.profiles)if(!state.profiles.some(p=>p.id===fallback.id))state.profiles.push({...fallback});state.profiles=state.profiles.map(p=>{const fallback=seed.profiles.find(x=>x.id===p.id)||{id:p.id,name:'Участник',emoji:'✦',color:COLORS[0],photo:''};return {...fallback,...p,name:typeof p.name==='string'?p.name:fallback.name,emoji:typeof p.emoji==='string'?p.emoji:fallback.emoji,color:typeof p.color==='string'?p.color:fallback.color,photo:safeAvatarPhoto(p.photo)}});const migratedPartner=state.profiles.find(p=>p.id==='her');migratedPartner.gender=migratedPartner.gender==='male'?'male':'female';
+    state.categories=Array.isArray(state.categories)?state.categories:[];state.theme=THEMES.some(t=>t.id===state.theme)?state.theme:'duo-sage';state.mode=state.mode==='dark'?'dark':'light';state.bgStyle=['gradient','doodle','sunset-silk','midnight-aurora','pastel-sage','tg-romantic','plain'].includes(state.bgStyle)?state.bgStyle:'gradient';state.profiles=Array.isArray(state.profiles)?state.profiles.filter(p=>p&&typeof p==='object'):[];for(const fallback of seed.profiles)if(!state.profiles.some(p=>p.id===fallback.id))state.profiles.push({...fallback});state.profiles=state.profiles.map(p=>{const fallback=seed.profiles.find(x=>x.id===p.id)||{id:p.id,name:'Участник',emoji:'✦',color:COLORS[0],photo:''};return {...fallback,...p,name:typeof p.name==='string'?p.name:fallback.name,emoji:typeof p.emoji==='string'?p.emoji:fallback.emoji,color:typeof p.color==='string'?p.color:fallback.color,photo:safeAvatarPhoto(p.photo)}});const migratedPartner=state.profiles.find(p=>p.id==='her');migratedPartner.gender=migratedPartner.gender==='male'?'male':'female';
     let currentScope='all',currentCategory='all',showDone=false,activeFeatureScreen='ideas',toastTimer,dragSuppressClick=false,historySubFilter='all';
     function getTodayIsoString(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
     function calcDaysDiff(dateA,dateB){if(!dateA||!dateB)return 0;const tA=new Date(`${dateA}T00:00:00Z`).getTime(),tB=new Date(`${dateB}T00:00:00Z`).getTime();return Math.round((tB-tA)/(24*3600*1000))}
@@ -1799,22 +1819,42 @@
       const makeBtn=t=>`<button type="button" class="theme-choice ${state.theme===t.id?'selected':''}" data-theme-id="${t.id}" aria-pressed="${state.theme===t.id}"><span class="theme-swatch" style="background:${t.swatch}"></span><span class="theme-choice-text"><span class="theme-choice-name">${t.name}</span><span class="theme-choice-hint">${t.hint}</span></span>${state.theme===t.id?'<span class="check" aria-hidden="true">✓</span>':''}</button>`;
       const currentBg=state.bgStyle||'gradient';
       const bgOptionsHtml=`
-        <div class="theme-group-label" style="margin-top:16px">Оформление заднего фона</div>
+        <div class="theme-group-label" style="margin-top:16px">Оформление заднего фона (2026)</div>
         <div class="bg-style-grid">
           <button type="button" class="bg-style-choice ${currentBg==='gradient'?'selected':''}" data-bg-choice="gradient" aria-pressed="${currentBg==='gradient'}">
             <span class="bg-style-icon">✨</span>
-            <span class="bg-style-name">Градиент</span>
-            <span class="bg-style-hint">Аура темы</span>
+            <span class="bg-style-name">Аура темы</span>
+            <span class="bg-style-hint">Градиент</span>
           </button>
           <button type="button" class="bg-style-choice ${currentBg==='doodle'?'selected':''}" data-bg-choice="doodle" aria-pressed="${currentBg==='doodle'}">
             <span class="bg-style-icon">💬</span>
             <span class="bg-style-name">Обои TG</span>
-            <span class="bg-style-hint">Узор-дудл</span>
+            <span class="bg-style-hint">Бесшовный дудл</span>
+          </button>
+          <button type="button" class="bg-style-choice ${currentBg==='sunset-silk'?'selected':''}" data-bg-choice="sunset-silk" aria-pressed="${currentBg==='sunset-silk'}">
+            <span class="bg-style-icon">🌅</span>
+            <span class="bg-style-name">Закат & Шёлк</span>
+            <span class="bg-style-hint">Тёплый шёлк</span>
+          </button>
+          <button type="button" class="bg-style-choice ${currentBg==='midnight-aurora'?'selected':''}" data-bg-choice="midnight-aurora" aria-pressed="${currentBg==='midnight-aurora'}">
+            <span class="bg-style-icon">🌌</span>
+            <span class="bg-style-name">Аврора</span>
+            <span class="bg-style-hint">Изумрудная ночь</span>
+          </button>
+          <button type="button" class="bg-style-choice ${currentBg==='pastel-sage'?'selected':''}" data-bg-choice="pastel-sage" aria-pressed="${currentBg==='pastel-sage'}">
+            <span class="bg-style-icon">🍃</span>
+            <span class="bg-style-name">Шалфей</span>
+            <span class="bg-style-hint">Утренняя роса</span>
+          </button>
+          <button type="button" class="bg-style-choice ${currentBg==='tg-romantic'?'selected':''}" data-bg-choice="tg-romantic" aria-pressed="${currentBg==='tg-romantic'}">
+            <span class="bg-style-icon">🎨</span>
+            <span class="bg-style-name">TG Canvas</span>
+            <span class="bg-style-hint">Романтика 2026</span>
           </button>
           <button type="button" class="bg-style-choice ${currentBg==='plain'?'selected':''}" data-bg-choice="plain" aria-pressed="${currentBg==='plain'}">
             <span class="bg-style-icon">⬜</span>
             <span class="bg-style-name">Сплошной</span>
-            <span class="bg-style-hint">Классика</span>
+            <span class="bg-style-hint">Минимализм</span>
           </button>
         </div>
       `;
@@ -1831,7 +1871,7 @@
         applyTheme();
         save();
         renderThemeOptions();
-        const names={gradient:'«Мягкий градиент»',doodle:'«Обои Telegram»',plain:'«Сплошной тон»'};
+        const names={gradient:'«Аура темы»',doodle:'«Обои Telegram (Бесшовный дудл)»','sunset-silk':'«Закат & Шёлк»','midnight-aurora':'«Полярное сияние»','pastel-sage':'«Утренний шалфей»','tg-romantic':'«Telegram Canvas 2026»',plain:'«Сплошной тон»'};
         showToast(`Фон изменён: ${names[choice]||choice}`);
         return;
       }
