@@ -1,4 +1,6 @@
 import crypto from "node:crypto";
+import http from "node:http";
+import https from "node:https";
 import type { Express, Request, Response } from "express";
 import { syncDb, CoupleRow, SyncedRecordRow } from "./db";
 import { ENV } from "./_core/env";
@@ -407,6 +409,103 @@ async function mutateResource(req: Request, res: Response, tableName: TableName,
   }
 }
 
+function escapeTgHtml(s: any): string {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+export async function sendTelegramMessage(chatId: string | number, text: string, replyMarkup?: any): Promise<boolean> {
+  const token = ENV.telegramBotToken;
+  if (!token) {
+    console.warn("[Telegram Bot] Cannot send message: TELEGRAM_BOT_TOKEN is not configured");
+    return false;
+  }
+
+  const payload = JSON.stringify({
+    chat_id: chatId,
+    text,
+    parse_mode: "HTML",
+    disable_web_page_preview: true,
+    reply_markup: replyMarkup,
+  });
+
+  const doRequest = (useProxy: boolean): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const options = {
+        hostname: "api.telegram.org",
+        port: 443,
+        path: `/bot${token}/sendMessage`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(payload),
+        },
+        timeout: 10000,
+      };
+
+      if (!useProxy) {
+        const req = https.request(options, (res) => {
+          let data = "";
+          res.on("data", (chunk) => (data += chunk));
+          res.on("end", () => {
+            try {
+              const parsed = JSON.parse(data);
+              resolve(Boolean(parsed.ok));
+            } catch {
+              resolve(false);
+            }
+          });
+        });
+        req.on("error", () => resolve(false));
+        req.on("timeout", () => { req.destroy(); resolve(false); });
+        req.write(payload);
+        req.end();
+      } else {
+        const proxyReq = http.request({
+          host: "127.0.0.1",
+          port: 10809,
+          method: "CONNECT",
+          path: "api.telegram.org:443",
+        });
+        proxyReq.on("connect", (_res, socket) => {
+          const req = https.request({
+            ...options,
+            socket,
+            agent: false,
+          }, (res) => {
+            let data = "";
+            res.on("data", (chunk) => (data += chunk));
+            res.on("end", () => {
+              try {
+                const parsed = JSON.parse(data);
+                resolve(Boolean(parsed.ok));
+              } catch {
+                resolve(false);
+              }
+            });
+          });
+          req.on("error", () => resolve(false));
+          req.on("timeout", () => { req.destroy(); resolve(false); });
+          req.write(payload);
+          req.end();
+        });
+        proxyReq.on("error", () => resolve(false));
+        proxyReq.on("timeout", () => { proxyReq.destroy(); resolve(false); });
+        proxyReq.end();
+      }
+    });
+  };
+
+  let ok = await doRequest(false);
+  if (!ok && !ENV.isProduction) {
+    ok = await doRequest(true);
+  }
+  return ok;
+}
+
 export function registerTelegramSyncRoutes(app: Express) {
   // Public runtime config endpoint
   app.get("/api/config", (_req, res) => {
@@ -686,28 +785,174 @@ export function registerTelegramSyncRoutes(app: Express) {
   // Feedback Submission: POST /api/feedback
   app.post("/api/feedback", async (req, res) => {
     try {
-      const { message, meta } = req.body || {};
+      const { message, meta, category } = req.body || {};
       if (!message || typeof message !== "string" || message.trim().length === 0) {
         return json(res, 400, { error: "message_required" });
       }
 
-      let userId = "anonymous";
+      let userId = "guest";
+      let userName = "Пользователь приложения";
+      let userUsername = "";
       let coupleId: string | null = null;
       try {
         const account = await auth(req, res);
         if (account) {
           userId = account.user.id;
+          userName = account.user.first_name || account.user.username || `User #${userId}`;
+          userUsername = account.user.username || "";
           const couple = await syncDb.getCoupleForUser(account.user.id);
           coupleId = couple ? couple.id : null;
         }
       } catch {}
 
-      const id = await syncDb.saveFeedback(userId, coupleId, message.trim(), meta);
-      console.log(`[Feedback Received #${id}] From User ${userId}: ${message.trim().slice(0, 100)}`);
+      const cleanMeta = {
+        category: category || "general",
+        userName,
+        userUsername,
+        ip: req.ip || req.socket.remoteAddress,
+        userAgent: req.header("user-agent"),
+        ...(meta || {})
+      };
 
-      return json(res, 200, { ok: true, id });
+      const id = await syncDb.saveFeedback(userId, coupleId, message.trim(), cleanMeta);
+      console.log(`[Feedback Received #${id}] From User ${userId} (${userName}): ${message.trim().slice(0, 100)}`);
+
+      // Category formatting
+      const catMap: Record<string, string> = {
+        idea: "💡 Идея / Предложение",
+        bug: "🐞 Баг / Ошибка",
+        question: "❓ Вопрос",
+        thanks: "❤️ Благодарность",
+        general: "💬 Обратная связь",
+      };
+      const catLabel = catMap[category] || "💬 Обратная связь";
+
+      // Dispatch private notification to Gennadiy's Telegram chat or private channel
+      const adminTarget = ENV.adminChatId || "136681806";
+      const nowStr = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
+
+      const tgText = [
+        `💌 <b>Новое личное обращение в «На двоих»!</b> [#${id}]`,
+        ``,
+        `👤 <b>От кого:</b> ${escapeTgHtml(userName)} ${userUsername ? `(@${escapeTgHtml(userUsername)})` : ""}`,
+        `🆔 <b>Telegram ID:</b> <code>${escapeTgHtml(userId)}</code>`,
+        `💑 <b>Пара:</b> <code>${escapeTgHtml(coupleId || "не привязана")}</code>`,
+        `📂 <b>Категория:</b> ${catLabel}`,
+        `🕒 <b>Время (МСК):</b> ${nowStr}`,
+        ``,
+        `💬 <b>Текст сообщения:</b>`,
+        `<blockquote>${escapeTgHtml(message.trim())}</blockquote>`,
+        ``,
+        `📱 <b>Диагностика:</b>`,
+        `• Платформа: <code>${escapeTgHtml(cleanMeta?.platform || "web")}</code>`,
+        `• Версия: <code>${escapeTgHtml(cleanMeta?.version || "2.1.0")}</code>`,
+        `• Сеть: <code>${cleanMeta?.online ? "Online" : "Offline"}</code>`,
+      ].join("\n");
+
+      const replyButtons: any[] = [];
+      if (userUsername) {
+        replyButtons.push([{ text: `✉️ Ответить @${userUsername} в личку`, url: `https://t.me/${userUsername}` }]);
+      } else if (userId && !userId.startsWith("web_") && !userId.startsWith("dev_") && userId !== "guest") {
+        replyButtons.push([{ text: `✉️ Ответить пользователю (ID: ${userId})`, url: `tg://user?id=${userId}` }]);
+      }
+      replyButtons.push([{ text: `👤 Личный контакт админа (@${ENV.adminUsername})`, url: `https://t.me/${ENV.adminUsername}` }]);
+
+      sendTelegramMessage(adminTarget, tgText, { inline_keyboard: replyButtons })
+        .then(sent => {
+          if (sent) console.log(`[Feedback #${id}] Successfully forwarded to admin (${adminTarget})`);
+          else console.warn(`[Feedback #${id}] Could not forward to admin (${adminTarget})`);
+        })
+        .catch(err => console.error("[Telegram Feedback Dispatch Error]", err));
+
+      return json(res, 200, { ok: true, id, deliveredToAdmin: true });
     } catch (err: any) {
       return json(res, 500, { error: err.message || "feedback_failed" });
+    }
+  });
+
+  // Telegram Bot Webhook: POST /api/telegram/webhook
+  app.post("/api/telegram/webhook", async (req, res) => {
+    try {
+      const update = req.body;
+      if (!update || !update.message) return json(res, 200, { ok: true });
+
+      const msg = update.message;
+      const senderId = String(msg.from?.id || "");
+      const senderName = msg.from?.first_name || msg.from?.username || `User ${senderId}`;
+      const senderUsername = msg.from?.username ? `@${msg.from.username}` : "";
+      const text = String(msg.text || "").trim();
+      const adminId = String(ENV.adminChatId || "136681806");
+
+      // Case 1: Gennadiy is replying to a forwarded user message
+      if (senderId === adminId && msg.reply_to_message) {
+        const replyText = msg.reply_to_message.text || "";
+        const match = replyText.match(/ID:\s*<code>?(\d+)<\/code>?/) || replyText.match(/ID:\s*(\d+)/);
+        if (match && match[1]) {
+          const targetUserId = match[1];
+          const userResponseText = [
+            `💬 <b>Ответ от разработчика Геннадия:</b>`,
+            ``,
+            escapeTgHtml(text),
+            ``,
+            `<i>Вы можете продолжить диалог, просто ответив на это сообщение.</i>`
+          ].join("\n");
+          await sendTelegramMessage(targetUserId, userResponseText);
+          await sendTelegramMessage(adminId, `✅ <b>Ваш ответ доставлен пользователю (ID: ${targetUserId})!</b>`);
+          return json(res, 200, { ok: true, action: "admin_reply_forwarded" });
+        }
+      }
+
+      // Case 2: A regular user sends /start or text message to the bot
+      if (senderId !== adminId && text) {
+        if (text === "/start") {
+          const welcome = [
+            `Здравствуйте, <b>${escapeTgHtml(senderName)}</b>! 👋`,
+            ``,
+            `Это официальный бот личной связи с разработчиком приложения «На двоих».`,
+            ``,
+            `Напишите сюда любой вопрос, предложение или сообщение об ошибке — оно будет передано лично автору проекта Геннадию.`,
+            `Никто другой ваши сообщения не увидит.`
+          ].join("\n");
+          await sendTelegramMessage(senderId, welcome);
+          return json(res, 200, { ok: true, action: "welcome_sent" });
+        }
+
+        // Save to DB
+        await syncDb.saveFeedback(senderId, null, text, {
+          source: "telegram_bot_direct",
+          senderName,
+          senderUsername
+        });
+
+        // Forward to Gennadiy
+        const adminNotification = [
+          `💬 <b>Новое личное сообщение в Telegram-боте!</b>`,
+          ``,
+          `👤 <b>От кого:</b> ${escapeTgHtml(senderName)} ${senderUsername}`,
+          `🆔 <b>Telegram ID:</b> <code>${senderId}</code>`,
+          ``,
+          `💬 <b>Текст:</b>`,
+          `<blockquote>${escapeTgHtml(text)}</blockquote>`,
+          ``,
+          `<i>💡 Чтобы ответить пользователю, просто сделайте Reply (Ответить) на это сообщение в Telegram!</i>`
+        ].join("\n");
+
+        const replyMarkup = senderUsername
+          ? { inline_keyboard: [[{ text: `✉️ Написать ${senderUsername}`, url: `https://t.me/${msg.from.username}` }]] }
+          : undefined;
+
+        await sendTelegramMessage(adminId, adminNotification, replyMarkup);
+
+        // Acknowledge to user
+        const ack = `Спасибо за сообщение! 🙏 Оно передано лично автору проекта Геннадию. Он прочитает его и ответит вам здесь.`;
+        await sendTelegramMessage(senderId, ack);
+        return json(res, 200, { ok: true, action: "forwarded_to_admin" });
+      }
+
+      return json(res, 200, { ok: true });
+    } catch (err: any) {
+      console.error("[Telegram Webhook Error]", err);
+      return json(res, 200, { ok: true, error: err.message });
     }
   });
 

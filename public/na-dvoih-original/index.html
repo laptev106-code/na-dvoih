@@ -1087,31 +1087,52 @@
     </section>
   </div>
 
-  <!-- Feedback / Связь с разработчиком Modal -->
+  <!-- Feedback / Личная связь с разработчиком Modal -->
   <div class="overlay" id="feedbackOverlay" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
-    <section class="sheet">
+    <section class="sheet" style="max-height:92vh;overflow-y:auto">
       <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="sheet-head">
         <div>
-          <div class="sheet-title" id="feedbackTitle">Связь с разработчиком 💬</div>
-          <div style="margin-top:3px;font-size:12px;color:var(--muted)">Предложения, идеи и обратная связь</div>
+          <div class="sheet-title" id="feedbackTitle">Связь с разработчиком 💌</div>
+          <div style="margin-top:3px;font-size:12px;color:var(--muted)">Личный диалог с автором приложения Геннадием</div>
         </div>
         <button class="close-btn" id="feedbackClose" data-close="feedbackOverlay" aria-label="Закрыть">✕</button>
       </div>
 
-      <div style="margin-top:12px;display:grid;gap:13px">
-        <p style="font-size:13px;line-height:1.45;color:var(--muted);margin:0">
-          Мы постоянно улучшаем «На двоих». Если у вас есть идея новой функции, предложение или вы заметили неточность — напишите нам напрямую:
-        </p>
-        <textarea id="feedbackText" rows="4" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--ink);font-size:13px;resize:vertical;outline:none;font-family:inherit" placeholder="Например: добавьте возможность прикреплять аудиосообщения или напоминания..."></textarea>
+      <div style="margin-top:14px;display:grid;gap:13px">
+        <div style="padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.45">
+          🔒 <b>Приватный канал:</b> ваши сообщения приходят лично мне (разработчику) в Telegram. Это не общий чат — чужие пользователи не видят ваши записи и вопросы.
+        </div>
+
+        <div>
+          <div style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px">Тема обращения:</div>
+          <div id="feedbackCategories" style="display:flex;flex-wrap:wrap;gap:6px">
+            <button type="button" class="feedback-cat-btn selected" data-cat="idea" style="padding:6px 12px;border-radius:20px;border:1px solid var(--green);background:var(--green-soft, rgba(52,199,89,0.15));color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">💡 Идея</button>
+            <button type="button" class="feedback-cat-btn" data-cat="bug" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">🐞 Ошибка</button>
+            <button type="button" class="feedback-cat-btn" data-cat="question" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">❓ Вопрос</button>
+            <button type="button" class="feedback-cat-btn" data-cat="thanks" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">❤️ Отзыв</button>
+          </div>
+        </div>
+
+        <textarea id="feedbackText" rows="4" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--ink);font-size:13px;resize:vertical;outline:none;font-family:inherit" placeholder="Напишите ваше сообщение, пожелание или опишите проблему..."></textarea>
         
         <label style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);cursor:pointer">
           <input type="checkbox" id="feedbackIncludeLogs" checked style="accent-color:var(--green)">
-          <span>Прикрепить анонимную диагностику для быстрой помощи</span>
+          <span>Прикрепить диагностику (ID пары, версию, статус сети для быстрого решения)</span>
         </label>
 
         <button class="primary-btn" id="feedbackSendBtn" type="button" style="height:48px;font-weight:750">
-          Отправить сообщение 🚀
+          Отправить лично разработчику 🚀
+        </button>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+          <div style="flex:1;height:1px;background:var(--line)"></div>
+          <span style="font-size:11px;color:var(--muted)">или напишите напрямую</span>
+          <div style="flex:1;height:1px;background:var(--line)"></div>
+        </div>
+
+        <button class="secondary-btn" id="feedbackDirectTgBtn" type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:1px solid var(--line);border-radius:14px;background:var(--card-bg);color:var(--ink);font-size:13px;font-weight:650;cursor:pointer">
+          <span>💬 Написать админу в личку в Telegram</span>
         </button>
       </div>
     </section>
@@ -1558,28 +1579,60 @@
     $('#openProfiles').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navPair').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});$('#heroAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});
     $('#openFeedback')?.addEventListener('click',()=>{triggerHaptic('light');openModal('feedbackOverlay')});
     $('#realtimeSyncBadge')?.addEventListener('click',()=>{triggerHaptic('light');openModal('syncOverlay')});
+    let currentFeedbackCat='idea';
+    $$('.feedback-cat-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        triggerHaptic('light');
+        $$('.feedback-cat-btn').forEach(b=>{b.classList.remove('selected');b.style.border='1px solid var(--line)';b.style.background='var(--field-bg)'});
+        btn.classList.add('selected');btn.style.border='1px solid var(--green)';btn.style.background='var(--green-soft, rgba(52,199,89,0.15))';
+        currentFeedbackCat=btn.dataset.cat||'idea';
+      });
+    });
+    $('#feedbackDirectTgBtn')?.addEventListener('click',()=>{
+      triggerHaptic('medium');
+      const tgUrl='https://t.me/Lomayderevo';
+      if(window.Telegram?.WebApp?.openTelegramLink){
+        window.Telegram.WebApp.openTelegramLink(tgUrl);
+      }else{
+        window.open(tgUrl,'_blank','noopener,noreferrer');
+      }
+    });
     $('#feedbackSendBtn')?.addEventListener('click',async()=>{
       const txt=$('#feedbackText')?.value?.trim();
-      if(!txt){showToast('Напишите текст отзыва');return}
+      if(!txt){showToast('Напишите текст сообщения');return}
       const includeLogs=$('#feedbackIncludeLogs')?.checked;
-      const meta=includeLogs?{logs:window.NaDvoihTelemetry?.getLogs?.()?.slice(0,25)}:null;
+      const sendBtn=$('#feedbackSendBtn');
+      const prevBtnText=sendBtn.textContent;
+      sendBtn.disabled=true;
+      sendBtn.textContent='Отправка лично разработчику... ⏳';
+      const meta={
+        platform:window.Telegram?.WebApp?.platform||(navigator.userAgent.includes('Mobile')?'mobile_web':'desktop_web'),
+        version:'2.1.0',
+        online:navigator.onLine,
+        url:window.location.href,
+        logs:includeLogs?window.NaDvoihTelemetry?.getLogs?.()?.slice(0,15):null
+      };
       try{
         const token=sessionStorage.getItem('na_dvoix_session_token_v2')||localStorage.getItem('na_dvoix_session_token_v2')||'';
         const res=await fetch('/api/feedback',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-          body:JSON.stringify({message:txt,meta})
+          body:JSON.stringify({message:txt,category:currentFeedbackCat,meta})
         });
-        if(res.ok){
+        const data=await res.json().catch(()=>({}));
+        if(res.ok&&data.ok){
           triggerHaptic('success');
-          showToast('Спасибо! Сообщение отправлено разработчику 💌');
+          showToast('💌 Сообщение доставлено лично разработчику!');
           $('#feedbackText').value='';
-          closeModal('feedbackOverlay');
+          setTimeout(()=>closeModal('feedbackOverlay'),900);
         }else{
-          showToast('Не удалось отправить отзыв, попробуйте позже');
+          showToast('Не удалось доставить сообщение, напишите напрямую в Telegram');
         }
       }catch{
-        showToast('Не удалось отправить отзыв');
+        showToast('Ошибка сети при отправке');
+      }finally{
+        sendBtn.disabled=false;
+        sendBtn.textContent=prevBtnText;
       }
     });
     $('#navIdeas').addEventListener('click',()=>{triggerHaptic('light');activeFeatureScreen='ideas';showDone=false;render();animateScreen($('#ideasScreen'))});$('#navDone').addEventListener('click',()=>{triggerHaptic('light');activeFeatureScreen='ideas';showDone=true;render();animateScreen($('#ideasScreen'))});
