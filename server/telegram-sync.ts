@@ -794,13 +794,28 @@ export function registerTelegramSyncRoutes(app: Express) {
       let userName = "Пользователь приложения";
       let userUsername = "";
       let coupleId: string | null = null;
+      // Optional authentication: resolve user if session or initData is present
       try {
-        const account = await auth(req, res);
-        if (account) {
-          userId = account.user.id;
-          userName = account.user.first_name || account.user.username || `User #${userId}`;
-          userUsername = account.user.username || "";
-          const couple = await syncDb.getCoupleForUser(account.user.id);
+        const sessionToken = String(req.header("Authorization") || "").replace(/^Bearer\s+/i, "");
+        if (sessionToken) {
+          const verified = verifySessionToken(sessionToken);
+          if (verified) {
+            userId = verified.uid;
+            userName = verified.name || `User #${userId}`;
+            coupleId = verified.cid;
+          }
+        }
+        if (userId === "guest") {
+          const initDataHeader = String(req.header("X-Telegram-Init-Data") || req.query.initData || req.body?.initData || "").trim();
+          if (initDataHeader) {
+            const acc = parseTelegramInitData(initDataHeader);
+            userId = acc.user.id;
+            userName = acc.user.first_name || acc.user.username || `User #${userId}`;
+            userUsername = acc.user.username || "";
+          }
+        }
+        if (userId !== "guest" && !coupleId) {
+          const couple = await syncDb.getCoupleForUser(userId);
           coupleId = couple ? couple.id : null;
         }
       } catch {}
