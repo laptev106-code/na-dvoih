@@ -140,6 +140,19 @@ function initSqliteTables(db: Database.Database) {
       meta TEXT,
       created_at INTEGER DEFAULT (unixepoch())
     );
+
+    CREATE TABLE IF NOT EXISTS scheduled_notifications (
+      id TEXT PRIMARY KEY,
+      couple_id TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      notify_at INTEGER NOT NULL,
+      status TEXT DEFAULT 'pending',
+      payload TEXT NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_sched_due ON scheduled_notifications(status, notify_at)
+    WHERE status = 'pending';
   `);
 
   // Auto-migration: if entities table is empty, copy existing wishes and household tasks
@@ -431,6 +444,16 @@ export const syncDb = {
           updated_at = excluded.updated_at
       `);
       const logStmt = db.prepare("INSERT INTO sync_log (coupleId, eventType, payload) VALUES (?, 'entity:delta', ?)");
+      const cancelNotifStmt = db.prepare("UPDATE scheduled_notifications SET status = 'cancelled', updated_at = ? WHERE entity_id = ? AND status = 'pending'");
+      const upsertNotifStmt = db.prepare(`
+        INSERT INTO scheduled_notifications (id, couple_id, entity_id, entity_type, notify_at, status, payload, updated_at)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          notify_at = excluded.notify_at,
+          payload = excluded.payload,
+          status = 'pending',
+          updated_at = excluded.updated_at
+      `);
 
       const now = Date.now();
 
@@ -503,6 +526,31 @@ export const syncDb = {
 
         // Record in sync_log for SSE replay
         logStmt.run(coupleId, JSON.stringify(deltaItem));
+
+        // Schedule or cancel background Telegram notifications
+        try {
+          if (m.isDelete || deletedAt != null || (currentData as any).done === true || (currentData as any).status === "completed") {
+            cancelNotifStmt.run(now, m.entityId);
+          } else {
+            const dateVal = (currentData as any).date || (currentData as any).dueDate || (currentData as any).deadline;
+            if (dateVal && typeof dateVal === "string" && /^\d{4}-\d{2}-\d{2}/.test(dateVal)) {
+              const cleanDate = dateVal.slice(0, 10);
+              // Target 09:00:00 MSK (UTC+3)
+              const targetTime = Date.parse(`${cleanDate}T09:00:00+03:00`);
+              if (Number.isFinite(targetTime) && targetTime > now - 12 * 60 * 60 * 1000) {
+                const notifId = `${m.entityId}_due`;
+                const notifPayload = JSON.stringify({
+                  title: (currentData as any).title || (currentData as any).name || "Событие для вас двоих",
+                  subtitle: (currentData as any).note || cleanDate,
+                  remindType: "morning_due",
+                });
+                upsertNotifStmt.run(notifId, coupleId, m.entityId, m.entityType, targetTime, notifPayload, now);
+              }
+            }
+          }
+        } catch (notifErr: any) {
+          console.warn("[Scheduled Notification Update Warning]", notifErr.message);
+        }
       }
     });
 
@@ -544,6 +592,46 @@ export const syncDb = {
       meta ? JSON.stringify(meta) : null
     );
     return Number(info.lastInsertRowid);
+  },
+
+  claimDueNotifications(now: number, limit = 25): Array<{
+    id: string;
+    couple_id: string;
+    entity_id: string;
+    entity_type: string;
+    notify_at: number;
+    status: string;
+    payload: string;
+    updated_at: number;
+    user1_tg_id?: string;
+    user2_tg_id?: string;
+  }> {
+    const db = getSqliteDb();
+    const rows = db.prepare(`
+      SELECT sn.*, c.ownerTelegramId as user1_tg_id, c.partnerTelegramId as user2_tg_id
+      FROM scheduled_notifications sn
+      JOIN couples c ON c.id = sn.couple_id
+      WHERE sn.status = 'pending' AND sn.notify_at <= ?
+      ORDER BY sn.notify_at ASC
+      LIMIT ?
+    `).all(now, limit) as any[];
+
+    if (rows.length > 0) {
+      const markProcessing = db.prepare(
+        "UPDATE scheduled_notifications SET status = 'processing', updated_at = ? WHERE id = ?"
+      );
+      for (const r of rows) markProcessing.run(now, r.id);
+    }
+    return rows;
+  },
+
+  updateNotificationStatus(id: string, status: "sent" | "failed" | "cancelled"): void {
+    const db = getSqliteDb();
+    db.prepare("UPDATE scheduled_notifications SET status = ?, updated_at = ? WHERE id = ?").run(
+      status,
+      Date.now(),
+      id
+    );
   },
 };
 

@@ -1143,4 +1143,59 @@ export function registerTelegramSyncRoutes(app: Express) {
       logs: telemetryLogs.slice(-100)
     });
   });
+
+  // Start background notification ticker
+  startNotificationWorker();
+}
+
+let notificationWorkerStarted = false;
+export function startNotificationWorker() {
+  if (notificationWorkerStarted) return;
+  notificationWorkerStarted = true;
+
+  const processTick = async () => {
+    try {
+      const now = Date.now();
+      const dueList = syncDb.claimDueNotifications(now, 25);
+      if (!dueList || dueList.length === 0) return;
+
+      for (const item of dueList) {
+        let payload: any = {};
+        try {
+          payload = JSON.parse(item.payload);
+        } catch {}
+
+        const title = payload.title || "Событие для вас двоих";
+        const subtitle = payload.subtitle ? `\n<i>${escapeTgHtml(payload.subtitle)}</i>` : "";
+        const tgIds = [item.user1_tg_id, item.user2_tg_id].filter(Boolean) as string[];
+
+        const botUsername = process.env.TELEGRAM_BOT_USERNAME || "Na_dvoix2bot";
+        const startParam = `${item.entity_type}_${item.entity_id}`.slice(0, 64);
+        const replyMarkup = {
+          inline_keyboard: [
+            [
+              {
+                text: "✨ Открыть карточку",
+                url: `https://t.me/${botUsername}?startapp=${startParam}`,
+              },
+            ],
+          ],
+        };
+
+        const messageText = `🔔 <b>Напоминание для вашей пары:</b>\n\n📌 <b>${escapeTgHtml(title)}</b>${subtitle}\n\n<i>Прекрасного совместного дня 💕</i>`;
+
+        const results = await Promise.allSettled(
+          tgIds.map((chatId) => sendTelegramMessage(chatId, messageText, replyMarkup))
+        );
+
+        const anySuccess = results.some((r) => r.status === "fulfilled" && (r as any).value === true);
+        syncDb.updateNotificationStatus(item.id, anySuccess ? "sent" : "failed");
+      }
+    } catch (err: any) {
+      console.warn("[Notification Worker Error]", err.message);
+    }
+  };
+
+  setTimeout(processTick, 5000);
+  setInterval(processTick, 30_000);
 }
