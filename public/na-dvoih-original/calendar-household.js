@@ -117,6 +117,17 @@
       .calendar-group-title{display:flex;align-items:center;justify-content:space-between;margin:0 2px 2px;font-size:11px;font-weight:750}
       .calendar-group-title small{color:var(--muted);font-weight:550}
       .calendar-event{display:grid;grid-template-columns:54px minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+      .calendar-event.overdue{border-color:color-mix(in srgb, var(--coral, #dc806a) 45%, var(--line));background:linear-gradient(145deg, color-mix(in srgb, var(--coral, #dc806a) 12%, var(--card)) 0%, var(--card) 100%)!important;box-shadow:inset 3.5px 0 0 var(--coral, #dc806a), var(--polish-shadow)!important}
+      :root[data-mode="dark"] .calendar-event.overdue{border-color:color-mix(in srgb, #f87171 45%, var(--line));background:linear-gradient(145deg, rgba(239, 68, 68, 0.16) 0%, var(--card) 100%)!important;box-shadow:inset 3.5px 0 0 #ef4444, var(--polish-shadow)!important}
+      .calendar-event.overdue .calendar-event-date{color:var(--coral, #dc806a)!important;font-weight:800}
+      .calendar-event.overdue .calendar-event-open small{color:#dc2626!important;background:color-mix(in srgb, var(--coral, #dc806a) 18%, transparent);padding:2px 7px;border-radius:6px;display:inline-block;font-weight:750}
+      :root[data-mode="dark"] .calendar-event.overdue .calendar-event-open small{color:#fca5a5!important;background:rgba(239, 68, 68, 0.24)}
+      .calendar-event-action.overdue-action{border-color:var(--coral, #dc806a);color:var(--coral, #dc806a);background:color-mix(in srgb, var(--coral, #dc806a) 12%, var(--card))}
+      .calendar-day.has-overdue{border-color:color-mix(in srgb, var(--coral, #dc806a) 55%, var(--line))!important;background:color-mix(in srgb, var(--coral, #dc806a) 12%, var(--card))!important}
+      .calendar-day.has-overdue .calendar-day-dot{background:var(--coral, #dc806a)!important;box-shadow:0 0 6px rgba(220, 128, 106, .7)}
+      .calendar-day.has-overdue .calendar-day-count{color:var(--coral, #dc806a)!important;font-weight:800}
+      .calendar-group-overdue span{color:var(--coral, #dc806a)!important;font-weight:800}
+      .calendar-group-overdue small{background:var(--coral, #dc806a)!important;color:#fff!important;padding:2px 8px!important;border-radius:10px!important;font-weight:750!important}
       .calendar-event-date{color:var(--muted-strong);font-size:9px;font-weight:700;line-height:1.35}
       .calendar-event-open{min-width:0;padding:0;border:0;background:transparent;text-align:left}
       .calendar-event-open strong{display:block;overflow:hidden;text-overflow:ellipsis;font-size:11px;line-height:1.35;font-weight:730;white-space:nowrap}
@@ -333,10 +344,11 @@
   function renderEventRow(item, today = localDateString(new Date()), reminder = false) {
     const label = calendarDateLabel(item.date);
     const canEdit = item._canEdit !== false;
+    const isOverdue = !item.done && item.date < today;
     const markButton = !item.done
-      ? `<button type="button" class="calendar-event-action" data-mark-done="${escapeHtml(item.id)}" ${canEdit ? "" : "disabled aria-disabled=\"true\" title=\"Это личная запись другого автора\""}>Сбылось</button>`
+      ? `<button type="button" class="calendar-event-action ${isOverdue ? "overdue-action" : ""}" data-mark-done="${escapeHtml(item.id)}" ${canEdit ? "" : "disabled aria-disabled=\"true\" title=\"Это личная запись другого автора\""}>Сбылось</button>`
       : `<span class="calendar-event-action" aria-label="Сбылось">Готово</span>`;
-    return `<article class="calendar-event ${item.done ? "done" : ""}" data-calendar-item="${escapeHtml(item.id)}"><div class="calendar-event-date">${escapeHtml(label)}</div><button type="button" class="calendar-event-open" data-open-wish="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(reminder ? `Напоминание · ${formatDayDifference(item.date, today)}` : item.done ? "Сбылось" : item.date < today ? "Просрочено" : formatDayDifference(item.date, today))}</small></button>${markButton}</article>`;
+    return `<article class="calendar-event ${item.done ? "done" : ""} ${isOverdue ? "overdue" : ""}" data-calendar-item="${escapeHtml(item.id)}"><div class="calendar-event-date">${escapeHtml(label)}</div><button type="button" class="calendar-event-open" data-open-wish="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(reminder ? `Напоминание · ${formatDayDifference(item.date, today)}` : item.done ? "Сбылось" : isOverdue ? "⏳ Просрочено" : formatDayDifference(item.date, today))}</small></button>${markButton}</article>`;
   }
 
   function renderReminders(today) {
@@ -374,7 +386,7 @@
     if (overdue.length) {
       const group = document.createElement("div");
       group.className = "calendar-list-group";
-      group.innerHTML = `<div class="calendar-group-title"><span>Просрочено</span><small>${overdue.length}</small></div>${overdue.map((item) => renderEventRow(item, today)).join("")}`;
+      group.innerHTML = `<div class="calendar-group-title calendar-group-overdue"><span>⏳ Просрочено</span><small>${overdue.length}</small></div>${overdue.map((item) => renderEventRow(item, today)).join("")}`;
       container.append(group);
     }
     if (upcoming.length) {
@@ -400,8 +412,10 @@
     const today = localDateString(new Date());
     for (let day = 1; day <= daysInMonth; day += 1) {
       const iso = `${monthKey}-${String(day).padStart(2, "0")}`;
-      const count = inMonth.filter((item) => item.date === iso).length;
-      cells += `<button type="button" class="calendar-day ${count ? "has-events" : ""} ${iso === selectedDate ? "selected" : ""} ${iso === today ? "today" : ""}" data-calendar-date="${iso}" aria-label="${escapeHtml(calendarDateLabel(iso, { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}" aria-pressed="${iso === selectedDate}"><span>${day}</span>${count ? `<span class="calendar-day-count">${count}</span><span class="calendar-day-dot" aria-hidden="true"></span>` : ""}</button>`;
+      const dayWishes = inMonth.filter((item) => item.date === iso);
+      const count = dayWishes.length;
+      const hasOverdue = dayWishes.some((item) => !item.done && item.date < today);
+      cells += `<button type="button" class="calendar-day ${count ? "has-events" : ""} ${hasOverdue ? "has-overdue" : ""} ${iso === selectedDate ? "selected" : ""} ${iso === today ? "today" : ""}" data-calendar-date="${iso}" aria-label="${escapeHtml(calendarDateLabel(iso, { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}" aria-pressed="${iso === selectedDate}"><span>${day}</span>${count ? `<span class="calendar-day-count">${count}</span><span class="calendar-day-dot" aria-hidden="true"></span>` : ""}</button>`;
     }
     const monthName = firstDay.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
     const selected = inMonth.filter((item) => item.date === selectedDate).sort(compareDated);

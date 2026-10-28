@@ -56,6 +56,9 @@ async function startServer() {
   app.use(express.static(resolve(process.cwd(), "public"), { index: false }));
 
   app.get(["/", "/na-dvoih", "/na-dvoih/*"], (_req, res) => {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
     res.sendFile(join(clientDir, "index.html"));
   });
 
