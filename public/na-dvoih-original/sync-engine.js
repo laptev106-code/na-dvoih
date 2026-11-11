@@ -436,7 +436,7 @@
             if (payload.deltas && Array.isArray(payload.deltas)) {
               this.applyIncomingDeltas(payload.deltas);
               window.NaDvoihHaptics?.impact?.("light");
-              this.showSyncBadgeToast("Синхронизировано ✨");
+              this.showSyncBadgeToast("Синхронизировано");
             }
           } catch (err) {
             console.error("[UnifiedSyncEngine] Delta error:", err);
@@ -451,7 +451,7 @@
               this.notifyListeners("presence", { partnerOnline: this.partnerOnline });
               this.updateSyncUI();
               if (this.partnerOnline) {
-                this.showSyncBadgeToast("Партнёр онлайн 💚");
+                this.showSyncBadgeToast("Партнёр онлайн");
               }
             }
           } catch {}
@@ -459,7 +459,7 @@
 
         this.eventSource.addEventListener("pair:joined", () => {
           window.NaDvoihHaptics?.notification?.("success");
-          this.showSyncBadgeToast("Партнёр подключился к паре! 🎉");
+          this.showSyncBadgeToast("Партнёр подключился к паре");
           this.initSession();
         });
 
@@ -487,24 +487,24 @@
         toast.id = "syncBadgeToast";
         toast.style.cssText = `
           position: fixed;
-          top: calc(var(--safe-top, 14px) + 12px);
+          top: calc(var(--safe-top, 14px) + 64px);
           left: 50%;
-          transform: translate(-50%, -20px);
+          transform: translate(-50%, -14px);
           background: var(--card, #fff);
           color: var(--green, #304e45);
           border: 1px solid var(--line, #ecebe4);
-          padding: 7px 15px;
+          padding: 7px 14px;
           border-radius: 999px;
-          font-size: 11.5px;
-          font-weight: 700;
-          box-shadow: 0 8px 24px rgba(44,55,47,.12);
+          font-size: 12px;
+          font-weight: 650;
+          box-shadow: 0 6px 18px rgba(24,32,26,.12);
           display: flex;
           align-items: center;
           gap: 6px;
           z-index: 1000;
           opacity: 0;
           pointer-events: none;
-          transition: transform .25s cubic-bezier(.2,.8,.2,1), opacity .25s ease;
+          transition: transform .22s cubic-bezier(.22,1,.36,1), opacity .22s ease;
         `;
         document.body.appendChild(toast);
       }
@@ -515,7 +515,7 @@
       });
       setTimeout(() => {
         toast.style.opacity = "0";
-        toast.style.transform = "translate(-50%, -15px)";
+        toast.style.transform = "translate(-50%, -12px)";
       }, 2500);
     }
 
@@ -534,9 +534,9 @@
           badge.style.display = "inline-flex";
         } else if (pair && pair.memberCount === 2) {
           if (this.partnerOnline) {
-            badge.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#34c759;display:inline-block"></span> Партнёр в сети 💚`;
+            badge.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#34c759;display:inline-block"></span> Партнёр в сети`;
           } else {
-            badge.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#304e45;display:inline-block"></span> Синхронизировано ✦`;
+            badge.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#304e45;display:inline-block"></span> Синхронизировано`;
           }
           badge.style.display = "inline-flex";
         } else if (pair && pair.memberCount === 1) {

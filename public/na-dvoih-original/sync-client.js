@@ -195,7 +195,7 @@
     }
 
     if (isPaired) {
-      setStatus("Вы в паре 💕");
+      setStatus("Вы в паре");
     } else if (isWaitingPartner) {
       setStatus("Отправьте код партнёру");
     } else {
@@ -404,10 +404,10 @@
         try {
           await navigator.clipboard.writeText(clean);
           window.triggerHaptic?.("success");
-          setStatus(`Код ${clean} скопирован 📋`);
+          setStatus(`Код ${clean} скопирован`);
           const toast = byId("toast");
           if (toast) {
-            toast.textContent = `Код ${clean} скопирован 📋`;
+            toast.textContent = `Код ${clean} скопирован`;
             toast.classList.add("show");
             setTimeout(() => toast.classList.remove("show"), 2000);
           }
@@ -451,7 +451,7 @@
       persistMetadata();
       await showInvite(result.inviteCode);
       updateControls();
-      setStatus("Код готов — отправьте партнёру");
+      setStatus("Код готов: отправьте партнёру");
       if (active) syncCycle();
     } catch (exception) {
       setStatus(exception.code === "already_in_pair" ? "Вы уже в паре" : ("Ошибка: " + (exception.message || "попробуйте позже")));
@@ -525,7 +525,7 @@
       metadata.pairId = result.pair.id;
       persistMetadata();
       updateControls();
-      setStatus("Вы в паре 💕");
+      setStatus("Вы в паре");
       syncCycle();
     } catch (exception) {
       setStatus(exception.code === "invite_not_found"
@@ -1005,7 +1005,7 @@
     }
     try {
       await navigator.clipboard.writeText(rawCode);
-      setStatus(`Код ${rawCode} скопирован в буфер обмена! 📋`);
+      setStatus(`Код ${rawCode} скопирован в буфер обмена`);
     } catch {
       setStatus(`Код: ${rawCode} (скопируйте вручную)`);
     }

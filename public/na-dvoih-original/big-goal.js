@@ -65,12 +65,12 @@
   }
 
   const CATEGORY_NAMES = {
-    trip: "✈️ Поездка",
-    home: "🏡 Дом и уют",
-    wedding: "💍 Свадьба",
-    buy: "🛍️ Покупка",
-    auto: "🚗 Автомобиль",
-    other: "✦ Мечта"
+    trip: "Поездка",
+    home: "Дом и уют",
+    wedding: "Свадьба",
+    buy: "Покупка",
+    auto: "Автомобиль",
+    other: "Мечта"
   };
 
   function formatMoney(amount, currency = "₽") {
@@ -99,48 +99,48 @@
     style.id = "bigGoalStyles";
     style.textContent = `
       .big-goal-page{display:grid;gap:16px;padding-bottom:16px}
-      .big-goal-card{position:relative;border:1px solid var(--soft-line);border-radius:var(--r-hero,24px);background:var(--glass-surface,var(--card));backdrop-filter:blur(20px) saturate(165%);-webkit-backdrop-filter:blur(20px) saturate(165%);box-shadow:var(--rim-light),var(--shadow-elev-1);padding:20px;overflow:hidden}
+      .big-goal-card{position:relative;border:1px solid var(--soft-line);border-radius:var(--r-hero,24px);background:var(--glass-surface,var(--card));box-shadow:var(--rim-light),var(--shadow-elev-1);padding:20px;overflow:hidden}
       .big-goal-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
       .big-goal-head-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--soft);border:1px solid var(--soft-line);font-size:12px;font-weight:700;color:var(--ink)}
-      .goal-edit-icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--soft-line);background:var(--soft);color:var(--ink);display:grid;place-items:center;font-size:16px;cursor:pointer;flex:none;transition:transform 140ms ease}
-      .goal-edit-icon-btn:active{transform:scale(.93)}
+      .goal-edit-icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--soft-line);background:var(--soft);color:var(--ink);display:grid;place-items:center;font-size:16px;cursor:pointer;flex:none;transition:transform 140ms ease}
+      .goal-edit-icon-btn:active:not(:disabled){transform:scale(.96)}
       .big-goal-title{font-size:clamp(22px,5vw,26px);font-weight:800;letter-spacing:-.03em;line-height:1.18;color:var(--ink);margin:0 0 6px 0}
       .big-goal-note{font-size:14px;line-height:1.45;color:var(--muted);margin:0 0 16px 0}
       
       /* Meadow / Celebration Art Widget */
-      .big-goal-meadow{position:relative;height:124px;border-radius:var(--r-control,16px);background:linear-gradient(180deg,color-mix(in srgb,var(--green2) 45%,var(--soft)) 0%,color-mix(in srgb,var(--green2) 80%,var(--soft)) 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:16px;border:1px solid var(--soft-line)}
+      .big-goal-meadow{position:relative;height:124px;border-radius:var(--r-control,16px);background:linear-gradient(180deg,color-mix(in srgb,var(--green2) 38%,var(--soft)) 0%,color-mix(in srgb,var(--green2) 64%,var(--soft)) 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:16px;border:1px solid var(--soft-line)}
       .big-goal-meadow svg{width:100%;height:100%}
-      .meadow-badge{position:absolute;bottom:10px;right:10px;background:var(--glass-surface-strong,rgba(255,255,255,.88));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--soft-line);box-shadow:var(--rim-light);padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:750;color:var(--green)}
-      :root[data-mode="dark"] .meadow-badge{background:rgba(28,28,32,.84);color:#9ac9a6;border-color:rgba(255,255,255,.1)}
+      .meadow-badge{position:absolute;bottom:10px;right:10px;background:var(--card);border:1px solid var(--soft-line);box-shadow:var(--rim-light);padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:750;color:var(--green)}
+      :root[data-mode="dark"] .meadow-badge{background:rgba(28,28,32,.92);color:#9ac9a6;border-color:rgba(255,255,255,.1)}
 
       /* Progress Bar & Amounts */
       .goal-amounts-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px}
       .goal-saved-big{font-size:22px;font-weight:850;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
       .goal-target-label{font-size:13.5px;font-weight:650;color:var(--muted);font-variant-numeric:tabular-nums}
       .goal-progress-track{position:relative;height:14px;background:var(--soft);border-radius:999px;overflow:hidden;border:1px solid var(--soft-line)}
-      .goal-progress-fill{height:100%;background:linear-gradient(90deg,var(--green) 0%,var(--action-cta,var(--coral,#df5734)) 100%);border-radius:999px;transition:width 460ms var(--spring-ease,cubic-bezier(0.22,1,0.36,1));box-shadow:0 0 10px rgba(48,78,69,.22)}
+      .goal-progress-fill{height:100%;background:var(--action-cta,var(--green));border-radius:999px;transition:width 460ms var(--ease-out,cubic-bezier(0.22,1,0.36,1));box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
       .goal-meta-sub{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px;font-weight:650;color:var(--muted);font-variant-numeric:tabular-nums}
 
       /* Duo Contributions */
-      .duo-contrib-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;padding:12px;border-radius:var(--r-control,16px);background:var(--soft);border:1px solid var(--soft-line)}
+      .duo-contrib-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;padding:14px 0;border:0;border-top:1px solid var(--soft-line);border-bottom:1px solid var(--soft-line);border-radius:0;background:transparent}
       .duo-contrib-person{display:flex;align-items:center;gap:10px;min-width:0}
       .duo-contrib-avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:var(--card);border:2px solid var(--paper);flex:none;box-shadow:0 2px 8px rgba(0,0,0,.08)}
       .duo-contrib-copy{display:flex;flex-direction:column;min-width:0}
       .duo-contrib-name{font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .duo-contrib-sum{font-size:15.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
       .goal-action-btn-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:16px}
-      .step-duo-btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;border-radius:14px;font-size:14px;font-weight:750;border:0;cursor:pointer;transition:transform 140ms var(--spring-ease,ease)}
-      .step-duo-btn:active{transform:scale(.96)}
-      .step-duo-btn--partner{background:linear-gradient(135deg,var(--coral,#c4627d),color-mix(in srgb,var(--coral,#df5734) 72%,var(--green)))!important;color:#fff!important}
+      .step-duo-btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;border-radius:14px;font-size:14px;font-weight:750;border:0;cursor:pointer;transition:transform 140ms var(--ease-out,ease)}
+      .step-duo-btn:active:not(:disabled){transform:scale(.96)}
+      .step-duo-btn--partner{background:var(--coral,#c4627d)!important;color:#fff!important}
 
       /* Milestones */
       .milestone-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
       .milestone-section-title{font-size:16.5px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
       .milestone-add-btn{min-height:36px;border:1px solid var(--soft-line);background:var(--soft);color:var(--green);padding:6px 12px;border-radius:12px;font-size:13px;font-weight:750;cursor:pointer;transition:transform 140ms ease}
-      .milestone-add-btn:active{transform:scale(.95)}
+      .milestone-add-btn:active:not(:disabled){transform:scale(.96)}
       .milestone-list{display:grid;gap:10px}
-      .milestone-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto 44px;align-items:center;gap:10px;min-height:56px;padding:10px 8px 10px 12px;border:1px solid var(--soft-line);border-radius:var(--r-control,16px);background:var(--glass-surface-strong,var(--card));transition:transform 160ms var(--spring-ease,ease),background-color 160ms ease}
-      .milestone-item:active{transform:scale(.99)}
+      .milestone-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto 44px;align-items:center;gap:10px;min-height:56px;padding:10px 8px 10px 12px;border:1px solid var(--soft-line);border-radius:var(--r-control,16px);background:var(--glass-surface-strong,var(--card));transition:transform 160ms var(--ease-out,ease),background-color 160ms ease}
+      .milestone-item:active{transform:scale(.985)}
       .milestone-item.done{background:color-mix(in srgb,var(--green2) 32%,var(--glass-surface,var(--card)))}
       .milestone-item.done .milestone-text{text-decoration:line-through;color:var(--muted)}
       .milestone-check{width:22px;height:22px;accent-color:var(--green);cursor:pointer}
@@ -149,13 +149,13 @@
       .milestone-sub{font-size:12.5px;color:var(--muted)}
       .milestone-badge{font-size:12px;font-weight:750;padding:4px 9px;border-radius:8px;background:var(--soft);border:1px solid var(--soft-line);color:var(--ink);white-space:nowrap}
       .milestone-del{width:44px;height:44px;border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:grid;place-items:center;border-radius:12px;transition:transform 120ms ease,background-color 120ms ease}
-      .milestone-del:active{transform:scale(.90);background:var(--soft)}
+      .milestone-del:active:not(:disabled){transform:scale(.96);background:var(--soft)}
 
       /* History Accordion */
-      .goal-history-details{border:1px solid var(--soft-line);border-radius:var(--r-card,20px);background:var(--glass-surface,var(--card));backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);box-shadow:var(--rim-light),var(--shadow-elev-1);overflow:hidden}
+      .goal-history-details{border:1px solid var(--soft-line);border-radius:var(--r-card,20px);background:var(--glass-surface,var(--card));box-shadow:var(--rim-light),var(--shadow-elev-1);overflow:hidden}
       .goal-history-summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:12px 16px;cursor:pointer;font-size:14px;font-weight:750;color:var(--ink);user-select:none}
       .goal-history-summary::-webkit-details-marker{display:none}
-      .goal-history-summary span:last-child{transition:transform 220ms var(--spring-ease,ease)}
+      .goal-history-summary span:last-child{transition:transform 220ms var(--ease-out,ease)}
       .goal-history-details[open] .goal-history-summary span:last-child{transform:rotate(180deg)}
       .goal-history-list{display:grid;gap:8px;padding:12px 16px 14px;border-top:1px solid var(--soft-line)}
       .goal-history-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13.5px;border-bottom:1px solid var(--soft-line)}
@@ -167,7 +167,7 @@
       /* Quick chips in contribute modal */
       .quick-chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;margin-top:8px}
       .quick-chip{flex:1;min-height:44px;border:1px solid var(--soft-line);border-radius:12px;background:var(--soft);color:var(--ink);font-size:13.5px;font-weight:750;cursor:pointer;white-space:nowrap;padding:0 12px;transition:transform 140ms ease}
-      .quick-chip:active{transform:scale(.95)}
+      .quick-chip:active:not(:disabled){transform:scale(.96)}
     `;
     document.head.append(style);
   }
@@ -196,7 +196,7 @@
         <path d="M10 15 Q15 19 18 15" stroke="#cbd5e1" stroke-width="1.2" fill="none" stroke-linecap="round"/>
         <!-- Webbed feet -->
         <path d="M12 23 L12 26 M16 23 L16 26" stroke="#f97316" stroke-width="1.5" stroke-linecap="round"/>
-        ${crown ? '<text x="18" y="3" font-size="9">👑</text>' : ''}
+        ${crown ? '<polygon points="18,3.5 19.5,0 22.5,2.2 25.5,0 27,3.5" fill="#f59e0b"/>' : ''}
       </g>
     `;
   }
@@ -229,7 +229,7 @@
           ${geeseCount >= 10 ? drawGooseSvg(75, 72, 1.25, true) : ''}
         </g>
       </svg>
-      <div class="meadow-badge">🌱 ${geeseCount} / 10</div>
+      <div class="meadow-badge">${geeseCount} / 10</div>
     `;
   }
 
@@ -259,10 +259,10 @@
       <!-- Main Dream Card -->
       <article class="big-goal-card">
         <div class="big-goal-card-top">
-          <div class="big-goal-head-badge">${isSteps ? "🎯 Трекер" : categoryLabel}${goal.deadline ? ` · ${escapeHtml(goal.deadline)}` : ""}</div>
-          <button type="button" class="goal-edit-icon-btn" id="openGoalEdit" aria-label="Настройки цели" title="Настройки">⚙️</button>
+          <div class="big-goal-head-badge">${isSteps ? "Трекер" : categoryLabel}${goal.deadline ? ` · ${escapeHtml(goal.deadline)}` : ""}</div>
+          <button type="button" class="goal-edit-icon-btn" id="openGoalEdit" aria-label="Настройки цели" title="Настройки"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg></button>
         </div>
-        <h3 class="big-goal-title">${escapeHtml(goal.title)}</h3>
+        <h2 class="big-goal-title" id="bigGoalHeaderTitle">${escapeHtml(goal.title)}</h2>
         ${goal.note && goal.note.trim() ? `<p class="big-goal-note">${escapeHtml(goal.note)}</p>` : ""}
 
         <!-- Meadow Visualizer -->
@@ -305,12 +305,12 @@
 
         ${isSteps ? `
           <div class="goal-action-btn-row" style="grid-template-columns:1fr 1fr;margin-top:16px;gap:10px">
-            <button type="button" class="primary-btn step-duo-btn" data-add-step="me" style="margin-top:0">👤 ${escapeHtml(me.name || "Я")}: +1</button>
-            <button type="button" class="primary-btn step-duo-btn step-duo-btn--partner" data-add-step="her" style="margin-top:0">🌸 ${escapeHtml(her.name || "Половинка")}: +1</button>
+            <button type="button" class="primary-btn step-duo-btn" data-add-step="me" style="margin-top:0">${escapeHtml(me.name || "Я")}: +1</button>
+            <button type="button" class="primary-btn step-duo-btn step-duo-btn--partner" data-add-step="her" style="margin-top:0">${escapeHtml(her.name || "Половинка")}: +1</button>
           </div>
         ` : `
           <div class="goal-action-btn-row" style="grid-template-columns:1fr">
-            <button type="button" class="primary-btn" id="openGoalContribute" style="margin-top:0">💰 Пополнить</button>
+            <button type="button" class="primary-btn" id="openGoalContribute" style="margin-top:0">Пополнить</button>
           </div>
         `}
       </article>
@@ -322,7 +322,7 @@
           <button type="button" class="milestone-add-btn" id="openAddMilestone">＋ Шаг</button>
         </div>
         <div class="milestone-list" id="goalMilestonesList">
-          ${goal.milestones.length === 0 ? '<div class="feature-empty" style="padding:18px 12px">Шагов пока нет</div>' : goal.milestones.map((m) => `
+          ${goal.milestones.length === 0 ? '<p style="margin:4px 0 0;color:var(--muted);font-size:13.5px">Шагов пока нет</p>' : goal.milestones.map((m) => `
             <div class="milestone-item ${m.done ? "done" : ""}" data-milestone-id="${escapeHtml(m.id)}">
               <input type="checkbox" class="milestone-check" data-toggle-milestone="${escapeHtml(m.id)}" ${m.done ? "checked" : ""} aria-label="Отметить шаг">
               <div class="milestone-main">
@@ -420,8 +420,8 @@
           <div class="field">
             <label>Тип</label>
             <div class="segmented" style="margin-bottom:0">
-              <button type="button" class="scope-btn" id="goalTypeMoneyBtn">💰 Накопления</button>
-              <button type="button" class="scope-btn" id="goalTypeStepsBtn">🎯 Шаги</button>
+              <button type="button" class="scope-btn" id="goalTypeMoneyBtn">Накопления</button>
+              <button type="button" class="scope-btn" id="goalTypeStepsBtn">Шаги</button>
             </div>
             <input type="hidden" id="goalInputType" name="goalType" value="money">
           </div>
@@ -438,12 +438,12 @@
           <div class="field">
             <label for="goalInputCategory">Категория</label>
             <select id="goalInputCategory" name="category">
-              <option value="trip">✈️ Поездка</option>
-              <option value="home">🏡 Дом и ремонт</option>
-              <option value="wedding">💍 Свадьба</option>
-              <option value="buy">🛍️ Покупка</option>
-              <option value="auto">🚗 Авто</option>
-              <option value="other">✦ Другое</option>
+              <option value="trip">Поездка</option>
+              <option value="home">Дом и ремонт</option>
+              <option value="wedding">Свадьба</option>
+              <option value="buy">Покупка</option>
+              <option value="auto">Авто</option>
+              <option value="other">Другое</option>
             </select>
           </div>
           <div class="field">
@@ -485,9 +485,9 @@
           <div class="field">
             <label for="msBy">Кто делает</label>
             <select id="msBy" name="by">
-              <option value="both">💕 Вместе</option>
-              <option value="me">👤 Я</option>
-              <option value="her">🌸 Партнёр</option>
+              <option value="both">Вместе</option>
+              <option value="me">Я</option>
+              <option value="her">Партнёр</option>
             </select>
           </div>
           <button type="submit" class="primary-btn">Добавить</button>
@@ -540,7 +540,7 @@
         const { total, target, percent } = getGoalProgress();
         const toast = q("#toast");
         if (toast) {
-          toast.textContent = `🎯 ${authorName}: +1 ${unit}! Всего: ${total} из ${target} (${percent}%)`;
+          toast.textContent = `${authorName}: +1 ${unit}. Всего: ${total} из ${target} (${percent}%)`;
           toast.classList.add("show");
           setTimeout(() => toast.classList.remove("show"), 2800);
         }
@@ -552,8 +552,8 @@
         const { me, her } = getPartnerProfiles();
         const sel = q("#contributeAuthor");
         sel.innerHTML = `
-          <option value="me">👤 ${escapeHtml(me.name || "Я")}</option>
-          <option value="her">🌸 ${escapeHtml(her.name || "Вторая половинка")}</option>
+          <option value="me">${escapeHtml(me.name || "Я")}</option>
+          <option value="her">${escapeHtml(her.name || "Вторая половинка")}</option>
         `;
         q("#contributeAmount").value = "";
         q("#contributeNote").value = "";
@@ -636,7 +636,6 @@
     // Submit Contribute
     q("#goalContributeForm")?.addEventListener("submit", (e) => {
       e.preventDefault();
-      console.log('CONTRIBUTE SUBMITTED');
       const form = e.currentTarget;
       const author = form.elements.author.value || "me";
       const amount = Math.max(1, parseInt(form.elements.amount.value, 10) || 0);
@@ -659,7 +658,7 @@
       const toast = q("#toast");
       if (toast) {
         const { percent } = getGoalProgress();
-        toast.textContent = `В копилку внесено +${amount.toLocaleString("ru-RU")} ₽! Собрано: ${percent}% 🎉`;
+        toast.textContent = `В копилку внесено +${amount.toLocaleString("ru-RU")} ₽. Собрано: ${percent}%`;
         toast.classList.add("show");
         setTimeout(() => toast.classList.remove("show"), 2800);
       }

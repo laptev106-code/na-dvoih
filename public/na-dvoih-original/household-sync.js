@@ -154,7 +154,7 @@
     box.innerHTML = '<strong>Конфликт изменения бытового дела</strong><p class="feature-subtitle">Ни одна версия не перезаписывается автоматически.</p><div id="householdSyncConflictList"></div>';
     screen.insertBefore(box, list);
     const style = document.createElement("style");
-    style.textContent = '.household-sync-conflicts{margin:8px 0}.household-sync-conflicts>strong{font-size:11px}.household-sync-conflicts #householdSyncConflictList{display:grid;gap:8px}.household-sync-conflicts .sync-conflict-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.household-sync-conflicts button{min-height:34px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:9px;font-weight:700}';
+    style.textContent = '.household-sync-conflicts{margin:8px 0}.household-sync-conflicts>strong{font-size:13px}.household-sync-conflicts #householdSyncConflictList{display:grid;gap:8px}.household-sync-conflicts .sync-conflict-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.household-sync-conflicts button{min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:12px;font-weight:700}';
     document.head.append(style);
   }
 

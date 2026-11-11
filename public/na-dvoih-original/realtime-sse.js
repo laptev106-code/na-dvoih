@@ -63,7 +63,7 @@
       document.body.appendChild(toast);
     }
 
-    toast.innerHTML = `<span style="font-size: 14px;">⚡</span> ${message}`;
+    toast.textContent = message;
     requestAnimationFrame(() => {
       toast.style.opacity = "1";
       toast.style.transform = "translate(-50%, 0)";
@@ -109,7 +109,7 @@
         if (data.authorTelegramId && String(data.authorTelegramId) !== localUserId) {
           window.NaDvoihHaptics?.impact?.("light");
           const isDone = data.task?.completed;
-          const msg = isDone ? "Партнёр выполнил пункт ✨" : "Партнёр обновил дела / покупки 🛒";
+          const msg = isDone ? "Партнёр выполнил пункт" : "Партнёр обновил дела";
           showPartnerToast(msg);
         }
         
@@ -131,7 +131,7 @@
 
         if (data.authorTelegramId && String(data.authorTelegramId) !== localUserId) {
           window.NaDvoihHaptics?.impact?.("light");
-          showPartnerToast("Партнёр обновил общее пространство 💌");
+          showPartnerToast("Партнёр обновил планы");
           window.NaDvoihTelemetry?.log?.("partner_wishes_event", e.type, data);
         }
 
@@ -150,7 +150,7 @@
       // Pair joined event
       eventSource.addEventListener("pair:joined", (e) => {
         window.NaDvoihHaptics?.notification?.("success");
-        showPartnerToast("Партнёр подключился к паре! 🎉");
+        showPartnerToast("Партнёр подключился к паре");
         window.NaDvoihWishesSync?.refreshSession?.();
       });
 
