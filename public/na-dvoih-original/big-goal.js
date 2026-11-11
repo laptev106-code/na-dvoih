@@ -100,7 +100,10 @@
     style.textContent = `
       .big-goal-page{display:grid;gap:16px;padding-bottom:16px}
       .big-goal-card{position:relative;border:1px solid var(--soft-line);border-radius:var(--r-hero,24px);background:var(--glass-surface,var(--card));backdrop-filter:blur(20px) saturate(165%);-webkit-backdrop-filter:blur(20px) saturate(165%);box-shadow:var(--rim-light),var(--shadow-elev-1);padding:20px;overflow:hidden}
-      .big-goal-head-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--soft);border:1px solid var(--soft-line);font-size:12px;font-weight:700;color:var(--ink);margin-bottom:12px}
+      .big-goal-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+      .big-goal-head-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--soft);border:1px solid var(--soft-line);font-size:12px;font-weight:700;color:var(--ink)}
+      .goal-edit-icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--soft-line);background:var(--soft);color:var(--ink);display:grid;place-items:center;font-size:16px;cursor:pointer;flex:none;transition:transform 140ms ease}
+      .goal-edit-icon-btn:active{transform:scale(.93)}
       .big-goal-title{font-size:clamp(22px,5vw,26px);font-weight:800;letter-spacing:-.03em;line-height:1.18;color:var(--ink);margin:0 0 6px 0}
       .big-goal-note{font-size:14px;line-height:1.45;color:var(--muted);margin:0 0 16px 0}
       
@@ -226,7 +229,7 @@
           ${geeseCount >= 10 ? drawGooseSvg(75, 72, 1.25, true) : ''}
         </g>
       </svg>
-      <div class="meadow-badge">🌱 На полянке цели: ${geeseCount} из 10 птиц</div>
+      <div class="meadow-badge">🌱 ${geeseCount} / 10</div>
     `;
   }
 
@@ -253,18 +256,14 @@
     const categoryLabel = CATEGORY_NAMES[goal.category] || CATEGORY_NAMES.trip;
 
     root.innerHTML = `
-      <div class="feature-head">
-        <div>
-          <h2 id="bigGoalHeaderTitle">Большая цель</h2>
-          <p class="feature-subtitle">${isSteps ? "Совместные шаги, занятия и победы" : "Совместная мечта, накопления и шаги"}</p>
-        </div>
-      </div>
-
       <!-- Main Dream Card -->
       <article class="big-goal-card">
-        <div class="big-goal-head-badge">${isSteps ? "🎯 Мульти-трекер" : categoryLabel} · дедлайн: ${escapeHtml(goal.deadline || "Не указан")}</div>
+        <div class="big-goal-card-top">
+          <div class="big-goal-head-badge">${isSteps ? "🎯 Трекер" : categoryLabel}${goal.deadline ? ` · ${escapeHtml(goal.deadline)}` : ""}</div>
+          <button type="button" class="goal-edit-icon-btn" id="openGoalEdit" aria-label="Настройки цели" title="Настройки">⚙️</button>
+        </div>
         <h3 class="big-goal-title">${escapeHtml(goal.title)}</h3>
-        <p class="big-goal-note">${escapeHtml(goal.note || (isSteps ? "Двигаемся к общей цели шаг за шагом." : "Копим вместе на главное совместное событие."))}</p>
+        ${goal.note && goal.note.trim() ? `<p class="big-goal-note">${escapeHtml(goal.note)}</p>` : ""}
 
         <!-- Meadow Visualizer -->
         <div class="big-goal-meadow">
@@ -274,7 +273,7 @@
         <!-- Amounts & Bar -->
         <div class="goal-amounts-row">
           <span class="goal-saved-big">${isSteps ? `${total} <small style="font-size:15px;font-weight:700;color:var(--muted)">${escapeHtml(unit)}</small>` : formatMoney(total, goal.currency)}</span>
-          <span class="goal-target-label">Цель: ${isSteps ? `${target} ${escapeHtml(unit)}` : formatMoney(target, goal.currency)}</span>
+          <span class="goal-target-label">из ${isSteps ? `${target} ${escapeHtml(unit)}` : formatMoney(target, goal.currency)}</span>
         </div>
 
         <div class="goal-progress-track">
@@ -282,8 +281,8 @@
         </div>
 
         <div class="goal-meta-sub">
-          <span>${isSteps ? "Пройдено" : "Собрано"}: <strong>${percent}%</strong></span>
-          <span>Осталось: <strong>${isSteps ? `${remaining} ${escapeHtml(unit)}` : formatMoney(remaining, goal.currency)}</strong></span>
+          <span><strong>${percent}%</strong></span>
+          <span>ещё <strong>${isSteps ? `${remaining} ${escapeHtml(unit)}` : formatMoney(remaining, goal.currency)}</strong></span>
         </div>
 
         <!-- Duo Contributions Split -->
@@ -309,11 +308,9 @@
             <button type="button" class="primary-btn step-duo-btn" data-add-step="me" style="margin-top:0">👤 ${escapeHtml(me.name || "Я")}: +1</button>
             <button type="button" class="primary-btn step-duo-btn step-duo-btn--partner" data-add-step="her" style="margin-top:0">🌸 ${escapeHtml(her.name || "Половинка")}: +1</button>
           </div>
-          <button type="button" class="secondary-btn" id="openGoalEdit" style="width:100%;height:46px;margin-top:8px">⚙️ Настройки цели</button>
         ` : `
-          <div class="goal-action-btn-row">
-            <button type="button" class="primary-btn" id="openGoalContribute" style="margin-top:0">💰 Внести в копилку</button>
-            <button type="button" class="secondary-btn" id="openGoalEdit" style="height:52px;padding:0 14px">⚙️ Настройки</button>
+          <div class="goal-action-btn-row" style="grid-template-columns:1fr">
+            <button type="button" class="primary-btn" id="openGoalContribute" style="margin-top:0">💰 Пополнить</button>
           </div>
         `}
       </article>
@@ -321,16 +318,16 @@
       <!-- Milestones Card -->
       <article class="big-goal-card">
         <div class="milestone-section-head">
-          <span class="milestone-section-title">Шаги и вехи к цели</span>
-          <button type="button" class="milestone-add-btn" id="openAddMilestone">＋ Добавить шаг</button>
+          <span class="milestone-section-title">План</span>
+          <button type="button" class="milestone-add-btn" id="openAddMilestone">＋ Шаг</button>
         </div>
         <div class="milestone-list" id="goalMilestonesList">
-          ${goal.milestones.length === 0 ? '<div class="feature-empty" style="padding:18px 12px">Добавьте первый важный шаг на пути к цели.</div>' : goal.milestones.map((m) => `
+          ${goal.milestones.length === 0 ? '<div class="feature-empty" style="padding:18px 12px">Шагов пока нет</div>' : goal.milestones.map((m) => `
             <div class="milestone-item ${m.done ? "done" : ""}" data-milestone-id="${escapeHtml(m.id)}">
               <input type="checkbox" class="milestone-check" data-toggle-milestone="${escapeHtml(m.id)}" ${m.done ? "checked" : ""} aria-label="Отметить шаг">
               <div class="milestone-main">
                 <span class="milestone-text">${escapeHtml(m.title)}</span>
-                <span class="milestone-sub">${m.by === "me" ? escapeHtml(me.name) : m.by === "her" ? escapeHtml(her.name) : "Вместе"} ${m.done ? "✓ Выполнено" : ""}</span>
+                <span class="milestone-sub">${m.by === "me" ? escapeHtml(me.name) : m.by === "her" ? escapeHtml(her.name) : "Вместе"}</span>
               </div>
               ${m.cost ? `<span class="milestone-badge">${formatMoney(m.cost, goal.currency)}</span>` : ""}
               <button type="button" class="milestone-del" data-del-milestone="${escapeHtml(m.id)}" aria-label="Удалить шаг">×</button>
@@ -342,11 +339,11 @@
       <!-- History Accordion -->
       <details class="goal-history-details">
         <summary class="goal-history-summary">
-          <span>${isSteps ? "История шагов" : "История пополнений"} (${goal.history.length})</span>
+          <span>История (${goal.history.length})</span>
           <span style="color:var(--green)">▾</span>
         </summary>
         <div class="goal-history-list">
-          ${goal.history.length === 0 ? '<div style="color:var(--muted);font-size:12px;padding:8px 0">Пока записей не было.</div>' : goal.history.map((h) => `
+          ${goal.history.length === 0 ? '<div style="color:var(--muted);font-size:12px;padding:8px 0">Записей пока нет</div>' : goal.history.map((h) => `
             <div class="goal-history-item" data-history-id="${escapeHtml(h.id)}">
               <div class="goal-history-copy">
                 <strong>${h.author === "her" ? escapeHtml(her.name) : escapeHtml(me.name)}: ${escapeHtml(h.note || (isSteps ? "Шаг" : "Взнос"))}</strong>
@@ -374,17 +371,17 @@
       <section class="sheet">
         <div class="sheet-drag-handle" aria-hidden="true"></div>
         <div class="sheet-head">
-          <div class="sheet-title" id="contributeTitle">Внести сумму в цель</div>
+          <div class="sheet-title" id="contributeTitle">Пополнить цель</div>
           <button class="close-btn" data-close="goalContributeOverlay" type="button" aria-label="Закрыть">×</button>
         </div>
         <form class="form-grid" id="goalContributeForm">
           <div class="field">
-            <label for="contributeAuthor">Кто вносит сумму?</label>
+            <label for="contributeAuthor">Кто</label>
             <select id="contributeAuthor" name="author"></select>
           </div>
           <div class="field">
             <label for="contributeAmount">Сумма (₽)</label>
-            <input id="contributeAmount" name="amount" type="number" min="1" step="any" placeholder="Например: 5000" inputmode="numeric" required>
+            <input id="contributeAmount" name="amount" type="number" min="1" step="any" placeholder="5000" inputmode="numeric" required>
             <div class="quick-chip-row">
               <button type="button" class="quick-chip" data-quick-sum="1000">+1 000</button>
               <button type="button" class="quick-chip" data-quick-sum="5000">+5 000</button>
@@ -393,10 +390,10 @@
             </div>
           </div>
           <div class="field">
-            <label for="contributeNote">Заметка или источник <span style="font-weight:400">· необязательно</span></label>
-            <input id="contributeNote" name="note" maxlength="60" placeholder="Например: премия, кэшбэк, зарплата">
+            <label for="contributeNote">Заметка <span style="font-weight:400">· опц.</span></label>
+            <input id="contributeNote" name="note" maxlength="60" placeholder="Премия, кэшбэк…">
           </div>
-          <button type="submit" class="primary-btn">Пополнить копилку 💕</button>
+          <button type="submit" class="primary-btn">Добавить</button>
         </form>
       </section>
     `;
@@ -412,52 +409,52 @@
       <section class="sheet">
         <div class="sheet-drag-handle" aria-hidden="true"></div>
         <div class="sheet-head">
-          <div class="sheet-title" id="goalEditTitle">Параметры цели</div>
+          <div class="sheet-title" id="goalEditTitle">Цель</div>
           <button class="close-btn" data-close="goalEditOverlay" type="button" aria-label="Закрыть">×</button>
         </div>
         <form class="form-grid" id="goalEditForm">
           <div class="field">
-            <label for="goalInputTitle">Название цели</label>
-            <input id="goalInputTitle" name="title" maxlength="90" required placeholder="Например: Наш отпуск в Риме или 40 уроков английского">
+            <label for="goalInputTitle">Название</label>
+            <input id="goalInputTitle" name="title" maxlength="90" required placeholder="Отпуск в Риме или 40 уроков">
           </div>
           <div class="field">
-            <label>Тип цели</label>
+            <label>Тип</label>
             <div class="segmented" style="margin-bottom:0">
-              <button type="button" class="scope-btn" id="goalTypeMoneyBtn">💰 Накопления (₽)</button>
-              <button type="button" class="scope-btn" id="goalTypeStepsBtn">🎯 Занятия / Шаги</button>
+              <button type="button" class="scope-btn" id="goalTypeMoneyBtn">💰 Накопления</button>
+              <button type="button" class="scope-btn" id="goalTypeStepsBtn">🎯 Шаги</button>
             </div>
             <input type="hidden" id="goalInputType" name="goalType" value="money">
           </div>
           <div class="field" id="goalFieldMoney">
-            <label for="goalInputTarget">Необходимая сумма (₽)</label>
+            <label for="goalInputTarget">Сумма (₽)</label>
             <input id="goalInputTarget" name="targetAmount" type="number" min="1000" step="1000" inputmode="numeric">
           </div>
           <div class="field" id="goalFieldSteps" style="display:none">
-            <label for="goalInputTargetSteps">Сколько занятий / шагов нужно пройти?</label>
-            <input id="goalInputTargetSteps" name="targetSteps" type="number" min="1" step="1" inputmode="numeric" placeholder="Например: 40">
-            <label for="goalInputStepUnit" style="margin-top:8px">Что считаем? <span style="font-weight:400">· единица измерения</span></label>
-            <input id="goalInputStepUnit" name="stepUnit" maxlength="30" placeholder="Например: урок, занятие, тренировка, шаг">
+            <label for="goalInputTargetSteps">Сколько шагов</label>
+            <input id="goalInputTargetSteps" name="targetSteps" type="number" min="1" step="1" inputmode="numeric" placeholder="40">
+            <label for="goalInputStepUnit" style="margin-top:8px">Единица</label>
+            <input id="goalInputStepUnit" name="stepUnit" maxlength="30" placeholder="урок, тренировка, шаг">
           </div>
           <div class="field">
-            <label for="goalInputCategory">Категория цели</label>
+            <label for="goalInputCategory">Категория</label>
             <select id="goalInputCategory" name="category">
-              <option value="trip">✈️ Поездка и путешествие</option>
-              <option value="home">🏡 Дом, ремонт и уют</option>
-              <option value="wedding">💍 Свадьба и торжество</option>
-              <option value="buy">🛍️ Большая покупка</option>
-              <option value="auto">🚗 Автомобиль</option>
-              <option value="other">✦ Мечта / Развитие</option>
+              <option value="trip">✈️ Поездка</option>
+              <option value="home">🏡 Дом и ремонт</option>
+              <option value="wedding">💍 Свадьба</option>
+              <option value="buy">🛍️ Покупка</option>
+              <option value="auto">🚗 Авто</option>
+              <option value="other">✦ Другое</option>
             </select>
           </div>
           <div class="field">
-            <label for="goalInputDeadline">Дедлайн цели</label>
+            <label for="goalInputDeadline">Дедлайн</label>
             <input id="goalInputDeadline" name="deadline" type="date">
           </div>
           <div class="field">
-            <label for="goalInputNote">Заметка или мечта</label>
-            <input id="goalInputNote" name="note" maxlength="140" placeholder="Коротко о том, почему это важно для вас">
+            <label for="goalInputNote">Заметка</label>
+            <input id="goalInputNote" name="note" maxlength="140" placeholder="Почему это важно">
           </div>
-          <button type="submit" class="primary-btn">Сохранить изменения</button>
+          <button type="submit" class="primary-btn">Сохранить</button>
         </form>
       </section>
     `;
@@ -473,27 +470,27 @@
       <section class="sheet">
         <div class="sheet-drag-handle" aria-hidden="true"></div>
         <div class="sheet-head">
-          <div class="sheet-title" id="milestoneAddTitle">Новый шаг к цели</div>
+          <div class="sheet-title" id="milestoneAddTitle">Новый шаг</div>
           <button class="close-btn" data-close="goalMilestoneOverlay" type="button" aria-label="Закрыть">×</button>
         </div>
         <form class="form-grid" id="goalMilestoneForm">
           <div class="field">
-            <label for="msTitle">Что нужно сделать?</label>
-            <input id="msTitle" name="title" maxlength="90" placeholder="Например: Купить билеты" required>
+            <label for="msTitle">Шаг</label>
+            <input id="msTitle" name="title" maxlength="90" placeholder="Купить билеты" required>
           </div>
           <div class="field">
-            <label for="msCost">Примерная стоимость (₽) <span style="font-weight:400">· если требуется</span></label>
-            <input id="msCost" name="cost" type="number" min="0" step="500" placeholder="Например: 50000" inputmode="numeric">
+            <label for="msCost">Стоимость <span style="font-weight:400">· опц.</span></label>
+            <input id="msCost" name="cost" type="number" min="0" step="500" placeholder="50000" inputmode="numeric">
           </div>
           <div class="field">
-            <label for="msBy">Кто отвечает за шаг?</label>
+            <label for="msBy">Кто делает</label>
             <select id="msBy" name="by">
               <option value="both">💕 Вместе</option>
               <option value="me">👤 Я</option>
-              <option value="her">🌸 Вторая половинка</option>
+              <option value="her">🌸 Партнёр</option>
             </select>
           </div>
-          <button type="submit" class="primary-btn">Добавить шаг</button>
+          <button type="submit" class="primary-btn">Добавить</button>
         </form>
       </section>
     `;

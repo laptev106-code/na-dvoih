@@ -1345,8 +1345,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: var(--space-1);
-      min-height: 78px;
+      gap: 4px;
+      min-height: 64px;
       padding: var(--space-2) var(--space-1);
       border: 1px solid var(--glass-hairline);
       border-radius: var(--r-control);
@@ -1364,8 +1364,50 @@
       background: color-mix(in srgb, var(--green2) 48%, var(--card));
     }
     .bg-style-icon { font-size: 20px; line-height: 1.1; }
-    .bg-style-name { font-size: 12px; font-weight: 740; color: var(--ink); line-height: 1.2; }
-    .bg-style-hint { font-size: 10.5px; color: var(--muted); line-height: 1.2; }
+    .bg-style-name { font-size: 12px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+
+    /* Minimal, Decluttered Hierarchy */
+    .hero {
+      min-height: 144px !important;
+      padding: 18px 20px !important;
+      margin: var(--space-1) var(--space-4) var(--space-4) !important;
+    }
+    .hero p[hidden] { display: none !important; }
+    .hero h1 { font-size: clamp(22px, 5.5vw, 26px) !important; margin: 6px 0 4px !important; }
+    .hero-stats { margin-top: 12px !important; gap: 8px !important; }
+    .wish-title {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    .wish-note {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    .wish-link-preview-copy strong {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .wish-link-preview-copy span {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+      overflow: hidden;
+    }
+    .theme-grid {
+      gap: 8px !important;
+    }
+    .theme-choice {
+      min-height: 48px !important;
+      padding: 10px 12px !important;
+      border-radius: 14px !important;
+    }
+    .media-hint { display: none !important; }
 
     @keyframes screen-enter {
       from { opacity: 0.4; transform: translateY(8px) scale(0.992); }
@@ -1424,13 +1466,12 @@
       </div>
     </header>
     <section class="hero" aria-label="Планы на двоих">
-      <div class="hero-content"><div class="eyebrow"><span class="dot"></span> НАШИ ПЛАНЫ</div><h1>Планы на двоих</h1><p>Места, свидания и мечты, которые хочется разделить.</p><div class="hero-stats"><strong id="heroCount">0 идей</strong><span>·</span><span id="heroDone">0 сбылось</span></div></div>
+      <div class="hero-content"><div class="eyebrow"><span class="dot"></span> НА ДВОИХ</div><h1>Планы на двоих</h1><p hidden></p><div class="hero-stats"><strong id="heroCount">0 в планах</strong><span>·</span><span id="heroDone">0 сбылось</span></div></div>
       <button class="hero-cta" id="heroAdd" aria-label="Добавить идею">+</button><div class="hero-people" id="heroAvatars" aria-hidden="true"></div>
     </section>
     <section class="content">
-      <div class="section-head"><div class="section-title" id="sectionTitle">Идеи</div><div class="section-hint" id="sectionHint">Идеи на будущее</div></div>
       <div class="search-filter-row">
-        <label class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7"></circle><path d="m16 16 4.5 4.5"></path></svg><input id="searchInput" type="search" placeholder="Найти идею или место…" autocomplete="off"><span class="sr-only">Поиск</span></label>
+        <label class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7"></circle><path d="m16 16 4.5 4.5"></path></svg><input id="searchInput" type="search" placeholder="Поиск…" autocomplete="off"><span class="sr-only">Поиск</span></label>
         <div class="scope-dropdown-wrap">
           <select id="scopeSelect" class="scope-select" aria-label="Фильтр по автору">
             <option value="all">👥 Все</option>
@@ -1446,12 +1487,11 @@
         <div class="segmented" style="margin-bottom:0">
           <button type="button" class="scope-btn active" data-history-filter="all">Все</button>
           <button type="button" class="scope-btn" data-history-filter="done">✨ Сбылось</button>
-          <button type="button" class="scope-btn" data-history-filter="pending">⏳ Ждут решения</button>
+          <button type="button" class="scope-btn" data-history-filter="pending">⏳ Ожидают</button>
         </div>
       </div>
       <div class="list-caption"><strong id="listTitle">В планах</strong><span id="listCount"></span></div>
       <div class="cards" id="cards"></div>
-      <p class="footnote">Только для вас двоих</p>
     </section>
     <nav class="bottom-nav" aria-label="Основная навигация">
       <button class="nav-btn active" id="navIdeas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h14a1 1 0 0 1 1 1v15l-4-2.4-4 2.4-4-2.4L4 20V5.5a1 1 0 0 1 1-1Z"></path><path d="M8 9h8M8 13h6"></path></svg><span>Идеи</span></button>
@@ -1463,20 +1503,20 @@
   <div class="overlay" id="wishOverlay" role="dialog" aria-modal="true" aria-labelledby="wishModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div class="sheet-title" id="wishModalTitle">Новая идея</div><button class="close-btn" data-close="wishOverlay" aria-label="Закрыть">×</button></div>
     <form id="wishForm" class="form-grid">
       <input type="hidden" name="id">
-      <div class="field"><label for="wishTitle">Что хочется сделать?</label><input id="wishTitle" name="title" maxlength="90" placeholder="Например, увидеть море зимой" required></div>
+      <div class="field"><label for="wishTitle">Идея</label><input id="wishTitle" name="title" maxlength="90" placeholder="Увидеть море зимой…" required></div>
       <div class="field"><label for="wishCategory">Категория</label><select id="wishCategory" name="category"></select></div>
       <div class="field">
-        <label for="wishScopeSelect">Для кого эта идея?</label>
+        <label for="wishScopeSelect">Для кого</label>
         <select id="wishScopeSelect" name="scopeSelect">
-          <option value="together">💕 Вместе (для двоих)</option>
-          <option value="me">👤 Личное (моё)</option>
-          <option value="her" id="wishScopePartnerOpt">🌸 Личное (для неё)</option>
+          <option value="together">💕 Вместе</option>
+          <option value="me">👤 Моё</option>
+          <option value="her" id="wishScopePartnerOpt">🌸 Для неё</option>
         </select>
         <input type="hidden" id="wishScopeHidden" name="scope" value="together">
         <input type="hidden" id="wishOwnerHidden" name="owner" value="both">
       </div>
       <div class="field">
-        <label for="wishDate">Дата события <span style="font-weight:400">· когда планируете</span></label>
+        <label for="wishDate">Дата</label>
         <input id="wishDate" name="date" type="date">
       </div>
       <div class="reminder-row" id="wishReminderRow">
@@ -1494,20 +1534,20 @@
       <details class="optional-details" id="wishOptionalDetails">
         <summary class="optional-summary">
           <div class="optional-summary-copy">
-            <strong>Дополнительно</strong>
-            <span>Заметка, теги, своё фото, ссылка и фон</span>
+            <strong>Ещё</strong>
+            <span>Фото, ссылка, заметка, фон</span>
           </div>
         </summary>
         <div class="optional-body">
-          <div class="field"><label for="wishNote">Заметка или место <span style="font-weight:400">· коротко</span></label><input id="wishNote" name="note" maxlength="70" placeholder="Коротко, чтобы не забыть"></div>
-          <div class="field"><label for="wishTags">Теги <span style="font-weight:400">· через запятую</span></label><input id="wishTags" name="tags" maxlength="70" placeholder="например: лето, кафе, подарок"></div>
+          <div class="field"><label for="wishNote">Заметка</label><input id="wishNote" name="note" maxlength="70" placeholder="Место или деталь"></div>
+          <div class="field"><label for="wishTags">Теги</label><input id="wishTags" name="tags" maxlength="70" placeholder="лето, кафе"></div>
           <div class="field">
-            <label for="wishImageFile">Своя фотография <span style="font-weight:400">· с подгонкой</span></label>
+            <label for="wishImageFile">Фото</label>
             <input id="wishImageFile" type="file" accept="image/*" aria-describedby="wishImageHint">
-            <p class="media-hint" id="wishImageHint">Фото можно приблизить и подогнать прямо здесь перед сохранением.</p>
+            <p class="media-hint" id="wishImageHint" hidden></p>
             
             <div class="wish-crop-container" id="wishCropContainer" hidden>
-              <div class="wish-crop-header">Передвигайте и приближайте фото:</div>
+              <div class="wish-crop-header">Кадрирование</div>
               <div class="wish-crop-viewport" id="wishCropViewport">
                 <canvas id="wishCropCanvas" width="260" height="260"></canvas>
               </div>
@@ -1522,63 +1562,57 @@
               <img id="wishPhotoPreviewImage" alt="Предпросмотр выбранного фото" title="Нажмите для просмотра на весь экран">
               <div class="wish-photo-preview-details">
                 <span id="wishPhotoMeta"></span>
-                <button type="button" class="text-link-btn" id="recropWishPhoto">Подрезать заново</button>
+                <button type="button" class="text-link-btn" id="recropWishPhoto">Обрезать</button>
               </div>
             </div>
             <button class="secondary-btn photo-remove" id="clearWishPhoto" type="button" hidden>Убрать фото</button>
           </div>
           <details class="media-details" id="wishLinkDetails">
-            <summary>Ссылка на место или товар</summary>
+            <summary>Ссылка</summary>
             <div class="media-details-body">
-              <div class="field"><label for="wishUrl">Ссылка</label><input id="wishUrl" name="url" type="url" maxlength="1200" inputmode="url" placeholder="https://…" autocomplete="url"></div>
-              <button class="secondary-btn" id="getLinkPreview" type="button">Загрузить карточку со страницы</button>
-              <p class="media-hint" id="linkPreviewHint">Автоматически находит название и фото по ссылке.</p>
+              <div class="field"><label for="wishUrl">URL</label><input id="wishUrl" name="url" type="url" maxlength="1200" inputmode="url" placeholder="https://…" autocomplete="url"></div>
+              <button class="secondary-btn" id="getLinkPreview" type="button">Загрузить превью</button>
               <p class="link-preview-status" id="linkPreviewStatus" aria-live="polite"></p>
               <div class="link-preview-card" id="linkPreviewCard" hidden>
                 <img id="linkPreviewImage" alt="" hidden>
                 <div class="link-preview-copy"><strong id="linkPreviewTitle"></strong><span id="linkPreviewDescription"></span></div>
-                <button class="secondary-btn link-preview-remove" id="clearLinkPreview" type="button">Убрать превью</button>
+                <button class="secondary-btn link-preview-remove" id="clearLinkPreview" type="button">Убрать</button>
               </div>
             </div>
           </details>
           <details class="media-details" id="wishVisualDetails">
             <summary>
               <span class="visual-summary-icon" id="wishArtSummaryIcon" aria-hidden="true"></span>
-              <span class="visual-summary-copy"><strong>Фон и иллюстрация</strong><small id="wishArtSummaryText">Выберите цвет фона и рисунок</small></span>
+              <span class="visual-summary-copy"><strong>Иконка и цвет</strong><small id="wishArtSummaryText"></small></span>
             </summary>
             <div class="media-details-body visual-body">
               <div class="wish-art-preview" id="wishArtPreview" aria-label="Предпросмотр оформления"></div>
-              <div class="field"><span class="field-label">Фон · 15 вариантов</span><div class="art-background-grid" id="wishBackgrounds"></div></div>
-              <div class="field"><span class="field-label">Рисунок · 15 вариантов</span><div class="art-illustration-grid" id="wishIllustrations"></div></div>
+              <div class="field"><span class="field-label">Фон</span><div class="art-background-grid" id="wishBackgrounds"></div></div>
+              <div class="field"><span class="field-label">Иконка</span><div class="art-illustration-grid" id="wishIllustrations"></div></div>
             </div>
           </details>
         </div>
       </details>
-      <button class="primary-btn" type="submit">Сохранить идею</button>
-      <button class="secondary-btn" id="deleteWish" type="button" hidden>Удалить идею</button>
+      <button class="primary-btn" type="submit">Сохранить</button>
+      <button class="secondary-btn" id="deleteWish" type="button" hidden>Удалить</button>
     </form>
   </section></div>
-  <div class="overlay" id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div><div class="sheet-title" id="profileModalTitle">Профили пары</div><div style="margin-top:3px;font-size:12.5px;color:var(--muted)">Имена, значки и аватары</div></div><button class="close-btn" data-close="profileOverlay" aria-label="Закрыть">×</button></div>
-    <form id="profileForm" class="form-grid"><div class="field"><label for="partnerGender">Вторая половинка</label><select id="partnerGender" name="partnerGender" aria-describedby="partnerGenderHint"><option value="female">Любимая · вкладка «Её»</option><option value="male">Любимый · вкладка «Его»</option></select><p class="partner-gender-hint" id="partnerGenderHint">Название вкладки для личных планов партнёра.</p></div><div class="avatar-profiles" id="profileEditors"></div><button class="primary-btn" type="submit">Сохранить профили</button></form>
+  <div class="overlay" id="profileOverlay" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div class="sheet-title" id="profileModalTitle">Профили</div><button class="close-btn" data-close="profileOverlay" aria-label="Закрыть">×</button></div>
+    <form id="profileForm" class="form-grid"><div class="field"><label for="partnerGender">Партнёр</label><select id="partnerGender" name="partnerGender"><option value="female">Девушка · вкладка «Её»</option><option value="male">Парень · вкладка «Его»</option></select><p class="partner-gender-hint" id="partnerGenderHint" hidden></p></div><div class="avatar-profiles" id="profileEditors"></div><button class="primary-btn" type="submit">Сохранить</button></form>
   </section></div>
-  <div class="overlay" id="themeOverlay" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div><div class="sheet-title" id="themeModalTitle">Цвет оформления</div><div style="margin-top:3px;font-size:12.5px;color:var(--muted)">Двойные дуэты и моно-палитры</div></div><button class="close-btn" data-close="themeOverlay" aria-label="Закрыть">×</button></div><div class="theme-options" id="themeOptions"></div></section></div>
+  <div class="overlay" id="themeOverlay" role="dialog" aria-modal="true" aria-labelledby="themeModalTitle"><section class="sheet"><div class="sheet-drag-handle" aria-hidden="true"></div><div class="sheet-head"><div class="sheet-title" id="themeModalTitle">Оформление</div><button class="close-btn" data-close="themeOverlay" aria-label="Закрыть">×</button></div><div class="theme-options" id="themeOptions"></div></section></div>
   <div class="overlay" id="categoryOverlay" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
     <section class="sheet">
       <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="sheet-head">
-        <div>
-          <div class="sheet-title" id="categoryModalTitle">Категории</div>
-          <div style="margin-top:3px;font-size:12.5px;color:var(--muted)">Управление и добавление новых</div>
-        </div>
+        <div class="sheet-title" id="categoryModalTitle">Категории</div>
         <button class="close-btn" data-close="categoryOverlay" aria-label="Закрыть">×</button>
       </div>
-      <div class="field-label" style="margin-bottom:6px">Текущие категории (нажмите ✕ чтобы удалить):</div>
       <div class="category-manage-list" id="categoryManageList"></div>
       <form id="categoryForm" class="form-grid" style="border-top:1px solid var(--line);padding-top:12px;margin-top:4px">
-        <div class="sheet-title" style="font-size:15px;margin-bottom:2px">＋ Новая категория</div>
-        <div class="field"><label for="categoryName">Название</label><input id="categoryName" name="name" maxlength="24" placeholder="Например, Спорт или Кино" required></div>
-        <div class="field"><span class="field-label">Значок</span><input type="hidden" name="icon" value="✦"><div class="emoji-options" id="categoryEmojiOptions" aria-label="Выбрать значок"></div></div>
-        <button class="primary-btn" type="submit">Добавить категорию</button>
+        <div class="field"><label for="categoryName">Новая категория</label><input id="categoryName" name="name" maxlength="24" placeholder="Спорт, Кино…" required></div>
+        <div class="field"><span class="field-label">Иконка</span><input type="hidden" name="icon" value="✦"><div class="emoji-options" id="categoryEmojiOptions" aria-label="Выбрать значок"></div></div>
+        <button class="primary-btn" type="submit">Добавить</button>
       </form>
     </section>
   </div>
@@ -1592,45 +1626,38 @@
     <section class="sheet">
       <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="sheet-head">
-        <div>
-          <div class="sheet-title" id="syncTitle">Синхронизация пары</div>
-          <div style="margin-top:3px;font-size:12.5px;color:var(--muted)">Общие планы и дела на двоих</div>
-        </div>
+        <div class="sheet-title" id="syncTitle">Пара</div>
         <button class="close-btn" id="syncClose" data-close="syncOverlay" aria-label="Закрыть">×</button>
       </div>
 
       <div class="sync-status-badge" id="syncStatusBadge">
-        <span id="syncStatus">Проверяем статус пары…</span>
+        <span id="syncStatus">Проверка…</span>
       </div>
 
       <!-- Card: When ALREADY Connected -->
       <div class="sync-connected-card" id="syncConnectedCard" hidden>
         <div class="sync-connected-icon">💕</div>
-        <div style="font-size:16px;font-weight:750;color:var(--ink)">Вы подключены друг к другу!</div>
-        <span class="sync-live-badge"><span class="dot"></span> Онлайн-синхронизация активна</span>
-        <p class="sync-card-desc">Все списки желаний, бытовые дела и календарь мгновенно обновляются на обоих устройствах в реальном времени.</p>
-        <button class="primary-btn sync-wide" id="syncNow" type="button" style="margin-top:6px">🔄 Синхронизировать сейчас</button>
-        <button class="sync-disconnect-btn" id="syncLeavePair" type="button">Отключить синхронизацию / Выйти</button>
+        <div style="font-size:16px;font-weight:750;color:var(--ink)">Синхронизация активна</div>
+        <span class="sync-live-badge"><span class="dot"></span> Онлайн</span>
+        <button class="primary-btn sync-wide" id="syncNow" type="button" style="margin-top:8px">Обновить сейчас</button>
+        <button class="sync-disconnect-btn" id="syncLeavePair" type="button">Отключить пару</button>
       </div>
 
       <!-- Section: When NOT Connected (Pairing Flow) -->
       <div id="syncPairingSection">
         <!-- Option 1: Share My Code -->
         <div class="sync-card" id="syncShareCard">
-          <div class="sync-card-title"><span>1️⃣</span> <span>Отправить свой код партнёру</span></div>
-          <p class="sync-card-desc">Партнёр сможет ввести этот код на своём телефоне и моментально соединиться с вами.</p>
+          <div class="sync-card-title"><span>Код для партнёра</span></div>
 
-          <button class="primary-btn sync-wide" id="syncCreatePair" type="button">✨ Сгенерировать код для партнёра</button>
+          <button class="primary-btn sync-wide" id="syncCreatePair" type="button">Создать код</button>
 
           <div class="sync-code-container" id="syncInviteBox" hidden>
-            <span class="sync-code-hint">Ваш код синхронизации:</span>
             <div class="sync-code-digits" id="syncInviteCode">--- ---</div>
-            <span class="sync-code-hint">Назовите или отправьте этот 6-значный код</span>
             <div class="sync-actions-grid" style="width:100%">
               <button class="primary-btn sync-btn-telegram" id="syncShareInvite" type="button">📲 В Telegram</button>
-              <button class="secondary-btn" id="syncCopyInvite" type="button">📋 Скопировать</button>
+              <button class="secondary-btn" id="syncCopyInvite" type="button">📋 Копировать</button>
             </div>
-            <button class="sync-text-btn" id="syncInviteRefresh" type="button" style="margin-top:4px">Сгенерировать другой код</button>
+            <button class="sync-text-btn" id="syncInviteRefresh" type="button" style="margin-top:4px">Новый код</button>
           </div>
         </div>
 
@@ -1638,11 +1665,10 @@
 
         <!-- Option 2: Enter Partner's Code -->
         <div class="sync-card" id="syncJoinCard">
-          <div class="sync-card-title"><span>2️⃣</span> <span>Ввести код от партнёра</span></div>
-          <p class="sync-card-desc">Если вторая половинка уже создала код, введите его ниже:</p>
+          <div class="sync-card-title"><span>Есть код?</span></div>
           <div class="sync-join" id="syncJoinForm">
-            <input id="syncInviteInput" class="field input sync-input-code" type="text" maxlength="12" autocomplete="off" placeholder="742 891" inputmode="numeric">
-            <button class="primary-btn" id="syncJoinButton" type="button" style="height:50px">Присоединиться к паре 💕</button>
+            <input id="syncInviteInput" class="field input sync-input-code" type="text" maxlength="12" autocomplete="off" placeholder="000 000" inputmode="numeric">
+            <button class="primary-btn" id="syncJoinButton" type="button" style="height:50px">Подключить</button>
           </div>
         </div>
       </div>
@@ -1654,13 +1680,13 @@
       <div class="sync-cloud-state" id="syncCloudState" hidden></div>
       <button class="primary-btn" id="syncEnable" type="button" hidden></button>
       <div class="sync-transfer-box" id="syncLegacyTransfer" hidden>
-        <p>Найден локальный список. Можно скопировать записи в текущий профиль.</p>
-        <button class="secondary-btn" id="legacyTransferCheck" type="button">Проверить локальный список</button>
+        <p>Найден локальный список</p>
+        <button class="secondary-btn" id="legacyTransferCheck" type="button">Проверить</button>
         <p class="sync-transfer-summary" id="legacyTransferSummary" hidden></p>
-        <button class="secondary-btn" id="legacyCopyConfirm" type="button" hidden>Скопировать в аккаунт</button>
+        <button class="secondary-btn" id="legacyCopyConfirm" type="button" hidden>Скопировать</button>
       </div>
       <div class="sync-conflicts" id="syncConflictBox" hidden>
-        <strong>Выберите версию для конфликтующей записи</strong>
+        <strong>Конфликт версий</strong>
         <div id="syncConflictList"></div>
       </div>
     </section>
@@ -1671,47 +1697,35 @@
     <section class="sheet" style="max-height:92vh;overflow-y:auto">
       <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="sheet-head">
-        <div>
-          <div class="sheet-title" id="feedbackTitle">Связь с разработчиком 💌</div>
-          <div style="margin-top:3px;font-size:12px;color:var(--muted)">Личный диалог с автором приложения Геннадием</div>
-        </div>
+        <div class="sheet-title" id="feedbackTitle">Написать автору</div>
         <button class="close-btn" id="feedbackClose" data-close="feedbackOverlay" aria-label="Закрыть">✕</button>
       </div>
 
-      <div style="margin-top:14px;display:grid;gap:13px">
-        <div style="padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.45">
-          🔒 <b>Приватный канал:</b> ваши сообщения приходят лично мне (разработчику) в Telegram. Это не общий чат — чужие пользователи не видят ваши записи и вопросы.
+      <div style="margin-top:12px;display:grid;gap:12px">
+        <div style="padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--line);font-size:12.5px;color:var(--muted);line-height:1.4">
+          🔒 Приватно — сообщение увидит только автор в Telegram.
         </div>
 
-        <div>
-          <div style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px">Тема обращения:</div>
-          <div id="feedbackCategories" style="display:flex;flex-wrap:wrap;gap:6px">
-            <button type="button" class="feedback-cat-btn selected" data-cat="idea" style="padding:6px 12px;border-radius:20px;border:1px solid var(--green);background:var(--green-soft, rgba(52,199,89,0.15));color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">💡 Идея</button>
-            <button type="button" class="feedback-cat-btn" data-cat="bug" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">🐞 Ошибка</button>
-            <button type="button" class="feedback-cat-btn" data-cat="question" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">❓ Вопрос</button>
-            <button type="button" class="feedback-cat-btn" data-cat="thanks" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer">❤️ Отзыв</button>
-          </div>
+        <div id="feedbackCategories" style="display:flex;flex-wrap:wrap;gap:6px">
+          <button type="button" class="feedback-cat-btn selected" data-cat="idea" style="padding:6px 12px;border-radius:20px;border:1px solid var(--green);background:var(--green-soft, rgba(52,199,89,0.15));color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer">💡 Идея</button>
+          <button type="button" class="feedback-cat-btn" data-cat="bug" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer">🐞 Ошибка</button>
+          <button type="button" class="feedback-cat-btn" data-cat="question" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer">❓ Вопрос</button>
+          <button type="button" class="feedback-cat-btn" data-cat="thanks" style="padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer">❤️ Отзыв</button>
         </div>
 
-        <textarea id="feedbackText" rows="4" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--ink);font-size:13px;resize:vertical;outline:none;font-family:inherit" placeholder="Напишите ваше сообщение, пожелание или опишите проблему..."></textarea>
+        <textarea id="feedbackText" rows="4" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--ink);font-size:16px;resize:vertical;outline:none;font-family:inherit" placeholder="Сообщение или идея…"></textarea>
         
-        <label style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);cursor:pointer">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer">
           <input type="checkbox" id="feedbackIncludeLogs" checked style="accent-color:var(--green)">
-          <span>Прикрепить диагностику (ID пары, версию, статус сети для быстрого решения)</span>
+          <span>Прикрепить диагностику</span>
         </label>
 
         <button class="primary-btn" id="feedbackSendBtn" type="button" style="height:48px;font-weight:750">
-          Отправить лично разработчику 🚀
+          Отправить
         </button>
 
-        <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
-          <div style="flex:1;height:1px;background:var(--line)"></div>
-          <span style="font-size:11px;color:var(--muted)">или напишите напрямую</span>
-          <div style="flex:1;height:1px;background:var(--line)"></div>
-        </div>
-
-        <button class="secondary-btn" id="feedbackDirectTgBtn" type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:1px solid var(--line);border-radius:14px;background:var(--card-bg);color:var(--ink);font-size:13px;font-weight:650;cursor:pointer">
-          <span>💬 Написать админу в личку в Telegram</span>
+        <button class="secondary-btn" id="feedbackDirectTgBtn" type="button" style="display:flex;align-items:center;justify-content:center;gap:8px;height:44px;border:1px solid var(--line);border-radius:14px;background:var(--card-bg);color:var(--ink);font-size:13.5px;font-weight:650;cursor:pointer">
+          <span>💬 Написать в Telegram</span>
         </button>
       </div>
     </section>
@@ -1722,20 +1736,17 @@
     <section class="sheet">
       <div class="sheet-drag-handle" aria-hidden="true"></div>
       <div class="sheet-head">
-        <div>
-          <div class="sheet-title" id="flightRecorderTitle">Бортовой самописец 📡</div>
-          <div style="margin-top:3px;font-size:12px;color:var(--muted)">Скрытый диагностический лог приложения</div>
-        </div>
+        <div class="sheet-title" id="flightRecorderTitle">Диагностика 📡</div>
         <button class="close-btn" id="flightRecorderClose" data-close="flightRecorderOverlay" aria-label="Закрыть">✕</button>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="font-size:12px;font-weight:700;color:var(--muted)">События сессии:</span>
-        <button class="secondary-btn" id="flightRecorderCopy" type="button" style="padding:6px 12px;font-size:11px">📋 Скопировать лог для агента</button>
+        <span style="font-size:12px;font-weight:700;color:var(--muted)">Логи сессии</span>
+        <button class="secondary-btn" id="flightRecorderCopy" type="button" style="padding:6px 12px;font-size:12px">📋 Копировать</button>
       </div>
 
-      <div class="flight-log-box" id="flightRecorderLogs">Загрузка логов...</div>
-      <button class="secondary-btn" id="flightRecorderClear" type="button" style="margin-top:10px;width:100%;font-size:11.5px">Очистить локальный буфер</button>
+      <div class="flight-log-box" id="flightRecorderLogs">Загрузка логов…</div>
+      <button class="secondary-btn" id="flightRecorderClear" type="button" style="margin-top:10px;width:100%;font-size:12px">Очистить буфер</button>
     </section>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1891,10 +1902,11 @@
     async function compressWishImage(file){if(!file.type.startsWith('image/'))throw new Error('Выберите файл изображения');if(file.size>MAX_SOURCE_IMAGE_BYTES)throw new Error('Фото слишком большое: выберите файл до 12 МБ');const decoded=await imageSource(file);try{if(!decoded.width||!decoded.height||decoded.width*decoded.height>40000000)throw new Error('У фото слишком высокое разрешение; выберите изображение поменьше');let scale=Math.min(1,1100/Math.max(decoded.width,decoded.height)),blob=null;const qualities=[.82,.72,.64,.56,.48];let mime='image/webp';for(let step=0;step<16;step++){const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(decoded.width*scale));canvas.height=Math.max(1,Math.round(decoded.height*scale));const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Не удалось обработать фото');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';if(mime==='image/jpeg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height)}else ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(decoded.source,0,0,canvas.width,canvas.height);const quality=qualities[step%qualities.length];blob=await canvasBlob(canvas,mime,quality);if(mime==='image/webp'&&blob.type!=='image/webp'){mime='image/jpeg';step--;continue}if(blob.size<=MAX_COMPRESSED_IMAGE_BYTES)break;if(step%qualities.length===qualities.length-1)scale*=.82}if(!blob||blob.size>MAX_COMPRESSED_IMAGE_BYTES)throw new Error('Не удалось уменьшить фото до 180 КБ; выберите изображение поменьше');return await blobDataUrl(blob)}finally{decoded.dispose()}}
     async function compressAvatarImage(file){if(!file.type.startsWith('image/'))throw new Error('Выберите файл изображения');if(file.size>MAX_AVATAR_SOURCE_BYTES)throw new Error('Фото слишком большое: выберите файл до 12 МБ');const decoded=await imageSource(file);try{if(!decoded.width||!decoded.height||decoded.width*decoded.height>40000000)throw new Error('У фото слишком высокое разрешение; выберите изображение поменьше');let scale=Math.min(1,320/Math.max(decoded.width,decoded.height)),quality=.82,blob=null;for(let step=0;step<20;step++){const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(decoded.width*scale));canvas.height=Math.max(1,Math.round(decoded.height*scale));const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Не удалось обработать фото');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(decoded.source,0,0,canvas.width,canvas.height);blob=await canvasBlob(canvas,'image/jpeg',quality);if(blob.size<=MAX_AVATAR_COMPRESSED_BYTES)break;if(step%3===2)scale*=.84;quality=Math.max(.42,quality-.07)}if(!blob||blob.size>MAX_AVATAR_COMPRESSED_BYTES)throw new Error('Не удалось уменьшить аватар до 70 КБ');const data=await blobDataUrl(blob);if(!safeAvatarPhoto(data))throw new Error('Сжатое фото превышает безопасный лимит для локального хранения');return data}finally{decoded.dispose()}}
     function imageBudgetWithoutCurrent(){const id=$('#wishForm').elements.id.value;return state.items.reduce((sum,item)=>sum+(item.id===id?0:(item.imageData||'').length+(item.linkPreview?.imageData||'').length),0)}
-    function renderPeople(){const pair=state.profiles.map(p=>avatar(p)).join('');if($('#headerAvatars'))$('#headerAvatars').innerHTML=pair;if($('#heroAvatars'))$('#heroAvatars').innerHTML=pair;if($('#heroCount'))$('#heroCount').textContent=`${state.items.filter(i=>!i.done).length} идей в планах`;if($('#heroDone'))$('#heroDone').textContent=`${state.items.filter(i=>i.done).length} уже сбылось`;if($('#wishOwner'))$('#wishOwner').innerHTML=state.profiles.map(p=>`<option value="${p.id}">${esc(personLabel(p))}</option>`).join('');const opt=$('#wishScopePartnerOpt');if(opt){const pl=partnerScopeLabel();opt.textContent=pl==='Его'?'👑 Личное (для него)':'🌸 Личное (для неё)';}}
+    function formatShortIsoDate(iso){if(!iso||!/^\d{4}-\d{2}-\d{2}$/.test(iso))return String(iso||'');const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d,12).toLocaleDateString('ru-RU',{day:'numeric',month:'short'}).replace('.','')}
+    function renderPeople(){const pair=state.profiles.map(p=>avatar(p)).join('');if($('#headerAvatars'))$('#headerAvatars').innerHTML=pair;if($('#heroAvatars'))$('#heroAvatars').innerHTML=pair;if($('#heroCount'))$('#heroCount').textContent=`${state.items.filter(i=>!i.done).length} в планах`;if($('#heroDone'))$('#heroDone').textContent=`${state.items.filter(i=>i.done).length} сбылось`;if($('#wishOwner'))$('#wishOwner').innerHTML=state.profiles.map(p=>`<option value="${p.id}">${esc(personLabel(p))}</option>`).join('');const opt=$('#wishScopePartnerOpt');if(opt){const pl=partnerScopeLabel();opt.textContent=pl==='Его'?'👑 Для него':'🌸 Для неё';}}
     function renderCategoryManageList(){const container=$('#categoryManageList');if(!container)return;const cats=categories();container.innerHTML=cats.map(c=>`<div class="cat-manage-item"><div class="cat-manage-name-wrap"><span>${esc(c.icon)}</span><span>${esc(c.name)}</span></div><button type="button" class="cat-manage-delete" data-delete-cat="${esc(c.id)}" aria-label="Удалить категорию ${esc(c.name)}" title="Удалить категорию">✕</button></div>`).join('')}
-    function renderCategories(){const cats=categories();$('#categoryTabs').innerHTML=`<button class="cat-chip ${currentCategory==='all'?'active':''}" data-category="all"><span class="cat-emoji">✦</span> Все</button>`+cats.map(c=>`<button class="cat-chip ${currentCategory===c.id?'active':''}" data-category="${esc(c.id)}"><span class="cat-emoji">${esc(c.icon)}</span> ${esc(c.name)}</button>`).join('')+'<button class="cat-add" data-open-category type="button" aria-label="Создать категорию">＋ Категория</button>';$('#wishCategory').innerHTML=cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}
-    function updateHeroShowcase(){const hero=$('.hero');if(!hero)return;const shouldShow=activeFeatureScreen==='ideas'&&!showDone;hero.hidden=!shouldShow;if(!shouldShow)return;const activeItems=state.items.filter(i=>!i.done);const withPhoto=activeItems.find(i=>i.imageData||i.image||i.linkPreview?.imageData);const featured=withPhoto||activeItems[0];const photo=featured?.imageData||featured?.image||featured?.linkPreview?.imageData;const heroTitle=hero.querySelector('h1');const heroP=hero.querySelector('p');const heroEyebrow=hero.querySelector('.eyebrow');if(featured&&photo){hero.classList.add('has-cover');hero.style.backgroundImage=`url("${photo}")`;if(heroTitle)heroTitle.textContent=featured.title;if(heroP)heroP.textContent=featured.note||(featured.date?`Событие: ${featured.date}`:'Ближайшая мечта для вас двоих');if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> БЛИЖАЙШАЯ МЕЧТА'}else if(featured){hero.classList.remove('has-cover');hero.style.backgroundImage='';if(heroTitle)heroTitle.textContent=featured.title;if(heroP)heroP.textContent=featured.note||'Планы на двоих: места и мечты';if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> НАШИ ПЛАНЫ'}else{hero.classList.remove('has-cover');hero.style.backgroundImage='';if(heroTitle)heroTitle.textContent='Планы на двоих';if(heroP)heroP.textContent='Места, свидания и мечты, которые хочется разделить.';if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> НАШИ ПЛАНЫ'}}
+    function renderCategories(){const cats=categories();$('#categoryTabs').innerHTML=`<button class="cat-chip ${currentCategory==='all'?'active':''}" data-category="all"><span class="cat-emoji">✦</span> Все</button>`+cats.map(c=>`<button class="cat-chip ${currentCategory===c.id?'active':''}" data-category="${esc(c.id)}"><span class="cat-emoji">${esc(c.icon)}</span> ${esc(c.name)}</button>`).join('')+'<button class="cat-add" data-open-category type="button" aria-label="Создать категорию">＋ Новая</button>';$('#wishCategory').innerHTML=cats.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}
+    function updateHeroShowcase(){const hero=$('.hero');if(!hero)return;const shouldShow=activeFeatureScreen==='ideas'&&!showDone;hero.hidden=!shouldShow;if(!shouldShow)return;const activeItems=state.items.filter(i=>!i.done);const withPhoto=activeItems.find(i=>i.imageData||i.image||i.linkPreview?.imageData);const featured=withPhoto||activeItems[0];const photo=featured?.imageData||featured?.image||featured?.linkPreview?.imageData;const heroTitle=hero.querySelector('h1');const heroP=hero.querySelector('p');const heroEyebrow=hero.querySelector('.eyebrow');if(featured&&photo){hero.classList.add('has-cover');hero.style.backgroundImage=`url("${photo}")`;if(heroTitle)heroTitle.textContent=featured.title;if(heroP){const sub=featured.note||(featured.date?formatShortIsoDate(featured.date):'');heroP.textContent=sub;heroP.hidden=!sub}if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> БЛИЖАЙШЕЕ'}else if(featured){hero.classList.remove('has-cover');hero.style.backgroundImage='';if(heroTitle)heroTitle.textContent=featured.title;if(heroP){const sub=featured.note||(featured.date?formatShortIsoDate(featured.date):'');heroP.textContent=sub;heroP.hidden=!sub}if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> НА ДВОИХ'}else{hero.classList.remove('has-cover');hero.style.backgroundImage='';if(heroTitle)heroTitle.textContent='Планы на двоих';if(heroP){heroP.textContent='';heroP.hidden=true}if(heroEyebrow)heroEyebrow.innerHTML='<span class="dot"></span> НА ДВОИХ'}}
     function renderCards(){
       const query=$('#searchInput').value.trim().toLocaleLowerCase('ru');
       const today=getTodayIsoString();
@@ -1911,7 +1923,7 @@
         const btnPending=historyWrap?.querySelector('[data-history-filter="pending"]');
         if(btnAll)btnAll.textContent=`Все (${doneItems.length+pendingItems.length})`;
         if(btnDone)btnDone.textContent=`✨ Сбылось (${doneItems.length})`;
-        if(btnPending)btnPending.textContent=`⏳ Ждут решения (${pendingItems.length})`;
+        if(btnPending)btnPending.textContent=`⏳ Ожидают (${pendingItems.length})`;
 
         historyWrap?.querySelectorAll('[data-history-filter]').forEach(b=>{
           b.classList.toggle('active',b.dataset.historyFilter===historySubFilter);
@@ -1934,14 +1946,14 @@
       if(currentCategory!=='all')list=list.filter(i=>i.category===currentCategory);
       if(query)list=list.filter(i=>[i.title,i.note,...(i.tags||[])].join(' ').toLocaleLowerCase('ru').includes(query));
 
-      $('#listTitle').textContent=showDone?(historySubFilter==='pending'?'Ждут решения':historySubFilter==='done'?'Сбылось':'История'):'В планах';
+      $('#listTitle').textContent=showDone?(historySubFilter==='pending'?'Ожидают':historySubFilter==='done'?'Сбылось':'История'):'В планах';
       if($('#sectionTitle'))$('#sectionTitle').textContent=showDone?'История':'Идеи';
-      if($('#sectionHint'))$('#sectionHint').textContent=showDone?'Воспоминания и решения':'Идеи на будущее';
-      $('#listCount').textContent=`${list.length} ${list.length===1?'запись':list.length>1&&list.length<5?'записи':'записей'}`;
+      if($('#sectionHint'))$('#sectionHint').textContent='';
+      $('#listCount').textContent=`${list.length}`;
 
       const cards=$('#cards');
       if(!list.length){
-        cards.innerHTML=`<div class="empty"><div class="empty-icon">${showDone?'♡':'✦'}</div><strong>${query?'Ничего не нашлось':showDone?'В этом разделе пока пусто':'Здесь пока тихо'}</strong><p>${query?'Попробуйте другое слово или сбросьте фильтр.':showDone?'Здесь появятся выполненные желания и карточки, требующие внимания.':'Добавьте сюда то, что однажды захочется сделать.'}</p></div>`;
+        cards.innerHTML=`<div class="empty"><div class="empty-icon">${showDone?'♡':'✦'}</div><strong>${query?'Ничего не нашлось':'Пока пусто'}</strong><p>${query?'Измените запрос или фильтр.':showDone?'Здесь появятся сбывшиеся мечты.':'Нажмите +, чтобы добавить идею.'}</p></div>`;
         return;
       }
 
@@ -1955,10 +1967,10 @@
         const link=safeWebUrl(i.url||''),preview=i.linkPreview&&i.linkPreview.url===link?i.linkPreview:null;
         const photo=i.imageData||i.image||preview?.imageData||(!i.visual?(c.image||'assets/event.jpg'):'');
         const art=artMarkup(visual,photo);
-        const linkMarkup=link?`<a class="wish-link" href="${esc(link)}" target="_blank" rel="noopener noreferrer" aria-label="Открыть сохранённую ссылку в новой вкладке">↗ Открыть ссылку</a>`:'';
-        const previewMarkup=preview&&(preview.title||preview.description)?`<div class="wish-link-preview-copy"><strong>${esc((preview.title||'').slice(0,180))}</strong>${preview.description?`<span>${esc(preview.description.slice(0,280))}</span>`:''}</div>`:'';
+        const linkMarkup=link?`<a class="wish-link" href="${esc(link)}" target="_blank" rel="noopener noreferrer" aria-label="Открыть сохранённую ссылку">↗ Ссылка</a>`:'';
+        const previewMarkup=preview&&preview.title?`<div class="wish-link-preview-copy"><strong>${esc(preview.title.slice(0,120))}</strong></div>`:'';
 
-        const statusBadge=isOverdue?`<span class="tag tag--overdue">⏳ Осталось позади · ${esc(i.date)}</span>`:isYesterday?`<span class="tag tag--yesterday">⏳ Вчера · Получилось сделать?</span>`:i.tags?.[0]?`<span class="tag">${esc(i.tags[0])}</span>`:'';
+        const statusBadge=isOverdue?`<span class="tag tag--overdue">Просрочено · ${esc(formatShortIsoDate(i.date))}</span>`:isYesterday?`<span class="tag tag--yesterday">Вчера</span>`:i.tags?.[0]?`<span class="tag">${esc(i.tags[0])}</span>`:'';
 
         const overdueActions=isOverdue&&i._canEdit!==false?`
           <div class="overdue-actions">
@@ -2081,7 +2093,7 @@
       activeFeatureScreen='ideas';render();
       if(item?._canEdit===false){showToast('Личную запись может редактировать только автор');return}
       photoTaskId++;
-      $('#wishImageHint').textContent='Фото можно приблизить и подогнать прямо здесь перед сохранением.';
+      $('#wishImageHint').textContent='';
       const f=$('#wishForm');
       f.reset();
       f.elements.id.value=item?.id||'';
@@ -2122,9 +2134,9 @@
           $('#wishOwnerHidden').value='both';
         }
         const partnerOpt=$('#wishScopePartnerOpt');
-        if(partnerOpt)partnerOpt.textContent=partnerScopeLabel()==='Его'?'👑 Личное (для него)':'🌸 Личное (для неё)';
+        if(partnerOpt)partnerOpt.textContent=partnerScopeLabel()==='Его'?'👑 Его':'🌸 Её';
       }
-      $('#wishModalTitle').textContent=item?'Редактировать идею':'Новая идея';
+      $('#wishModalTitle').textContent=item?'Идея':'Новая идея';
       $('#deleteWish').hidden=!item;
       renderVisualPicker();
       updateWishPhotoPreview();
@@ -2178,10 +2190,10 @@
       render();
       closeModal('wishOverlay');
       triggerHaptic('success');
-      showToast(existing?'Изменения сохранены':'Идея добавлена в копилку');
+      showToast(existing?'Сохранено':'Добавлено');
     });
 
-    $('#deleteWish').addEventListener('click',()=>{const id=$('#wishForm').elements.id.value;if(!id)return;const item=state.items.find(i=>i.id===id);if(item?._canEdit===false){showToast('Личную запись может удалить только автор');return}const before=state.items;state.items=state.items.filter(i=>i.id!==id);if(!save()){state.items=before;return}if(window.syncEngine){window.syncEngine.mutate('wish',id,{},true)}render();closeModal('wishOverlay');triggerHaptic('medium');showToast('Идея удалена')});
+    $('#deleteWish').addEventListener('click',()=>{const id=$('#wishForm').elements.id.value;if(!id)return;const item=state.items.find(i=>i.id===id);if(item?._canEdit===false){showToast('Личную запись может удалить только автор');return}const before=state.items;state.items=state.items.filter(i=>i.id!==id);if(!save()){state.items=before;return}if(window.syncEngine){window.syncEngine.mutate('wish',id,{},true)}render();closeModal('wishOverlay');triggerHaptic('medium');showToast('Удалено')});
     $('#wishVisualDetails').addEventListener('click',e=>{const bg=e.target.closest('[data-wish-background]'),ill=e.target.closest('[data-wish-illustration]');if(bg){selectedWishBackground=bg.dataset.wishBackground;$('#wishBackgrounds').querySelectorAll('[data-wish-background]').forEach(x=>{const yes=x===bg;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(ill){selectedWishIllustration=ill.dataset.wishIllustration;$('#wishIllustrations').querySelectorAll('[data-wish-illustration]').forEach(x=>{const yes=x===ill;x.classList.toggle('selected',yes);x.setAttribute('aria-pressed',yes?'true':'false')})}if(bg||ill)updateWishArtPreview()});
 
     $('#wishImageFile').addEventListener('change',e=>{
@@ -2193,14 +2205,14 @@
         const img=new Image();
         img.onload=()=>{
           initCropperWithImage(img);
-          $('#wishImageHint').textContent='Подгоните нужный фрагмент и нажмите «Готово».';
+          $('#wishImageHint').textContent='Настройте кадр';
         };
         img.src=ev.target.result;
       };
       reader.readAsDataURL(file);
     });
 
-    $('#clearWishPhoto').addEventListener('click',()=>{photoTaskId++;selectedWishImageData='';selectedWishLegacyImage='';$('#wishImageFile').value='';cropperState.img=null;$('#wishCropContainer').hidden=true;$('#wishImageHint').textContent='Фото убрано; останется выбранная иллюстрация.';updateWishPhotoPreview();showToast('Фото убрано — останется рисунок')});
+    $('#clearWishPhoto').addEventListener('click',()=>{photoTaskId++;selectedWishImageData='';selectedWishLegacyImage='';$('#wishImageFile').value='';cropperState.img=null;$('#wishCropContainer').hidden=true;$('#wishImageHint').textContent='';updateWishPhotoPreview();showToast('Фото убрано')});
 
     $('#cards').addEventListener('click',e=>{
       const overdueBtn=e.target.closest('[data-overdue]');
@@ -2216,7 +2228,7 @@
           if(window.syncEngine)window.syncEngine.mutate('wish',item.id,item,false);
           render();
           triggerHaptic('success');
-          showToast('✨ Отмечено как сбывшееся! Приятные воспоминания 💕');
+          showToast('✨ Сбылось 💕');
         }else if(action==='tomorrow'){
           const d=new Date();
           d.setDate(d.getDate()+1);
@@ -2226,14 +2238,14 @@
           if(window.syncEngine)window.syncEngine.mutate('wish',item.id,item,false);
           render();
           triggerHaptic('light');
-          showToast('↻ Перенесено на завтра! Карточка вернулась в планы');
+          showToast('↻ На завтра');
         }else if(action==='nodate'){
           item.date='';
           save();
           if(window.syncEngine)window.syncEngine.mutate('wish',item.id,item,false);
           render();
           triggerHaptic('light');
-          showToast('✦ Перенесено в идеи без даты');
+          showToast('Без даты');
         }
         return;
       }
@@ -2255,7 +2267,7 @@
       if(window.syncEngine){window.syncEngine.mutate('wish',item.id,item,false)}
       render();
       triggerHaptic(item.done?'success':'light');
-      showToast(item.done?'Отмечено как сбывшееся':'Вернули в планы');
+      showToast(item.done?'Сбылось':'В планах');
     });
 
     $('#historySubTabsWrap')?.addEventListener('click',e=>{
@@ -2270,11 +2282,11 @@
     $('#scopeSelect')?.addEventListener('change',e=>{triggerHaptic('light');currentScope=e.target.value;renderCards();animateScreen($('#cards'))});
     $('#searchInput').addEventListener('input',renderCards);
     const profilesRoot=$('#profileEditors'),avatarPhotoDrafts=new Map(),avatarPhotoDirty=new Set(),avatarPhotoTasks=new Map();
-    function updatePartnerGenderHint(){const g=$('#partnerGender')?.value;$('#partnerGenderHint').textContent=g==='male'?'Личный фильтр партнёра будет «Его». Вкладка «Мои» всегда остаётся вашим списком.':'Личный фильтр партнёра будет «Её». Вкладка «Мои» всегда остаётся вашим списком.'}
-    function updateProfilePreview(wrap){const id=wrap.dataset.profile,p=person(id),emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji,color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color,photo=avatarPhotoDirty.has(id)?(avatarPhotoDrafts.get(id)||''):safeAvatarPhoto(p.photo),preview=wrap.querySelector('[data-preview]');preview.style.background=color;preview.classList.toggle('has-photo',!!photo);preview.innerHTML=avatarContent(photo,emoji);const meta=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`),clear=wrap.querySelector(`[data-avatar-clear="${id}"]`);if(meta&&avatarPhotoDirty.has(id)&&photo)meta.textContent=`Сжато до ${Math.max(1,Math.round(photo.length*.75/1024))} КБ · сохраните профили`;if(clear)clear.hidden=!photo}
-    function renderProfileForm(){avatarPhotoDrafts.clear();avatarPhotoDirty.clear();avatarPhotoTasks.clear();profilesRoot.innerHTML=state.profiles.map(p=>`<section class="profile-card" data-profile="${esc(p.id)}"><div class="profile-line">${avatar(p,'lg',true)}<div class="profile-name"><label for="name-${esc(p.id)}">${p.id==='me'?'ЭТО Я':'МОЯ ПОЛОВИНКА'}</label><input id="name-${esc(p.id)}" name="name-${esc(p.id)}" maxlength="22" value="${esc(p.name)}" aria-label="Имя"></div></div><div class="avatar-photo-tools"><label class="avatar-photo-button" for="avatarPhoto-${esc(p.id)}">Загрузить фото</label><input class="avatar-photo-input" id="avatarPhoto-${esc(p.id)}" data-avatar-photo="${esc(p.id)}" type="file" accept="image/*" aria-label="Загрузить фото аватара: ${esc(p.name)}"><span class="avatar-photo-status" data-avatar-photo-meta="${esc(p.id)}">${p.photo?'Своё фото сохранено':'Фото сожмётся прямо на телефоне'}</span><button class="secondary-btn avatar-photo-clear" type="button" data-avatar-clear="${esc(p.id)}" ${p.photo?'':'hidden'}>Убрать фото</button></div><div class="emoji-options avatar-emoji-options" aria-label="Выбрать один из ${EMOJIS.length} готовых аватаров">${EMOJIS.map(emoji=>{const selected=p.emoji===emoji;return `<button class="emoji-option ${selected?'selected':''}" type="button" data-emoji="${emoji}" aria-label="${selected?'Выбранный аватар':'Аватар'} ${emoji}" aria-pressed="${selected}">${selected?'<span aria-hidden="true">✓</span>':emoji}</button>`}).join('')}</div><div class="color-options" aria-label="Выбрать фон аватара">${COLORS.map(color=>`<button class="color-option ${p.color===color?'selected':''}" type="button" data-color="${color}" style="background:${color}" aria-label="Цвет фона" aria-pressed="${p.color===color}"></button>`).join('')}</div></section>`).join('');$('#partnerGender').value=person('her').gender==='male'?'male':'female';updatePartnerGenderHint()}
-    profilesRoot.addEventListener('click',e=>{const clear=e.target.closest('[data-avatar-clear]');if(clear){triggerHaptic('medium');const id=clear.dataset.avatarClear,wrap=clear.closest('[data-profile]');avatarPhotoDrafts.set(id,'');avatarPhotoDirty.add(id);avatarPhotoTasks.set(id,(avatarPhotoTasks.get(id)||0)+1);wrap.querySelector(`[data-avatar-photo="${id}"]`).value='';wrap.querySelector(`[data-avatar-photo-meta="${id}"]`).textContent='Фото будет убрано после сохранения профилей';updateProfilePreview(wrap);return}const b=e.target.closest('[data-emoji],[data-color]');if(!b)return;triggerHaptic('light');const wrap=b.closest('[data-profile]');if(b.dataset.emoji){wrap.querySelectorAll('[data-emoji]').forEach(x=>{const selected=x===b;x.classList.toggle('selected',selected);x.setAttribute('aria-pressed',selected?'true':'false');x.innerHTML=selected?'<span aria-hidden="true">✓</span>':esc(x.dataset.emoji)})}else{wrap.querySelectorAll('[data-color]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})}updateProfilePreview(wrap)});
-    profilesRoot.addEventListener('change',async e=>{const input=e.target.closest('[data-avatar-photo]'),file=input?.files?.[0];if(!input||!file)return;const id=input.dataset.avatarPhoto,wrap=input.closest('[data-profile]'),task=(avatarPhotoTasks.get(id)||0)+1;avatarPhotoTasks.set(id,task);const status=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`);status.textContent='Сжимаем фото прямо на устройстве…';try{const data=await compressAvatarImage(file);if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;avatarPhotoDrafts.set(id,data);avatarPhotoDirty.add(id);updateProfilePreview(wrap);status.textContent=`Сжато до ${Math.max(1,Math.round(data.length*.75/1024))} КБ · сохраните профили`;triggerHaptic('success');showToast('Фото аватара сжато локально')}catch(error){if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;status.textContent=error.message||'Не удалось обработать фото';input.value='';showToast(error.message||'Не удалось обработать фото')}});
+    function updatePartnerGenderHint(){const g=$('#partnerGender')?.value;$('#partnerGenderHint').textContent=g==='male'?'Личный фильтр партнёра — «Его»':'Личный фильтр партнёра — «Её»'}
+    function updateProfilePreview(wrap){const id=wrap.dataset.profile,p=person(id),emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji,color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color,photo=avatarPhotoDirty.has(id)?(avatarPhotoDrafts.get(id)||''):safeAvatarPhoto(p.photo),preview=wrap.querySelector('[data-preview]');preview.style.background=color;preview.classList.toggle('has-photo',!!photo);preview.innerHTML=avatarContent(photo,emoji);const meta=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`),clear=wrap.querySelector(`[data-avatar-clear="${id}"]`);if(meta&&avatarPhotoDirty.has(id)&&photo)meta.textContent=`Сжато (${Math.max(1,Math.round(photo.length*.75/1024))} КБ)`;if(clear)clear.hidden=!photo}
+    function renderProfileForm(){avatarPhotoDrafts.clear();avatarPhotoDirty.clear();avatarPhotoTasks.clear();profilesRoot.innerHTML=state.profiles.map(p=>`<section class="profile-card" data-profile="${esc(p.id)}"><div class="profile-line">${avatar(p,'lg',true)}<div class="profile-name"><label for="name-${esc(p.id)}">${p.id==='me'?'Я':'ПАРТНЁР'}</label><input id="name-${esc(p.id)}" name="name-${esc(p.id)}" maxlength="22" value="${esc(p.name)}" aria-label="Имя"></div></div><div class="avatar-photo-tools"><label class="avatar-photo-button" for="avatarPhoto-${esc(p.id)}">Загрузить фото</label><input class="avatar-photo-input" id="avatarPhoto-${esc(p.id)}" data-avatar-photo="${esc(p.id)}" type="file" accept="image/*" aria-label="Загрузить фото аватара: ${esc(p.name)}"><span class="avatar-photo-status" data-avatar-photo-meta="${esc(p.id)}">${p.photo?'Фото есть':''}</span><button class="secondary-btn avatar-photo-clear" type="button" data-avatar-clear="${esc(p.id)}" ${p.photo?'':'hidden'}>Убрать</button></div><div class="emoji-options avatar-emoji-options" aria-label="Выбрать один из ${EMOJIS.length} готовых аватаров">${EMOJIS.map(emoji=>{const selected=p.emoji===emoji;return `<button class="emoji-option ${selected?'selected':''}" type="button" data-emoji="${emoji}" aria-label="${selected?'Выбранный аватар':'Аватар'} ${emoji}" aria-pressed="${selected}">${selected?'<span aria-hidden="true">✓</span>':emoji}</button>`}).join('')}</div><div class="color-options" aria-label="Выбрать фон аватара">${COLORS.map(color=>`<button class="color-option ${p.color===color?'selected':''}" type="button" data-color="${color}" style="background:${color}" aria-label="Цвет фона" aria-pressed="${p.color===color}"></button>`).join('')}</div></section>`).join('');$('#partnerGender').value=person('her').gender==='male'?'male':'female';updatePartnerGenderHint()}
+    profilesRoot.addEventListener('click',e=>{const clear=e.target.closest('[data-avatar-clear]');if(clear){triggerHaptic('medium');const id=clear.dataset.avatarClear,wrap=clear.closest('[data-profile]');avatarPhotoDrafts.set(id,'');avatarPhotoDirty.add(id);avatarPhotoTasks.set(id,(avatarPhotoTasks.get(id)||0)+1);wrap.querySelector(`[data-avatar-photo="${id}"]`).value='';wrap.querySelector(`[data-avatar-photo-meta="${id}"]`).textContent='Уберётся после сохранения';updateProfilePreview(wrap);return}const b=e.target.closest('[data-emoji],[data-color]');if(!b)return;triggerHaptic('light');const wrap=b.closest('[data-profile]');if(b.dataset.emoji){wrap.querySelectorAll('[data-emoji]').forEach(x=>{const selected=x===b;x.classList.toggle('selected',selected);x.setAttribute('aria-pressed',selected?'true':'false');x.innerHTML=selected?'<span aria-hidden="true">✓</span>':esc(x.dataset.emoji)})}else{wrap.querySelectorAll('[data-color]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')})}updateProfilePreview(wrap)});
+    profilesRoot.addEventListener('change',async e=>{const input=e.target.closest('[data-avatar-photo]'),file=input?.files?.[0];if(!input||!file)return;const id=input.dataset.avatarPhoto,wrap=input.closest('[data-profile]'),task=(avatarPhotoTasks.get(id)||0)+1;avatarPhotoTasks.set(id,task);const status=wrap.querySelector(`[data-avatar-photo-meta="${id}"]`);status.textContent='Сжимаем…';try{const data=await compressAvatarImage(file);if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;avatarPhotoDrafts.set(id,data);avatarPhotoDirty.add(id);updateProfilePreview(wrap);status.textContent=`Сжато (${Math.max(1,Math.round(data.length*.75/1024))} КБ)`;triggerHaptic('success');showToast('Фото сжато')}catch(error){if(avatarPhotoTasks.get(id)!==task||!wrap.isConnected)return;status.textContent=error.message||'Ошибка фото';input.value='';showToast(error.message||'Ошибка фото')}});
     $('#partnerGender').addEventListener('change',updatePartnerGenderHint);
     $('#profileForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget,before=structuredClone(state);state.profiles.forEach(p=>{const wrap=profilesRoot.querySelector(`[data-profile="${p.id}"]`);p.name=f.elements[`name-${p.id}`].value.trim()||p.name;p.emoji=wrap.querySelector('[data-emoji].selected')?.dataset.emoji||p.emoji;p.color=wrap.querySelector('[data-color].selected')?.dataset.color||p.color;if(avatarPhotoDirty.has(p.id))p.photo=avatarPhotoDrafts.get(p.id)||''});person('her').gender=f.elements.partnerGender.value==='male'?'male':'female';if(!save()){state=before;renderProfileForm();return}render();closeModal('profileOverlay');triggerHaptic('success');showToast('Профили обновлены')});
     $('#openProfiles').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navPair').addEventListener('click',()=>{triggerHaptic('light');renderProfileForm();openModal('profileOverlay')});$('#navAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});$('#heroAdd').addEventListener('click',()=>{triggerHaptic('light');openWish()});
@@ -2300,12 +2312,12 @@
     });
     $('#feedbackSendBtn')?.addEventListener('click',async()=>{
       const txt=$('#feedbackText')?.value?.trim();
-      if(!txt){showToast('Напишите текст сообщения');return}
+      if(!txt){showToast('Напишите сообщение');return}
       const includeLogs=$('#feedbackIncludeLogs')?.checked;
       const sendBtn=$('#feedbackSendBtn');
       const prevBtnText=sendBtn.textContent;
       sendBtn.disabled=true;
-      sendBtn.textContent='Отправка лично разработчику... ⏳';
+      sendBtn.textContent='Отправка…';
       const meta={
         platform:window.Telegram?.WebApp?.platform||(navigator.userAgent.includes('Mobile')?'mobile_web':'desktop_web'),
         version:'2.1.0',
@@ -2323,14 +2335,14 @@
         const data=await res.json().catch(()=>({}));
         if(res.ok&&data.ok){
           triggerHaptic('success');
-          showToast('💌 Сообщение доставлено лично разработчику!');
+          showToast('💌 Отправлено');
           $('#feedbackText').value='';
           setTimeout(()=>closeModal('feedbackOverlay'),900);
         }else{
-          showToast('Не удалось доставить сообщение, напишите напрямую в Telegram');
+          showToast('Не удалось отправить — напишите в Telegram');
         }
       }catch{
-        showToast('Ошибка сети при отправке');
+        showToast('Ошибка сети');
       }finally{
         sendBtn.disabled=false;
         sendBtn.textContent=prevBtnText;
@@ -2341,29 +2353,26 @@
     function renderThemeOptions(){
       const root=$('#themeOptions');
       const duos=THEMES.filter(t=>t.type==='duo'),classics=THEMES.filter(t=>t.type==='classic');
-      const makeBtn=t=>`<button type="button" class="theme-choice ${state.theme===t.id?'selected':''}" data-theme-id="${t.id}" aria-pressed="${state.theme===t.id}"><span class="theme-swatch" style="background:${t.swatch}"></span><span class="theme-choice-text"><span class="theme-choice-name">${t.name}</span><span class="theme-choice-hint">${t.hint}</span></span>${state.theme===t.id?'<span class="check" aria-hidden="true">✓</span>':''}</button>`;
+      const makeBtn=t=>`<button type="button" class="theme-choice ${state.theme===t.id?'selected':''}" data-theme-id="${t.id}" aria-pressed="${state.theme===t.id}"><span class="theme-swatch" style="background:${t.swatch}"></span><span class="theme-choice-text"><span class="theme-choice-name">${t.name}</span></span>${state.theme===t.id?'<span class="check" aria-hidden="true">✓</span>':''}</button>`;
       const currentBg=['gradient','contrast-gradient','plain'].includes(state.bgStyle)?state.bgStyle:'gradient';
       const bgOptionsHtml=`
-        <div class="theme-group-label" style="margin-top:16px">Оформление фона</div>
+        <div class="theme-group-label" style="margin-top:16px">Фон</div>
         <div class="bg-style-grid">
           <button type="button" class="bg-style-choice ${currentBg==='gradient'?'selected':''}" data-bg-choice="gradient" aria-pressed="${currentBg==='gradient'}">
             <span class="bg-style-icon">✨</span>
-            <span class="bg-style-name">Аура темы</span>
-            <span class="bg-style-hint">Мягкий градиент</span>
+            <span class="bg-style-name">Аура</span>
           </button>
           <button type="button" class="bg-style-choice ${currentBg==='contrast-gradient'?'selected':''}" data-bg-choice="contrast-gradient" aria-pressed="${currentBg==='contrast-gradient'}">
             <span class="bg-style-icon">🫧</span>
             <span class="bg-style-name">Живой шёлк</span>
-            <span class="bg-style-hint">Глубокий градиент</span>
           </button>
           <button type="button" class="bg-style-choice ${currentBg==='plain'?'selected':''}" data-bg-choice="plain" aria-pressed="${currentBg==='plain'}">
             <span class="bg-style-icon">⬜</span>
             <span class="bg-style-name">Сплошной</span>
-            <span class="bg-style-hint">Чистый минимализм</span>
           </button>
         </div>
       `;
-      root.innerHTML=`<div class="theme-group-label">Двухцветные дуэты (Основа + Акцент)</div><div class="theme-grid">${duos.map(makeBtn).join('')}</div><div class="theme-group-label" style="margin-top:14px">Монохромные палитры</div><div class="theme-grid">${classics.map(makeBtn).join('')}</div>${bgOptionsHtml}`;
+      root.innerHTML=`<div class="theme-group-label">Дуэты</div><div class="theme-grid">${duos.map(makeBtn).join('')}</div><div class="theme-group-label" style="margin-top:14px">Палитры</div><div class="theme-grid">${classics.map(makeBtn).join('')}</div>${bgOptionsHtml}`;
     }
     $('#openThemes').addEventListener('click',()=>{triggerHaptic('light');renderThemeOptions();openModal('themeOverlay')});
     $('#toggleMode').addEventListener('click',()=>{triggerHaptic('light');const before=state.mode;state.mode=state.mode==='dark'?'light':'dark';applyTheme();if(!save()){state.mode=before;applyTheme()}});
@@ -2376,8 +2385,8 @@
         applyTheme();
         save();
         renderThemeOptions();
-        const names={gradient:'«Аура темы»','contrast-gradient':'«Живой шёлк»',plain:'«Сплошной тон»'};
-        showToast(`Фон изменён: ${names[choice]||choice}`);
+        const names={gradient:'Аура','contrast-gradient':'Живой шёлк',plain:'Сплошной'};
+        showToast(`Фон: ${names[choice]||choice}`);
         return;
       }
       const b=e.target.closest('[data-theme-id]');
@@ -2388,7 +2397,7 @@
       applyTheme();
       if(!save()){state.theme=before;applyTheme();renderThemeOptions();return}
       renderThemeOptions();
-      showToast(`Тема «${THEMES.find(t=>t.id===state.theme).name}» включена`);
+      showToast(`Тема: ${THEMES.find(t=>t.id===state.theme).name}`);
     });
     function openCategory(){const f=$('#categoryForm');f.reset();f.elements.icon.value='✦';renderCategoryManageList();$('#categoryEmojiOptions').innerHTML=CATEGORY_EMOJIS.map((icon,i)=>`<button type="button" class="emoji-option ${i===0?'selected':''}" data-category-icon="${esc(icon)}" aria-label="Значок ${esc(icon)}">${esc(icon)}</button>`).join('');openModal('categoryOverlay')}
     $('#categoryEmojiOptions').addEventListener('click',e=>{const b=e.target.closest('[data-category-icon]');if(!b)return;triggerHaptic('light');$('#categoryEmojiOptions').querySelectorAll('[data-category-icon]').forEach(x=>x.classList.toggle('selected',x===b));$('#categoryForm').elements.icon.value=b.dataset.categoryIcon});
@@ -2521,12 +2530,12 @@
     } catch {}
   })();
   </script>
-  <script src="./sync-engine.js?v=20261111"></script>
-  <script src="./sync-client.js?v=20261111"></script>
-  <script src="./calendar-household.js?v=20261111"></script>
-  <script src="./big-goal.js?v=20261111"></script>
-  <script src="./household-sync.js?v=20261111"></script>
-  <script src="./realtime-sse.js?v=20261111"></script>
-  <script src="./telegram-haptics.js?v=20261111"></script>
+  <script src="./sync-engine.js?v=20261111b"></script>
+  <script src="./sync-client.js?v=20261111b"></script>
+  <script src="./calendar-household.js?v=20261111b"></script>
+  <script src="./big-goal.js?v=20261111b"></script>
+  <script src="./household-sync.js?v=20261111b"></script>
+  <script src="./realtime-sse.js?v=20261111b"></script>
+  <script src="./telegram-haptics.js?v=20261111b"></script>
 </body>
 </html>

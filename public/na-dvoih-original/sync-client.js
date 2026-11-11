@@ -195,11 +195,11 @@
     }
 
     if (isPaired) {
-      setStatus("Вы в паре 💕 Общие списки синхронизируются онлайн.");
+      setStatus("Вы в паре 💕");
     } else if (isWaitingPartner) {
-      setStatus("Код создан! Отправьте его партнёру для соединения.");
+      setStatus("Отправьте код партнёру");
     } else {
-      setStatus("Создайте свой код или введите код партнёра.");
+      setStatus("Создайте или введите код");
     }
 
     window.dispatchEvent(new CustomEvent("na-dvoih:sync-state", {
@@ -343,7 +343,7 @@
     if (!initData) {
       sessionInfo = null;
       active = false;
-      setStatus("Синхронизация работает внутри Telegram Mini App. Вне Telegram записи сохраняются на этом устройстве.");
+      setStatus("Работает в Telegram · в браузере хранится локально");
       updateControls();
       return;
     }
@@ -367,8 +367,8 @@
         const list = await api("/api/wishes");
         remoteItems = list.items || [];
         remoteDeleted = list.deleted || [];
-        byId("syncCloudState").textContent = `Онлайн-список подключён: ${remoteItems.length} записей. Проверка изменений выполняется автоматически.`;
-        setStatus("Синхронизация активна.");
+        byId("syncCloudState").textContent = `В сети · ${remoteItems.length} записей`;
+        setStatus("Синхронизация активна");
         if (active) {
           if (!syncTimer) {
             syncTimer = setInterval(() => {
@@ -378,16 +378,16 @@
           syncCycle();
         }
       } else {
-        setStatus("Войдите в пару: создайте новую или присоединитесь по ссылке партнёра.");
+        setStatus("Создайте или введите код");
       }
     } catch (exception) {
       active = false;
       updateControls();
       setStatus(exception.code === "telegram_auth_not_configured" || exception.code === "storage_not_configured"
-        ? "Серверная синхронизация пока не настроена. Локальный список продолжает работать."
+        ? "Сервер не настроен · сохранено локально"
         : exception.code === "telegram_init_data_expired"
-          ? "Данные входа Telegram устарели. Перезапустите Mini App, чтобы обновить сессию."
-          : "Не удалось связаться с сервером. Локальные записи сохранены.");
+          ? "Сессия устарела · перезапустите Mini App"
+          : "Нет связи · сохранено локально");
     }
   }
 
@@ -399,15 +399,15 @@
       inviteNode.textContent = clean.length === 6 ? `${clean.slice(0, 3)} ${clean.slice(3)}` : clean;
       inviteNode.dataset.rawCode = clean;
       inviteNode.style.cursor = "pointer";
-      inviteNode.title = "Нажмите, чтобы скопировать код";
+      inviteNode.title = "Копировать";
       inviteNode.onclick = async () => {
         try {
           await navigator.clipboard.writeText(clean);
           window.triggerHaptic?.("success");
-          setStatus(`Код ${clean} скопирован в буфер обмена! 📋`);
+          setStatus(`Код ${clean} скопирован 📋`);
           const toast = byId("toast");
           if (toast) {
-            toast.textContent = `Код ${clean} скопирован! 📋`;
+            toast.textContent = `Код ${clean} скопирован 📋`;
             toast.classList.add("show");
             setTimeout(() => toast.classList.remove("show"), 2000);
           }
@@ -438,7 +438,7 @@
 
   async function createPair() {
     try {
-      setStatus("Генерируем код...");
+      setStatus("Создаём код…");
       const result = await api("/api/pair", { method: "POST", body: {} });
       sessionInfo = { ...(sessionInfo || {}), pair: result.pair };
       if (result.inviteCode) {
@@ -451,29 +451,29 @@
       persistMetadata();
       await showInvite(result.inviteCode);
       updateControls();
-      setStatus("Код успешно создан! Отправьте его партнёру.");
+      setStatus("Код готов — отправьте партнёру");
       if (active) syncCycle();
     } catch (exception) {
-      setStatus(exception.code === "already_in_pair" ? "Вы уже состоите в паре." : ("Не удалось создать код: " + (exception.message || "попробуйте позже.")));
+      setStatus(exception.code === "already_in_pair" ? "Вы уже в паре" : ("Ошибка: " + (exception.message || "попробуйте позже")));
     }
   }
 
   async function refreshInvite() {
     try {
-      setStatus("Обновляем код...");
+      setStatus("Обновляем…");
       const result = await api("/api/pair/invite", { method: "POST", body: {} });
       if (sessionInfo?.pair) sessionInfo.pair.inviteCode = result.inviteCode;
       await showInvite(result.inviteCode);
-      setStatus("Новый код создан!");
+      setStatus("Новый код готов");
     } catch (exception) {
-      setStatus(exception.code === "partner_already_joined" ? "Второй участник уже присоединился." : "Не удалось создать код приглашения.");
+      setStatus(exception.code === "partner_already_joined" ? "Партнёр уже подключился" : "Не удалось обновить код");
     }
   }
 
   async function leavePair() {
-    if (!confirm("Вы уверены, что хотите отключить синхронизацию пары?")) return;
+    if (!confirm("Отключить синхронизацию пары?")) return;
     try {
-      setStatus("Отключаем...");
+      setStatus("Отключаем…");
       await api("/api/pair", { method: "DELETE", body: {} });
       sessionInfo = { ...(sessionInfo || {}), pair: null };
       active = false;
@@ -488,9 +488,9 @@
       const box = byId("syncInviteBox");
       if (box) box.hidden = true;
       updateControls();
-      setStatus("Синхронизация отключена. Вы можете создать новую пару или присоединиться по коду.");
+      setStatus("Синхронизация отключена");
     } catch (exception) {
-      setStatus("Не удалось отключить пару. Попробуйте позже.");
+      setStatus("Не удалось отключить пару");
     }
   }
 
@@ -499,22 +499,22 @@
       await api("/api/pair/invite", { method: "DELETE", body: {} });
       byId("syncInviteCode").textContent = "";
       byId("syncInviteBox").hidden = true;
-      setStatus("Код отозван.");
+      setStatus("Код отозван");
     } catch (exception) {
       setStatus(exception.code === "partner_already_joined"
-        ? "Партнёр уже присоединился."
-        : "Не удалось отозвать код приглашения.");
+        ? "Партнёр уже в паре"
+        : "Не удалось отозвать код");
     }
   }
 
   async function joinPairWithCode(code) {
     const inviteCode = String(code || "").trim().replace(/[\s-]/g, "").toUpperCase();
     if (!inviteCode) {
-      setStatus("Введите 6-значный код от партнёра.");
+      setStatus("Введите 6-значный код");
       return;
     }
     try {
-      setStatus("Подключаемся к паре...");
+      setStatus("Подключаем…");
       const result = await api("/api/pair/join", { method: "POST", body: { inviteCode } });
       const input = byId("syncInviteInput");
       if (input) input.value = "";
@@ -525,20 +525,20 @@
       metadata.pairId = result.pair.id;
       persistMetadata();
       updateControls();
-      setStatus("Ура! Вы успешно соединились в пару 💕");
+      setStatus("Вы в паре 💕");
       syncCycle();
     } catch (exception) {
       setStatus(exception.code === "invite_not_found"
-        ? "Код приглашения не найден или устарел. Проверьте цифры или попросите партнёра создать новый код."
+        ? "Код не найден или устарел"
         : exception.code === "already_in_pair"
-          ? "Вы уже состоите в паре."
-          : ("Не удалось присоединиться к паре: " + (exception.message || "попробуйте позже.")));
+          ? "Вы уже в паре"
+          : ("Не удалось подключиться: " + (exception.message || "попробуйте позже")));
     }
   }
 
   async function joinPair() {
     const inviteCode = byId("syncInviteInput").value.trim();
-    if (!inviteCode) { setStatus("Введите код приглашения второго участника."); return; }
+    if (!inviteCode) { setStatus("Введите код партнёра"); return; }
     await joinPairWithCode(inviteCode);
   }
 

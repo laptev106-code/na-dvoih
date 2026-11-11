@@ -102,7 +102,8 @@
       .feature-page[hidden],.feature-settings[hidden],.feature-calendar-view[hidden]{display:none!important}
       .feature-page{min-width:0;padding-bottom:12px}
       .feature-page.screen-enter{animation:screen-enter var(--motion-duration,260ms) var(--spring-ease,cubic-bezier(0.22,1,0.36,1)) both}
-      .feature-head{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;margin:4px 2px 16px!important}
+      .feature-head{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;margin:4px 2px 14px!important}
+      .feature-head--row{flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
       .feature-head h2{margin:0!important;font-size:clamp(22px,5vw,26px)!important;letter-spacing:-.03em!important;font-weight:780!important;color:var(--ink)!important;line-height:1.18!important}
       .feature-subtitle{margin:0!important;color:var(--muted)!important;font-size:13.5px!important;font-weight:500!important;line-height:1.4!important}
       .feature-note{padding:12px 14px;margin:0 0 14px;border:1px solid var(--soft-line);border-radius:var(--r-control,14px);background:var(--glass-surface,var(--soft));backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);box-shadow:var(--rim-light),var(--shadow-elev-1);color:var(--muted-strong);font-size:13px;line-height:1.45}
@@ -137,7 +138,8 @@
       .calendar-event-open strong{display:block;overflow:hidden;text-overflow:ellipsis;font-size:14.5px;line-height:1.35;font-weight:720;color:var(--ink);white-space:nowrap}
       .calendar-event-open small{display:block;margin-top:3px;color:var(--muted);font-size:12px;line-height:1.3}
       .calendar-event.done{opacity:.86}.calendar-event.done .calendar-event-open strong{text-decoration:line-through;color:var(--muted)}
-      .calendar-event-action{min-height:44px;padding:8px 12px;border:1px solid var(--soft-line);border-radius:12px;background:var(--soft);color:var(--green);font-size:12.5px;font-weight:750;white-space:nowrap;transition:transform 140ms ease,background-color 140ms ease}
+      .calendar-event-action{width:42px;height:42px;min-height:42px;padding:0;display:grid;place-items:center;border:1px solid var(--soft-line);border-radius:12px;background:var(--soft);color:var(--green);font-size:17px;font-weight:750;transition:transform 140ms ease,background-color 140ms ease}
+      .calendar-event.done .calendar-event-action{background:var(--green2);border-color:color-mix(in srgb,var(--green) 35%,transparent);color:var(--green)}
       .calendar-event-action:active{transform:scale(.95)}
       .calendar-event-action:disabled{opacity:.6;color:var(--muted);border-style:dashed;cursor:not-allowed}
       .calendar-month-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 12px}
@@ -155,6 +157,7 @@
       .calendar-day-count{position:absolute;top:3px;right:4px;color:var(--muted);font-size:10px;font-weight:700}
       .calendar-selected{display:grid;gap:8px;margin-top:16px}.calendar-selected>strong{font-size:14px;font-weight:750;color:var(--ink)}
       .feature-empty{padding:26px 16px;border:1px dashed var(--line);border-radius:var(--r-card,20px);background:var(--glass-surface,var(--field-bg));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-align:center;color:var(--muted);font-size:13.5px;line-height:1.5}
+      .feature-status:empty{display:none!important}
       .calendar-source-highlight{outline:2px solid var(--green);outline-offset:3px;transition:outline-color var(--motion-duration) var(--motion-easing)}
       .wish-date-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--soft-line);border-radius:999px;background:var(--soft);color:var(--muted-strong);font-size:11.5px;font-weight:700;white-space:nowrap}
       .calendar-date-field .reminder-choice{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--muted-strong);font-size:13.5px;font-weight:600}
@@ -163,8 +166,8 @@
       .feature-settings-title{margin:0;font-size:15px;font-weight:750;color:var(--ink)}.feature-settings-note{margin:-4px 0 4px;color:var(--muted);font-size:12.5px;line-height:1.45}
       .feature-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:10px 14px;border:1px solid var(--soft-line);border-radius:var(--r-control,14px);background:var(--glass-surface,var(--field-bg));box-shadow:var(--rim-light);font-size:14px;font-weight:650;color:var(--ink)}
       .feature-toggle input{width:20px;height:20px;flex:none}
-      .household-toolbar{display:grid;gap:12px;margin-bottom:16px}
-      .household-add{min-height:48px;padding:0 16px;border:0;border-radius:var(--r-control,14px);background:var(--action-cta,var(--green))!important;color:var(--action-ink,#fff)!important;box-shadow:0 4px 14px var(--action-cta-shadow,rgba(0,0,0,.14)),inset 0 1px 0 rgba(255,255,255,.22);font-size:14.5px;font-weight:750;transition:transform 140ms ease}
+      .household-toolbar{display:grid;gap:10px;margin-bottom:14px}
+      .household-add{min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--action-cta,var(--green))!important;color:var(--action-ink,#fff)!important;box-shadow:0 4px 14px var(--action-cta-shadow,rgba(0,0,0,.14)),inset 0 1px 0 rgba(255,255,255,.22);font-size:13.5px;font-weight:750;white-space:nowrap;transition:transform 140ms ease}
       .household-add:active{transform:scale(.97)}
       .household-filters{display:flex;gap:8px;overflow:auto;padding:0 1px 4px;scrollbar-width:none}
       .household-filter{flex:none;min-height:40px;padding:8px 14px;border:1px solid var(--soft-line);border-radius:999px;background:var(--glass-surface,transparent);color:var(--muted);font-size:13px;font-weight:650;white-space:nowrap;transition:transform 140ms ease,background-color 160ms ease}
@@ -232,7 +235,7 @@
     if (!form || !note || q("#wishDate", form)) return;
     const field = document.createElement("div");
     field.className = "field calendar-date-field";
-    field.innerHTML = '<label for="wishDate">Дата события <span style="font-weight:400">· необязательно</span></label><input id="wishDate" name="date" type="date"><label class="reminder-choice"><input id="wishReminder" name="reminder" type="checkbox" checked><span>Напомнить за день в приложении</span></label>';
+    field.innerHTML = '<label for="wishDate">Дата <span style="font-weight:400">· опц.</span></label><input id="wishDate" name="date" type="date"><label class="reminder-choice"><input id="wishReminder" name="reminder" type="checkbox" checked><span>Напомнить за день</span></label>';
     note.closest(".field").before(field);
   }
 
@@ -245,7 +248,7 @@
     calendar.hidden = true;
     calendar.setAttribute("aria-labelledby", "calendarTitle");
     calendar.innerHTML = `
-      <div class="feature-head"><div><h2 id="calendarTitle">Календарь</h2><p class="feature-subtitle">События и важные даты</p></div></div>
+      <div class="feature-head"><h2 id="calendarTitle">Календарь</h2></div>
       <div class="calendar-reminders" id="calendarReminders" aria-live="polite" hidden></div>
       <div class="feature-tabs" role="tablist" aria-label="Вид календаря"><button class="feature-tab active" type="button" data-calendar-mode="soon" role="tab" aria-selected="true">Скоро</button><button class="feature-tab" type="button" data-calendar-mode="month" role="tab" aria-selected="false">Месяц</button></div>
       <div class="feature-calendar-view" id="calendarSoonView"></div>
@@ -256,10 +259,10 @@
     household.hidden = true;
     household.setAttribute("aria-labelledby", "householdTitle");
     household.innerHTML = `
-      <div class="feature-head"><div><h2 id="householdTitle">Быт</h2><p class="feature-subtitle">Совместные дела и заботы</p></div></div>
-      <div class="household-toolbar"><button class="household-add" id="householdAdd" type="button">＋ Новое дело</button><div class="household-filters" id="householdFilters" aria-label="Подкатегории бытовых дел"></div></div>
+      <div class="feature-head feature-head--row"><h2 id="householdTitle">Быт</h2><button class="household-add" id="householdAdd" type="button">＋ Дело</button></div>
+      <div class="household-toolbar"><div class="household-filters" id="householdFilters" aria-label="Фильтр"></div></div>
       <div class="household-list" id="householdList"></div>
-      <div class="feature-status" id="householdSyncStatus" aria-live="polite">Синхронизировано</div>`;
+      <div class="feature-status" id="householdSyncStatus" aria-live="polite"></div>`;
     content.append(calendar, household);
   }
 
@@ -271,15 +274,14 @@
     block.className = "feature-settings";
     block.setAttribute("aria-labelledby", "featureSettingsTitle");
     block.innerHTML = `
-      <h3 class="feature-settings-title" id="featureSettingsTitle">Разделы приложения</h3>
-      <p class="feature-settings-note">Включите или скройте разделы, которые вам нужны.</p>
-      <label class="feature-toggle" for="featureCalendarToggle"><span>Календарь событий</span><input id="featureCalendarToggle" type="checkbox"></label>
+      <h3 class="feature-settings-title" id="featureSettingsTitle">Разделы</h3>
+      <label class="feature-toggle" for="featureCalendarToggle"><span>Календарь</span><input id="featureCalendarToggle" type="checkbox"></label>
       <label class="feature-toggle" for="featureBigGoalToggle"><span>Большая цель</span><input id="featureBigGoalToggle" type="checkbox"></label>
-      <label class="feature-toggle" for="featureHouseholdToggle"><span>Наш быт</span><input id="featureHouseholdToggle" type="checkbox"></label>`;
+      <label class="feature-toggle" for="featureHouseholdToggle"><span>Быт</span><input id="featureHouseholdToggle" type="checkbox"></label>`;
     sheet.append(block);
     const trigger = q("#openThemes");
     if (trigger) {
-      trigger.setAttribute("aria-label", "Настройки оформления и разделов");
+      trigger.setAttribute("aria-label", "Настройки");
       trigger.title = "Настройки";
     }
   }
@@ -298,10 +300,10 @@
         <div class="sheet-head"><div class="sheet-title" id="householdTaskTitle">Новое дело</div><button class="close-btn" id="householdTaskClose" type="button" aria-label="Закрыть">×</button></div>
         <form class="form-grid" id="householdTaskForm">
         <input type="hidden" name="id">
-        <div class="field"><label for="householdTaskCategory">Подкатегория</label><select id="householdTaskCategory" name="subcategory">${getHouseholdCategories().map((category) => `<option value="${category.id}">${category.label}</option>`).join("")}</select></div>
-        <div class="field"><label for="householdTaskName">Дело</label><input id="householdTaskName" name="title" maxlength="90" placeholder="Например, купить молоко" required></div>
+        <div class="field"><label for="householdTaskCategory">Категория</label><select id="householdTaskCategory" name="subcategory">${getHouseholdCategories().map((category) => `<option value="${category.id}">${category.label}</option>`).join("")}</select></div>
+        <div class="field"><label for="householdTaskName">Дело</label><input id="householdTaskName" name="title" maxlength="90" placeholder="Купить кофе" required></div>
         <button class="primary-btn" id="householdTaskSave" type="submit">Сохранить</button>
-        <button class="secondary-btn" id="householdTaskDelete" type="button" hidden>Удалить дело</button>
+        <button class="secondary-btn" id="householdTaskDelete" type="button" hidden>Удалить</button>
       </form></section>`;
     document.body.append(overlay);
   }
@@ -317,7 +319,7 @@
 
   function formatDayDifference(value, today) {
     if (value === today) return "сегодня";
-    if (value < today) return "дата прошла";
+    if (value < today) return "просрочено";
     const delta = Math.round((Date.parse(`${value}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
     if (delta === 1) return "завтра";
     return `через ${delta} дн.`;
@@ -328,9 +330,9 @@
     const canEdit = item._canEdit !== false;
     const isOverdue = !item.done && item.date < today;
     const markButton = !item.done
-      ? `<button type="button" class="calendar-event-action ${isOverdue ? "overdue-action" : ""}" data-mark-done="${escapeHtml(item.id)}" ${canEdit ? "" : "disabled aria-disabled=\"true\" title=\"Это личная запись другого автора\""}>Сбылось</button>`
-      : `<span class="calendar-event-action" aria-label="Сбылось">Готово</span>`;
-    return `<article class="calendar-event ${item.done ? "done" : ""} ${isOverdue ? "overdue" : ""}" data-calendar-item="${escapeHtml(item.id)}"><div class="calendar-event-date">${escapeHtml(label)}</div><button type="button" class="calendar-event-open" data-open-wish="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(reminder ? `Напоминание · ${formatDayDifference(item.date, today)}` : item.done ? "Сбылось" : isOverdue ? "⏳ Просрочено" : formatDayDifference(item.date, today))}</small></button>${markButton}</article>`;
+      ? `<button type="button" class="calendar-event-action ${isOverdue ? "overdue-action" : ""}" data-mark-done="${escapeHtml(item.id)}" aria-label="Отметить выполненным" title="Сбылось" ${canEdit ? "" : "disabled aria-disabled=\"true\" title=\"Личная запись партнёра\""}>○</button>`
+      : `<span class="calendar-event-action" aria-label="Сбылось" title="Сбылось">✓</span>`;
+    return `<article class="calendar-event ${item.done ? "done" : ""} ${isOverdue ? "overdue" : ""}" data-calendar-item="${escapeHtml(item.id)}"><div class="calendar-event-date">${escapeHtml(label)}</div><button type="button" class="calendar-event-open" data-open-wish="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(reminder ? `Напоминание · ${formatDayDifference(item.date, today)}` : item.done ? "Сбылось" : isOverdue ? "Просрочено" : formatDayDifference(item.date, today))}</small></button>${markButton}</article>`;
   }
 
   function renderReminders(today) {
@@ -362,7 +364,7 @@
     const upcoming = upcomingWishes(today);
     container.replaceChildren();
     if (!overdue.length && !upcoming.length) {
-      container.innerHTML = '<div class="feature-empty">Здесь появятся незавершённые желания с датой. Добавьте дату исходной карточке — отдельная календарная запись не создаётся.</div>';
+      container.innerHTML = '<div class="feature-empty">Нет событий с датой</div>';
       return;
     }
     if (overdue.length) {
@@ -432,7 +434,7 @@
       .sort((a, b) => Number(a.done) - Number(b.done) || String(a.title).localeCompare(String(b.title), "ru") || String(a.id).localeCompare(String(b.id), "en"));
     const list = q("#householdList");
     if (!tasks.length) {
-      list.innerHTML = '<div class="feature-empty">Пока дел нет. Добавьте небольшую задачу для вас двоих.</div>';
+      list.innerHTML = '<div class="feature-empty">Дел пока нет</div>';
       return;
     }
     list.innerHTML = tasks.map((task) => `<article class="household-task ${task.done ? "done" : ""}" data-household-id="${escapeHtml(task.id)}"><input type="checkbox" data-household-toggle="${escapeHtml(task.id)}" aria-label="${task.done ? "Вернуть в дела" : "Отметить выполненным"}" ${task.done ? "checked" : ""}><div class="household-task-main"><strong>${escapeHtml(task.title)}</strong><small>${houseCats.find((category) => category.id === task.subcategory)?.label || "Другие дела"}</small></div><button type="button" data-household-edit="${escapeHtml(task.id)}" aria-label="Редактировать дело">✎</button><button type="button" data-household-delete="${escapeHtml(task.id)}" aria-label="Удалить дело">×</button></article>`).join("");
@@ -724,14 +726,14 @@
       const task = { ...(existing || {}), id, title, subcategory: form.elements.subcategory.value, done: existing?.done || false };
       const old = [...state.householdTasks];
       const next = existing ? old.map((item) => item.id === id ? task : item) : [task, ...old];
-      if (saveTaskMutation(next, old, existing ? "Дело обновлено." : "Дело добавлено.")) closeTaskEditor();
+      if (saveTaskMutation(next, old, existing ? "Сохранено" : "Добавлено")) closeTaskEditor();
     });
     q("#householdTaskDelete").addEventListener("click", () => {
       const id = q("#householdTaskForm").elements.id.value;
       if (!id) return;
       const old = state.householdTasks;
       state.householdTasks = old.filter((task) => String(task.id) !== id);
-      if (saveTaskMutation(state.householdTasks, old, "Дело удалено.")) closeTaskEditor();
+      if (saveTaskMutation(state.householdTasks, old, "Удалено")) closeTaskEditor();
     });
     q("#householdTaskClose").addEventListener("click", closeTaskEditor);
     q("#householdTaskOverlay").addEventListener("click", (event) => {
@@ -742,7 +744,9 @@
     window.addEventListener("na-dvoih:local-save", renderScreens);
     window.addEventListener("na-dvoih:household-sync-status", (event) => {
       const status = q("#householdSyncStatus");
-      if (status) status.textContent = String(event.detail?.message || "");
+      if (!status) return;
+      const msg = String(event.detail?.message || "").trim();
+      status.textContent = msg === "Синхронизировано" ? "" : msg;
     });
     renderScreens();
     app.render();
