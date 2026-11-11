@@ -98,67 +98,72 @@
     const style = document.createElement("style");
     style.id = "bigGoalStyles";
     style.textContent = `
-      .big-goal-page{display:grid;gap:15px;padding-bottom:16px}
-      .big-goal-card{position:relative;border:1px solid var(--line);border-radius:22px;background:var(--card);box-shadow:0 3px 12px rgba(42,50,42,.04);padding:18px;overflow:hidden}
-      .big-goal-head-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--soft);font-size:12px;font-weight:700;color:var(--ink);margin-bottom:10px}
-      .big-goal-title{font-size:24px;font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--ink);margin:0 0 6px 0}
-      .big-goal-note{font-size:13.5px;line-height:1.45;color:var(--muted);margin:0 0 14px 0}
+      .big-goal-page{display:grid;gap:16px;padding-bottom:16px}
+      .big-goal-card{position:relative;border:1px solid var(--soft-line);border-radius:var(--r-hero,24px);background:var(--glass-surface,var(--card));backdrop-filter:blur(20px) saturate(165%);-webkit-backdrop-filter:blur(20px) saturate(165%);box-shadow:var(--rim-light),var(--shadow-elev-1);padding:20px;overflow:hidden}
+      .big-goal-head-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--soft);border:1px solid var(--soft-line);font-size:12px;font-weight:700;color:var(--ink);margin-bottom:12px}
+      .big-goal-title{font-size:clamp(22px,5vw,26px);font-weight:800;letter-spacing:-.03em;line-height:1.18;color:var(--ink);margin:0 0 6px 0}
+      .big-goal-note{font-size:14px;line-height:1.45;color:var(--muted);margin:0 0 16px 0}
       
       /* Meadow / Celebration Art Widget */
-      .big-goal-meadow{position:relative;height:120px;border-radius:16px;background:linear-gradient(180deg,color-mix(in srgb,var(--green2) 45%,var(--soft)) 0%,color-mix(in srgb,var(--green2) 80%,var(--soft)) 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:16px;border:1px solid var(--soft-line)}
+      .big-goal-meadow{position:relative;height:124px;border-radius:var(--r-control,16px);background:linear-gradient(180deg,color-mix(in srgb,var(--green2) 45%,var(--soft)) 0%,color-mix(in srgb,var(--green2) 80%,var(--soft)) 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:16px;border:1px solid var(--soft-line)}
       .big-goal-meadow svg{width:100%;height:100%}
-      .meadow-badge{position:absolute;bottom:10px;right:12px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,.06);padding:5px 11px;border-radius:999px;font-size:12.5px;font-weight:750;color:var(--green)}
-      :root[data-mode="dark"] .meadow-badge{background:rgba(30,30,35,.85);color:#9ac9a6;border-color:rgba(255,255,255,.1)}
+      .meadow-badge{position:absolute;bottom:10px;right:10px;background:var(--glass-surface-strong,rgba(255,255,255,.88));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--soft-line);box-shadow:var(--rim-light);padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:750;color:var(--green)}
+      :root[data-mode="dark"] .meadow-badge{background:rgba(28,28,32,.84);color:#9ac9a6;border-color:rgba(255,255,255,.1)}
 
       /* Progress Bar & Amounts */
-      .goal-amounts-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-      .goal-saved-big{font-size:22px;font-weight:850;color:var(--green);font-variant-numeric:tabular-nums}
-      .goal-target-label{font-size:13.5px;font-weight:650;color:var(--muted)}
-      .goal-progress-track{position:relative;height:16px;background:var(--soft);border-radius:999px;overflow:hidden;border:1px solid var(--soft-line)}
-      .goal-progress-fill{height:100%;background:linear-gradient(90deg,var(--green) 0%,var(--action-cta,var(--coral,#df5734)) 100%);border-radius:999px;transition:width 400ms ease;box-shadow:0 0 10px rgba(48,78,69,.25)}
-      .goal-meta-sub{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px;font-weight:650;color:var(--muted)}
+      .goal-amounts-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px}
+      .goal-saved-big{font-size:22px;font-weight:850;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+      .goal-target-label{font-size:13.5px;font-weight:650;color:var(--muted);font-variant-numeric:tabular-nums}
+      .goal-progress-track{position:relative;height:14px;background:var(--soft);border-radius:999px;overflow:hidden;border:1px solid var(--soft-line)}
+      .goal-progress-fill{height:100%;background:linear-gradient(90deg,var(--green) 0%,var(--action-cta,var(--coral,#df5734)) 100%);border-radius:999px;transition:width 460ms var(--spring-ease,cubic-bezier(0.22,1,0.36,1));box-shadow:0 0 10px rgba(48,78,69,.22)}
+      .goal-meta-sub{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12.5px;font-weight:650;color:var(--muted);font-variant-numeric:tabular-nums}
 
       /* Duo Contributions */
-      .duo-contrib-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding:12px;border-radius:16px;background:var(--soft);border:1px solid var(--soft-line)}
-      .duo-contrib-person{display:flex;align-items:center;gap:9px}
-      .duo-contrib-avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:var(--card);border:2px solid var(--paper);flex:none;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+      .duo-contrib-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;padding:12px;border-radius:var(--r-control,16px);background:var(--soft);border:1px solid var(--soft-line)}
+      .duo-contrib-person{display:flex;align-items:center;gap:10px;min-width:0}
+      .duo-contrib-avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:var(--card);border:2px solid var(--paper);flex:none;box-shadow:0 2px 8px rgba(0,0,0,.08)}
       .duo-contrib-copy{display:flex;flex-direction:column;min-width:0}
-      .duo-contrib-name{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .duo-contrib-name{font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .duo-contrib-sum{font-size:15.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
-      .goal-action-btn-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:14px}
-      .step-duo-btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:50px;border-radius:15px;font-size:14px;font-weight:750;border:0;cursor:pointer;transition:transform .14s}
+      .goal-action-btn-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:16px}
+      .step-duo-btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;border-radius:14px;font-size:14px;font-weight:750;border:0;cursor:pointer;transition:transform 140ms var(--spring-ease,ease)}
       .step-duo-btn:active{transform:scale(.96)}
+      .step-duo-btn--partner{background:linear-gradient(135deg,var(--coral,#c4627d),color-mix(in srgb,var(--coral,#df5734) 72%,var(--green)))!important;color:#fff!important}
 
       /* Milestones */
-      .milestone-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-      .milestone-section-title{font-size:16.5px;font-weight:800;color:var(--ink)}
-      .milestone-add-btn{border:0;background:var(--soft);color:var(--green);padding:7px 12px;border-radius:12px;font-size:13px;font-weight:750;cursor:pointer}
-      .milestone-list{display:grid;gap:9px}
-      .milestone-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto 32px;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--card);transition:transform 140ms ease,background-color 140ms ease}
-      .milestone-item.done{background:color-mix(in srgb,var(--green2) 30%,var(--card))}
+      .milestone-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+      .milestone-section-title{font-size:16.5px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+      .milestone-add-btn{min-height:36px;border:1px solid var(--soft-line);background:var(--soft);color:var(--green);padding:6px 12px;border-radius:12px;font-size:13px;font-weight:750;cursor:pointer;transition:transform 140ms ease}
+      .milestone-add-btn:active{transform:scale(.95)}
+      .milestone-list{display:grid;gap:10px}
+      .milestone-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto 44px;align-items:center;gap:10px;min-height:56px;padding:10px 8px 10px 12px;border:1px solid var(--soft-line);border-radius:var(--r-control,16px);background:var(--glass-surface-strong,var(--card));transition:transform 160ms var(--spring-ease,ease),background-color 160ms ease}
+      .milestone-item:active{transform:scale(.99)}
+      .milestone-item.done{background:color-mix(in srgb,var(--green2) 32%,var(--glass-surface,var(--card)))}
       .milestone-item.done .milestone-text{text-decoration:line-through;color:var(--muted)}
       .milestone-check{width:22px;height:22px;accent-color:var(--green);cursor:pointer}
       .milestone-main{min-width:0;display:flex;flex-direction:column;gap:2px}
-      .milestone-text{font-size:14px;font-weight:700;line-height:1.3;color:var(--ink)}
+      .milestone-text{font-size:14.5px;font-weight:700;line-height:1.3;color:var(--ink)}
       .milestone-sub{font-size:12.5px;color:var(--muted)}
-      .milestone-badge{font-size:12px;font-weight:750;padding:4px 8px;border-radius:8px;background:var(--soft);color:var(--ink);white-space:nowrap}
-      .milestone-del{width:32px;height:32px;border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:grid;place-items:center;border-radius:8px}
+      .milestone-badge{font-size:12px;font-weight:750;padding:4px 9px;border-radius:8px;background:var(--soft);border:1px solid var(--soft-line);color:var(--ink);white-space:nowrap}
+      .milestone-del{width:44px;height:44px;border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:grid;place-items:center;border-radius:12px;transition:transform 120ms ease,background-color 120ms ease}
+      .milestone-del:active{transform:scale(.90);background:var(--soft)}
 
       /* History Accordion */
-      .goal-history-details{border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden;margin-top:2px}
-      .goal-history-summary{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;font-size:14px;font-weight:750;color:var(--ink);user-select:none}
+      .goal-history-details{border:1px solid var(--soft-line);border-radius:var(--r-card,20px);background:var(--glass-surface,var(--card));backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);box-shadow:var(--rim-light),var(--shadow-elev-1);overflow:hidden}
+      .goal-history-summary{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:12px 16px;cursor:pointer;font-size:14px;font-weight:750;color:var(--ink);user-select:none}
       .goal-history-summary::-webkit-details-marker{display:none}
-      .goal-history-list{display:grid;gap:8px;padding:0 16px 14px 16px;border-top:1px solid var(--soft-line);padding-top:12px}
-      .goal-history-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid var(--soft-line)}
+      .goal-history-summary span:last-child{transition:transform 220ms var(--spring-ease,ease)}
+      .goal-history-details[open] .goal-history-summary span:last-child{transform:rotate(180deg)}
+      .goal-history-list{display:grid;gap:8px;padding:12px 16px 14px;border-top:1px solid var(--soft-line)}
+      .goal-history-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13.5px;border-bottom:1px solid var(--soft-line)}
       .goal-history-item:last-child{border-bottom:0}
       .goal-history-copy strong{color:var(--ink)}
-      .goal-history-copy small{display:block;color:var(--muted);font-size:11.5px}
-      .goal-history-amount{font-weight:800;color:var(--green);font-size:14px}
+      .goal-history-copy small{display:block;color:var(--muted);font-size:12px}
+      .goal-history-amount{font-weight:800;color:var(--green);font-size:14px;font-variant-numeric:tabular-nums}
 
       /* Quick chips in contribute modal */
-      .quick-chip-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-top:6px}
-      .quick-chip{flex:1;min-height:40px;border:1px solid var(--line);border-radius:11px;background:var(--soft);color:var(--ink);font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap;padding:0 10px}
-      .quick-chip:active{transform:scale(.95)}
+      .quick-chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;margin-top:8px}
+      .quick-chip{flex:1;min-height:44px;border:1px solid var(--soft-line);border-radius:12px;background:var(--soft);color:var(--ink);font-size:13.5px;font-weight:750;cursor:pointer;white-space:nowrap;padding:0 12px;transition:transform 140ms ease}
       .quick-chip:active{transform:scale(.95)}
     `;
     document.head.append(style);
@@ -300,9 +305,9 @@
         </div>
 
         ${isSteps ? `
-          <div class="goal-action-btn-row" style="grid-template-columns:1fr 1fr;margin-top:14px;gap:8px">
+          <div class="goal-action-btn-row" style="grid-template-columns:1fr 1fr;margin-top:16px;gap:10px">
             <button type="button" class="primary-btn step-duo-btn" data-add-step="me" style="margin-top:0">👤 ${escapeHtml(me.name || "Я")}: +1</button>
-            <button type="button" class="primary-btn step-duo-btn" data-add-step="her" style="margin-top:0;background:linear-gradient(135deg,#c4627d,#df5734)">🌸 ${escapeHtml(her.name || "Половинка")}: +1</button>
+            <button type="button" class="primary-btn step-duo-btn step-duo-btn--partner" data-add-step="her" style="margin-top:0">🌸 ${escapeHtml(her.name || "Половинка")}: +1</button>
           </div>
           <button type="button" class="secondary-btn" id="openGoalEdit" style="width:100%;height:46px;margin-top:8px">⚙️ Настройки цели</button>
         ` : `

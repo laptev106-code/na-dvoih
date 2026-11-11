@@ -31,15 +31,15 @@
     } catch {}
   }
 
-  // Sync Telegram header and background colors with app theme
+  // Sync Telegram header and background colors seamlessly with app theme
   function syncTelegramTheme() {
     if (!tg) return;
     try {
       const styles = getComputedStyle(document.documentElement);
-      const paper = styles.getPropertyValue("--paper").trim() || "#f8f7f2";
-      const outer = styles.getPropertyValue("--outer").trim() || "#ecefe9";
+      const isDark = document.documentElement.dataset.mode === "dark";
+      const paper = styles.getPropertyValue("--paper").trim() || (isDark ? "#17161a" : "#f8f7f2");
       tg.setHeaderColor?.(paper);
-      tg.setBackgroundColor?.(outer);
+      tg.setBackgroundColor?.(paper);
     } catch {}
   }
 
@@ -150,6 +150,9 @@
   window.addEventListener("na-dvoih:render", () => {
     syncTelegramTheme();
     updateBackButton();
+  });
+  window.addEventListener("na-dvoih:theme", () => {
+    syncTelegramTheme();
   });
 
   // Initial sync
